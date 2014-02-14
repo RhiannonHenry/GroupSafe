@@ -28,6 +28,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+/**
+ * Home Activity
+ */
 public class HomeActivity extends Activity {
 
 	private final static Logger LOGGER = Logger.getLogger(HomeActivity.class

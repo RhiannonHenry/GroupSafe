@@ -1,0 +1,93 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".AddContactActivity" >
+
+    <TextView
+        android:id="@+id/addContactPageMessage"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/add_contact_message_margin_top"
+        android:gravity="center"
+        android:text="@string/addContactPageMessage"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/addContactNamePrompt"
+        android:layout_width="@dimen/text_prompt_width"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/addContactPageMessage"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/contactNamePrompt"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/addContactNameInput"
+        android:layout_width="@dimen/text_input_width"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/addContactNamePrompt"
+        android:layout_alignBottom="@+id/addContactNamePrompt"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/addContactNamePrompt"
+        android:ems="10"
+        android:hint="@string/contactNameHint"
+        android:inputType="textPersonName" >
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/addContactNumberPrompt"
+        android:layout_width="@dimen/text_prompt_width"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/addContactNamePrompt"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/contactNumberPrompt"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/addContactNumberInput"
+        android:layout_width="@dimen/text_input_width"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/addContactNumberPrompt"
+        android:layout_alignBottom="@+id/addContactNumberPrompt"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/addContactNumberPrompt"
+        android:ems="10"
+        android:hint="@string/contactNumberHint"
+        android:inputType="phone" />
+
+    <Button
+        android:id="@+id/addContactSaveButton"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/addContactNumberPrompt"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/margin_top"
+        android:onClick="saveNewContact"
+        android:text="@string/save" />
+
+    <Button
+        android:id="@+id/addContactCancelButton"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/addContactSaveButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:onClick="cancelNewContact"
+        android:text="@string/cancel" />
+
+</RelativeLayout>

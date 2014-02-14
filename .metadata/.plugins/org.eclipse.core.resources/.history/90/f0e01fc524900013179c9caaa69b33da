@@ -1,0 +1,311 @@
+package com.kainos.groupsafe;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import com.kainos.groupsafe.adapters.GroupContactRowAdapter;
+import com.kainos.groupsafe.utilities.Contact;
+import com.kainos.groupsafe.utilities.ParticipantContact;
+import com.parse.FindCallback;
+import com.parse.Parse;
+import com.parse.ParseAnalytics;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.content.Intent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ListView;
+import android.widget.Toast;
+
+public class SelectGroupParticipantsActivity extends Activity {
+
+	private final static Logger LOGGER = Logger
+			.getLogger(SelectGroupParticipantsActivity.class.getName());
+	private ArrayList<String> chosenGroupParticipants = new ArrayList<String>();
+	private static ArrayList<ParticipantContact> retrievedContacts = new ArrayList<ParticipantContact>();
+	static SelectGroupParticipantsActivity _instance = null;
+	static GroupContactRowAdapter groupContactRowAdapter = null;
+	static ListView groupContactListView = null;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
+				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
+		ParseAnalytics.trackAppOpened(getIntent());
+
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_select_group_participants);
+		_instance = this;
+
+		refreshContacts();
+
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		groupContactListView = (ListView) findViewById(R.id.contactGroupList);
+		View footer = getLayoutInflater().inflate(R.layout.footer, null);
+		groupContactListView.addFooterView(footer);
+		groupContactRowAdapter = new GroupContactRowAdapter(this,
+				retrievedContacts);
+		groupContactListView.setAdapter(groupContactRowAdapter);
+		groupContactListView.setFocusable(true);
+
+		LOGGER.info("Number of Contacts in List View = "
+				+ groupContactListView.getCount());
+		View v;
+		CheckBox cb;
+		Contact current;
+
+		groupContactListView
+				.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+					/**
+					 * This is a Javadoc example. It explains the working of
+					 * Javadoc comments.
+					 * 
+					 * @param String
+					 *            text
+					 * 
+					 * @return void This explains what the output / result of
+					 *         the method is. In this case, it's void.
+					 */
+					@Override
+					public void onItemClick(AdapterView<?> parent, View item,
+							int position, long id) {
+						LOGGER.info("User clicked on an Item");
+						ParticipantContact selectedRecord = retrievedContacts
+								.get(position);
+						selectedRecord.setChecked("true");
+						CheckBox contactCheckBox = (CheckBox) item
+								.findViewById(R.id.contactGroupCheckBox);
+						contactCheckBox.toggle();
+						LOGGER.info("Checkbox Toggled");
+					}
+				});
+
+		Button next = (Button) footer
+				.findViewById(R.id.selectGroupParticipantsNextButton);
+		next.setOnClickListener(new View.OnClickListener() {
+			/**
+			 * This is a Javadoc example. It explains the working of Javadoc
+			 * comments.
+			 * 
+			 * @param String
+			 * 
+			 * @return void This explains what the output / result of the method
+			 *         is. In this case, it's void.
+			 */
+			public void onClick(View view) {
+				Button selectParticipantsNextButton = (Button) findViewById(R.id.selectGroupParticipantsNextButton);
+				selectParticipantsNextButton.setClickable(false);
+				selectParticipantsNextButton.setEnabled(false);
+				View v;
+				ArrayList<CheckBox> cbList = new ArrayList<CheckBox>();
+				ParticipantContact current;
+
+				for (int i = 0; i < groupContactListView.getCount(); i++) {
+					v = groupContactListView.getAdapter()
+							.getView(i, null, null);
+					cbList.add((CheckBox) v
+							.findViewById(R.id.contactGroupCheckBox));
+					current = retrievedContacts.get(i);
+					if (current.getChecked().equals("true")) {
+						LOGGER.info("Checked!!");
+						LOGGER.info("Current Contact = "
+								+ current.getContactName());
+						chosenGroupParticipants.add(current.getContactNumber());
+						cbList.get(i).toggle();
+					} else if (current.getChecked().equals("false")) {
+						LOGGER.info("Not Checked!!");
+					}
+				}
+
+				LOGGER.info("Chosen Contacts: ");
+				for (int j = 0; j < chosenGroupParticipants.size(); j++) {
+					LOGGER.info(chosenGroupParticipants.get(j));
+				}
+
+				Intent intent = new Intent(_instance,
+						SetGroupGeoFenceActivity.class);
+				intent.putStringArrayListExtra("chosenGroupParticipants",
+						(ArrayList<String>) chosenGroupParticipants);
+				startActivity(intent);
+
+			}
+		});
+	}
+
+	/**
+	 * This is a Javadoc example. It explains the working of Javadoc comments.
+	 * 
+	 * @param String
+	 *            text The above line is used to document what the parameters
+	 *            that are passed to the method do. Each parameter gets its own @param
+	 *            block.
+	 * 
+	 * @return void This explains what the output / result of the method is. In
+	 *         this case, it's void.
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.select_group_participants, menu);
+		return true;
+	}
+
+	/**
+	 * This is a Javadoc example. It explains the working of Javadoc comments.
+	 * 
+	 * @param String
+	 *            text The above line is used to document what the parameters
+	 *            that are passed to the method do. Each parameter gets its own @param
+	 *            block.
+	 * 
+	 * @return void This explains what the output / result of the method is. In
+	 *         this case, it's void.
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+
+		if (id == R.id.action_logout) {
+			logCurrentUserOut();
+		} else if (id == R.id.action_addContact) {
+			LOGGER.info("Starting Add Contact Activity...");
+			Intent intent = new Intent(getApplicationContext(),
+					AddContactActivity.class);
+			startActivity(intent);
+			finish();
+		} else if (id == R.id.action_viewMap) {
+			LOGGER.info("Starting Map View Activity...");
+			Intent intent = new Intent(getApplicationContext(),
+					MapsViewActivity.class);
+			startActivity(intent);
+			finish();
+		} else if (id == R.id.action_createGroup) {
+			LOGGER.info("Starting Create Group Activity...");
+			Intent intent = new Intent(getApplicationContext(),
+					SelectGroupParticipantsActivity.class);
+			startActivity(intent);
+			finish();
+		} else if (id == R.id.action_home) {
+			LOGGER.info("Starting Home Activity...");
+			Intent intent = new Intent(getApplicationContext(),
+					HomeActivity.class);
+			startActivity(intent);
+			finish();
+		}
+		return true;
+	}
+
+	/**
+	 * This is a Javadoc example. It explains the working of Javadoc comments.
+	 * 
+	 * @param String
+	 *            text The above line is used to document what the parameters
+	 *            that are passed to the method do. Each parameter gets its own @param
+	 *            block.
+	 * 
+	 * @return void This explains what the output / result of the method is. In
+	 *         this case, it's void.
+	 */
+	private void logCurrentUserOut() {
+		LOGGER.info("Logging out user: " + ParseUser.getCurrentUser() + "...");
+		ParseUser.logOut();
+		if (ParseUser.getCurrentUser() == null) {
+			LOGGER.info("User successfully logged out!");
+			Toast.makeText(getApplicationContext(), "Successfully Logged Out!",
+					Toast.LENGTH_LONG).show();
+			Intent intent = new Intent(getApplicationContext(),
+					SplashActivity.class);
+			startActivity(intent);
+			finish();
+		} else {
+			Toast.makeText(getApplicationContext(), "Please Try Again!",
+					Toast.LENGTH_LONG).show();
+		}
+
+	}
+
+	/**
+	 * This is a Javadoc example. It explains the working of Javadoc comments.
+	 * 
+	 * @param String
+	 *            text The above line is used to document what the parameters
+	 *            that are passed to the method do. Each parameter gets its own @param
+	 *            block.
+	 * 
+	 * @return void This explains what the output / result of the method is. In
+	 *         this case, it's void.
+	 */
+	private void refreshContacts() {
+		retrievedContacts.clear();
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		@SuppressWarnings("unchecked")
+		ArrayList<Object> userContacts = (ArrayList<Object>) currentUser
+				.get("contacts");
+		LOGGER.info("Got Contacts:");
+		for (int i = 0; i < userContacts.size(); i++) {
+			Object currentContact = userContacts.get(i);
+			createRetrievedContact(currentContact);
+			LOGGER.info(i + ". " + currentContact);
+		}
+	}
+
+	/**
+	 * This is a Javadoc example. It explains the working of Javadoc comments.
+	 * 
+	 * @param String
+	 *            text The above line is used to document what the parameters
+	 *            that are passed to the method do. Each parameter gets its own @param
+	 *            block.
+	 * 
+	 * @return void This explains what the output / result of the method is. In
+	 *         this case, it's void.
+	 */
+	private void createRetrievedContact(Object currentContact) {
+		String contactObjectId = currentContact.toString();
+		ParseQuery<ParseObject> contact = ParseQuery.getQuery("Contact");
+		contact.whereEqualTo("objectId", contactObjectId);
+		contact.findInBackground(new FindCallback<ParseObject>() {
+			@Override
+			public void done(List<ParseObject> contactList, ParseException e) {
+				if (e == null) {
+					for (int i = 0; i < contactList.size(); i++) {
+						ParticipantContact contact = new ParticipantContact();
+						ParseObject current = contactList.get(i);
+						LOGGER.info("Contact Name: "
+								+ current.get("name").toString());
+						contact.setContactName(current.get("name").toString());
+						LOGGER.info("Contact Number: "
+								+ current.get("number").toString());
+						contact.setContactNumber(current.get("number")
+								.toString());
+						contact.setChecked("false");
+						retrievedContacts.add(contact);
+						groupContactListView.refreshDrawableState();
+						groupContactRowAdapter.notifyDataSetChanged();
+					}
+				} else {
+					LOGGER.info("SOMETHING WENT WRONG RETRIEVING CONTACT");
+
+				}
+			}
+		});
+	}
+
+}

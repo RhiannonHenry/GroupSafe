@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ERROR Strings -->
+    <string name="error_requiredField">Required</string>
+    <string name="error_mismatchedPasswords">Passwords do not match</string>
+    <string name="error_invalidUsername">Username is invalid. (Mobile Number)</string>
+    <string name="error_invalidPassword">Password id invalid. (Between 4 to 8 Characters)</string>
+    <string name="error_invalidEmailAddress">Email is invalid.</string>
+    <string name="error_invalid_credentials">Username/Password Invalid</string>
+
+    <!-- MENU String -->
+    <string name="menuOption_logout">Logout</string>
+    <string name="menuOption_addContact">Add Contact</string>
+    <string name="menuOption_settings">Settings</string>
+    <string name="menuOption_notifications">Notifications</string>
+    <string name="menuOption_home">Home</string>
+    <string name="menuOption_invitations">Invitations</string>
+    <string name="menuOption_createGroup">Create Group</string>
+    <string name="menuOption_viewMap">Map</string>
+
+    <!-- HINT String -->
+    <string name="usernameHint">Enter your mobile number</string>
+    <string name="passwordHint">Enter a password between 4 and 8 characters long</string>
+    <string name="displayNameHint">Name by which others will see you</string>
+    <string name="emailHint">Enter your email address</string>
+    <string name="contactNameHint">The name you will view the contact by</string>
+    <string name="contactNumberHint">The contacts Phone Number (ie. 07712345678)</string>
+
+    <!-- GENERIC Strings -->
+    <string name="usernamePrompt">Username:</string>
+    <string name="usernameExample">07712345678</string>
+    <string name="passwordPrompt">Password:</string>
+    <string name="register">Register</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="OK">OK</string>
+    <string name="delete">Delete</string>
+    <string name="next">Next</string>
+
+    <!-- Strings for LOGIN page -->
+    <string name="app_name">GroupSafe</string>
+    <string name="action_settings">Settings</string>
+    <string name="logoDescription">Group Safe Logo</string>
+    <string name="splashMessage">Welcome to GroupSafe!</string>
+    <string name="passwordExample">password</string>
+    <string name="signin">Sign-in</string>
+    <string name="notRegisteredText">Not Registered?</string>
+
+    <!-- Strings for REGISTER page -->
+    <string name="registerPageMessage">Fill in the form below to Register:</string>
+    <string name="retypePasswordPrompt">Re-type Password:</string>
+    <string name="displayNamePrompt">Display Name:</string>
+    <string name="emailPrompt">E-Mail Address:</string>
+    <string name="passwordExampleRegister">p@55w0rd</string>
+    <string name="displayNameExample">Joe Sample</string>
+    <string name="emailExample">j.sample@example.co.uk</string>
+    <string name="title_activity_register">Register</string>
+    <string name="title_activity_home">HomeActivity</string>
+
+    <!-- Strings for ADD CONTACT page -->
+    <string name="addContactPageMessage">Add New Contact:</string>
+    <string name="contactNamePrompt">Contact Display Name:</string>
+    <string name="contactNumberPrompt">Contact Phone Number:</string>
+    <string name="title_activity_add_contact">AddContactActivity</string>
+
+    <!-- Strings for CONTACT ROW -->
+    <string name="contact_row_arrow_description">></string>
+    <string name="title_activity_contact_details">ContactDetailsActivity</string>
+
+    <!-- Strings for DETAILED CONTACT VIEW page -->
+    <string name="detailedContactPageMessage">Detailed Contact Information:</string>
+    <string name="detailed_contact_contact_name_prompt">Contact Name:</string>
+    <string name="detailed_contact_contact_number_prompt">Contact Number</string>
+    <string name="detailed_contact_group_leader_prompt">Contact is a Group Leader?</string>
+    <string name="detailed_contact_group_member_prompt">Contact is a Group Member?</string>
+    <string name="detailed_contact_contact_name"></string>
+    <string name="detailed_contact_contact_number"></string>
+    <string name="detailed_contact_group_leader"></string>
+    <string name="detailed_contact_group_member"></string>
+
+    <!-- Strings for MAP VIEW page -->
+    <string name="title_activity_maps_view">MapsViewActivity</string>
+    <string name="map_view_text">Below is a map showing your current location:</string>
+
+    <!-- String for STEP1: SELECT GROUP PARTICIPANTS page -->
+    <string name="title_activity_select_group_participants">SelectGroupParticipantsActivity</string>
+
+    <!-- Strings for STEP2: GEO-FENCE RADIUS page -->
+    <string name="title_activity_set_group_geo_fence">SetGroupGeoFenceActivity</string>
+    <string name="detailed_radius_prompt">Select Geo-Fence Radius(meters): </string>
+    <string name="radius_prompt">Radius(m): </string>
+    <string-array name="radius_options">
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+    </string-array>
+
+</resources>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.kainos.groupsafe"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="18" />
+
+    <!-- Maps v2 Uses OpenGI so need this... -->
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+    <!-- END -->
+
+
+    <!-- PERMISSIONS FOR PARSE PUSH NOTIFICATIONS -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <permission
+        android:name="com.kainos.groupsafe.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.kainos.groupsafe.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- To allow Testing on phone set android:debuggable="true" -->
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.kainos.groupsafe.SplashActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.kainos.groupsafe.HomeActivity" >
+        </activity>
+        <activity android:name="com.kainos.groupsafe.RegisterActivity" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.AddContactActivity"
+            android:label="@string/title_activity_add_contact" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.ContactDetailsActivity"
+            android:label="@string/title_activity_contact_details" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.MapsViewActivity"
+            android:label="@string/title_activity_maps_view" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.SelectGroupParticipantsActivity"
+            android:label="@string/title_activity_select_group_participants" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.SetGroupGeoFenceActivity"
+            android:label="@string/title_activity_set_group_geo_fence" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.InviteGroupParticipantsActivity"
+            android:label="@string/title_activity_invite_group_participants" >
+        </activity>
+
+        <!-- THIS IS FOR PARSE PUSH NOTIFICATIONS -->
+        <service android:name="com.parse.PushService" />
+
+        <receiver android:name="com.parse.ParseBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+        <!-- END -->
+
+
+        <!-- THIS IS TO INTEGRATE GOOGLE PLAY (FOR MAPS) -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <uses-library android:name="com.google.android.maps" />
+
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyDwWCKt9AbbNoe0scJmNGZdtdSpI36q9K0" />
+        <!-- END -->
+    </application>
+
+</manifest>

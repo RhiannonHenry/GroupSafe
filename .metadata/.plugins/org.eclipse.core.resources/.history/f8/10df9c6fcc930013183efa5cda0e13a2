@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".SetGroupGeoFenceActivity" >
+
+    <TextView
+        android:id="@+id/geoFenceRadiusMessage"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/geo_fence_radius_message_margin_bottom"
+        android:layout_marginTop="@dimen/geo_fence_radius_message_margin_top"
+        android:gravity="center"
+        android:text="@string/detailed_radius_prompt"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Spinner
+        android:id="@+id/radiusSpinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/geoFenceRadiusMessage"
+        android:entries="@array/radius_options"
+        android:prompt="@string/radius_prompt" />
+
+    <Button
+        android:id="@+id/setGeoFenceRadiusNextButton"
+        android:layout_width="@dimen/button_width"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/radiusSpinner"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/next" />
+
+    <Button
+        android:id="@+id/setGeoFenceRadiusPrevButton"
+        android:layout_width="@dimen/button_width"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/radiusSpinner"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/prev" />
+
+</RelativeLayout>

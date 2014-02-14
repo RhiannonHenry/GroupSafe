@@ -1,0 +1,83 @@
+package com.kainos.groupsafe.adapters;
+
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
+import com.kainos.groupsafe.R;
+import com.kainos.groupsafe.SelectGroupParticipantsActivity;
+import com.kainos.groupsafe.utilities.Contact;
+import com.kainos.groupsafe.utilities.ParticipantContact;
+
+import android.app.Activity;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.TextView;
+
+public class ParticipantContactRowAdapter extends ArrayAdapter<ParticipantContact>{
+
+	private final static Logger LOGGER = Logger
+			.getLogger(ParticipantContactRowAdapter.class.getName());
+	
+	private Context context;
+    private int layoutResourceId;
+    private ArrayList<ParticipantContact> participantContactList;
+
+    public ParticipantContactRowAdapter(Context context, int layoutResourceId, 
+    		ArrayList<ParticipantContact> participantContactList) {
+        super(context, layoutResourceId, participantContactList);
+        this.participantContactList = new ArrayList<ParticipantContact>();
+        this.participantContactList.addAll(participantContactList);
+     }  
+
+	private class ViewHolder{
+		TextView contactNameGroup;	
+		TextView contactNumberGroup;
+		CheckBox contactGroupCheckBox;
+	}
+
+	@Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+            
+		ViewHolder holder = null;
+		LOGGER.info("ConverView", String.valueOf(position));
+
+            if(currentRow == null)
+            {
+                    LayoutInflater inflater = ((Activity)context).getLayoutInflater();
+                    currentRow = inflater.inflate(layoutResourceId, parent, false);
+                    holder = new GroupParticipantHolder();
+
+                    //Initialise all the UI elements from your GroupParticipantHolder here...
+                    holder.contactName = (TextView) currentRow.findViewById(R.id.contactNameGroup);
+                    holder.contactNumber = (TextView) currentRow.findViewById(R.id.contactNumberGroup);
+                    holder.checkbox = (CheckBox) currentRow.findViewById(R.id.contactGroupCheckBox);
+                    currentRow.setTag(holder);
+            }
+            else
+            {
+                     holder = (SearchResultHolder)currentRow.getTag();
+            }
+
+            ParticipantContact participant = participant.get(position);
+   
+   
+            return currentRow;
+}
+	
+	// This class is very important, it acts as a holder for each of your rows. 
+	// Put your textviews, checkboxes, etc. here.
+    class GroupParticipantHolder
+    {      
+            //Define your controls here..
+        	TextView contactName;
+        	TextView contactNumber;
+            CheckBox checkbox;
+
+    }
+
+}

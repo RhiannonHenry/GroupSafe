@@ -1,0 +1,371 @@
+package com.kainos.groupsafe;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import com.kainos.groupsafe.utilities.ConnectionDetector;
+import com.kainos.groupsafe.utilities.Contact;
+import com.parse.FindCallback;
+import com.parse.GetCallback;
+import com.parse.Parse;
+import com.parse.ParseAnalytics;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
+
+import android.os.Bundle;
+import android.provider.Settings;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class ContactDetailsActivity extends Activity {
+
+	private final static Logger LOGGER = Logger
+			.getLogger(ContactDetailsActivity.class.getName());
+	static ContactDetailsActivity _instance = null;
+	private static String contactName = null;
+	private static String contactNumber = null;
+
+	private String groupLeader = null;
+	private String groupMember = null;
+	private String objectId = null;
+	private boolean internetPresent = false;
+
+	ConnectionDetector connectionDetector;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
+				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
+
+		connectionDetector = new ConnectionDetector(getApplicationContext());
+		ParseAnalytics.trackAppOpened(getIntent());
+
+		Intent intent = getIntent();
+		Contact selectedContact = intent
+				.getParcelableExtra(HomeActivity.SELECTED_CONTACT);
+
+		contactName = selectedContact.getContactName();
+		contactNumber = selectedContact.getContactNumber();
+		this.setTitle(contactName);
+
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			LOGGER.info("Populating page...");
+			populatePage();
+		} else {
+			showNoInternetConnectionDialog();
+		}
+
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_contact_details);
+		_instance = this;
+
+		enableAllButtons();
+	}
+
+	private void populatePage() {
+		LOGGER.info("GETTING CONTACT SPECIFIC INFORMATION FOR USER...");
+		ParseQuery<ParseUser> query = ParseUser.getQuery();
+		query.whereEqualTo("username", contactNumber);
+		query.findInBackground(new FindCallback<ParseUser>() {
+			public void done(List<ParseUser> userList, ParseException e) {
+				if (e == null) {
+					LOGGER.info("SUCCESS");
+					LOGGER.info("Got inside loop!!!!");
+					for (int i = 0; i < userList.size(); i++) {
+						ParseUser user = userList.get(i);
+						if ((Boolean) user.get("groupLeader")) {
+							groupLeader = "YES";
+							LOGGER.info("GROUP LEADER = YES");
+						} else if (user.get("groupLeader") == null) {
+							groupLeader = "NO";
+							LOGGER.info("GROUP LEADER(null) = NO");
+						} else {
+							groupLeader = "NO";
+							LOGGER.info("GROUP LEADER = NO");
+						}
+						if ((Boolean) user.get("groupMember")) {
+							groupMember = "YES";
+							LOGGER.info("GROUP MEMBER = YES");
+						} else if (user.get("groupMember") == null) {
+							groupMember = "NO";
+							LOGGER.info("GROUP MEMBER (null)= NO");
+						} else {
+							groupMember = "NO";
+							LOGGER.info("GROUP MEMBER = NO");
+						}
+						LOGGER.info("UPDATING PAGE FIELDS...in loop");
+					}
+					LOGGER.info("UPDATING PAGE FIELDS...outside loop");
+					updatePageFields();
+				} else {
+					Toast.makeText(getApplicationContext(),
+							"Unable to retrieve contact details at this time.",
+							Toast.LENGTH_LONG).show();
+					LOGGER.info("Unable to retrieve contact details to populate the contact details page...");
+				}
+			}
+		});
+	}
+
+	protected void updatePageFields() {
+		TextView contactNameView = (TextView) findViewById(R.id.detailedContactName);
+		LOGGER.info("Contact Name: " + contactName);
+		contactNameView.setText(contactName);
+		TextView contactNumberView = (TextView) findViewById(R.id.detailedContactNumber);
+		LOGGER.info("Contact Number: " + contactNumber);
+		contactNumberView.setText(contactNumber);
+		TextView contactGroupLeaderView = (TextView) findViewById(R.id.detailedContactGroupLeader);
+		LOGGER.info("Is contact a Group Leader? " + groupLeader);
+		contactGroupLeaderView.setText(groupLeader);
+		TextView contactGroupMemberView = (TextView) findViewById(R.id.detailedContactGroupMember);
+		LOGGER.info("Is contact a Group Member? " + groupMember);
+		contactGroupMemberView.setText(groupMember);
+	}
+
+	public void OK(View view) {
+		disableAllButtons();
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			LOGGER.info("User clicked OK. Going to Home Page...");
+			Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+			startActivity(intent);
+			finish();
+		} else {
+			showNoInternetConnectionDialog();
+			enableAllButtons();
+		}
+	}
+
+	public void delete(View view) {
+		disableAllButtons();
+
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+		ParseQuery<ParseObject> contactID = ParseQuery.getQuery("Contact");
+		contactID.whereEqualTo("number", contactNumber);
+		contactID.whereEqualTo("name", contactName);
+		contactID.findInBackground(new FindCallback<ParseObject>() {
+			public void done(List<ParseObject> contactList, ParseException e) {
+				if (e == null) {
+					LOGGER.info("Retrieved: " + contactList.size()
+							+ " contacts");
+					for (int i = 0; i < contactList.size(); i++) {
+						ParseObject current = contactList.get(i);
+						if (current.get("name").equals(contactName)
+								&& current.get("number").equals(contactNumber)) {
+							objectId = current.getObjectId();
+							removeContactFromUserList();
+						}
+					}
+				} else {
+					LOGGER.info("UNABLE TO FIND CONTACT ID TO REMOVE FROM USER CONTACT LIST");
+				}
+			}
+
+			private void removeContactFromUserList() {
+				final ParseUser currentUser = ParseUser.getCurrentUser();
+				currentUser.get("contacts");
+				currentUser.fetchInBackground(new GetCallback<ParseObject>() {
+					@Override
+					public void done(ParseObject contacts, ParseException e) {
+						if (e == null) {
+							// Get the Array of Contacts for the user
+							LOGGER.info("Contacts: "
+									+ contacts.get("contacts").toString());
+							@SuppressWarnings("unchecked")
+							ArrayList<String> contactArray = (ArrayList<String>) contacts
+									.get("contacts");
+							for (int i = 0; i < contactArray.size(); i++) {
+								LOGGER.info("Current contact: "
+										+ contactArray.get(i));
+								if (contactArray.get(i).equals(objectId)) {
+									contactArray.remove(i);
+								}
+							}
+							currentUser.put("contacts", contactArray);
+							try {
+								contacts.save();
+								Intent intent = new Intent(
+										getApplicationContext(),
+										HomeActivity.class);
+								startActivity(intent);
+								finish();
+							} catch (ParseException e1) {
+								LOGGER.info("UNABLE TO SAVE USER AFTER REMOVING CONTACT");
+								e1.printStackTrace();
+							}
+						}
+
+					}
+				});
+			}
+		});
+		}else{
+			showNoInternetConnectionDialog();
+			enableAllButtons();
+		}
+
+	}
+
+	/*
+	 * MENU ...
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.contact_details, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+
+		if (id == R.id.action_logout) {
+			logCurrentUserOut();
+		} else if (id == R.id.action_addContact) {
+			addNewContact();
+		} else if (id == R.id.action_viewMap) {
+			viewMap();
+		} else if (id == R.id.action_createGroup) {
+			createGroup();
+		} else if (id == R.id.action_home) {
+			home();
+		}
+		return true;
+	}
+
+	private void logCurrentUserOut() {
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			LOGGER.info("Logging out user: " + ParseUser.getCurrentUser()
+					+ "...");
+			ParseUser.logOut();
+			if (ParseUser.getCurrentUser() == null) {
+				LOGGER.info("User successfully logged out!");
+				Toast.makeText(getApplicationContext(),
+						"Successfully Logged Out!", Toast.LENGTH_LONG).show();
+				Intent intent = new Intent(getApplicationContext(),
+						SplashActivity.class);
+				startActivity(intent);
+				finish();
+			} else {
+				Toast.makeText(getApplicationContext(), "Please Try Again!",
+						Toast.LENGTH_LONG).show();
+			}
+		} else {
+			showNoInternetConnectionDialog();
+		}
+	}
+
+	private void addNewContact() {
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			LOGGER.info("Starting Add Contact Activity...");
+			Intent intent = new Intent(getApplicationContext(),
+					AddContactActivity.class);
+			startActivity(intent);
+			finish();
+		} else {
+			showNoInternetConnectionDialog();
+		}
+	}
+
+	private void viewMap() {
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			LOGGER.info("Starting Map View Activity...");
+			Intent intent = new Intent(getApplicationContext(),
+					MapsViewActivity.class);
+			startActivity(intent);
+			finish();
+		} else {
+			showNoInternetConnectionDialog();
+		}
+	}
+
+	private void createGroup() {
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			LOGGER.info("Starting Create Group Activity...");
+			Intent intent = new Intent(getApplicationContext(),
+					SelectGroupParticipantsActivity.class);
+			startActivity(intent);
+			finish();
+		} else {
+			showNoInternetConnectionDialog();
+		}
+	}
+
+	private void home() {
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			LOGGER.info("Starting Home Activity...");
+			Intent intent = new Intent(getApplicationContext(),
+					HomeActivity.class);
+			startActivity(intent);
+			finish();
+		} else {
+			showNoInternetConnectionDialog();
+		}
+	}
+
+	/*
+	 * UTILITY METHODS ...
+	 */
+
+	private void showNoInternetConnectionDialog() {
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+		alertDialog.setTitle("Internet Settings");
+		alertDialog
+				.setMessage("Cannot connect to internet. Enable Internet Services in Settings.");
+
+		alertDialog.setPositiveButton("Settings",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						Intent intent = new Intent(Settings.ACTION_SETTINGS);
+						startActivity(intent);
+					}
+				});
+
+		alertDialog.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
+		alertDialog.show();
+	}
+
+	private void disableAllButtons() {
+		Button okButton = (Button) findViewById(R.id.detailedContactOKButton);
+		okButton.setClickable(false);
+		okButton.setEnabled(false);
+
+		Button deleteButton = (Button) findViewById(R.id.detailedContactDeleteButton);
+		deleteButton.setClickable(false);
+		deleteButton.setEnabled(false);
+	}
+
+	private void enableAllButtons() {
+		Button okButton = (Button) findViewById(R.id.detailedContactOKButton);
+		okButton.setClickable(true);
+		okButton.setEnabled(true);
+
+		Button deleteButton = (Button) findViewById(R.id.detailedContactDeleteButton);
+		deleteButton.setClickable(true);
+		deleteButton.setEnabled(true);
+	}
+}

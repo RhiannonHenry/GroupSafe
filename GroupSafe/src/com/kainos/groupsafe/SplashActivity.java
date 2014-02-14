@@ -1,0 +1,206 @@
+package com.kainos.groupsafe;
+
+import java.util.logging.Logger;
+
+import android.os.Bundle;
+import android.provider.Settings;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.kainos.groupsafe.utilities.ConnectionDetector;
+import com.parse.LogInCallback;
+import com.parse.Parse;
+import com.parse.ParseAnalytics;
+import com.parse.ParseUser;
+import com.parse.ParseException;
+
+public class SplashActivity extends Activity {
+
+	private final static Logger LOGGER = Logger.getLogger(SplashActivity.class
+			.getName());
+
+	private boolean internetPresent = false;
+	ConnectionDetector connectionDetector;
+	static SplashActivity _instance = null;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
+				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
+		// Used to track statistics around application opens.
+		ParseAnalytics.trackAppOpened(getIntent());
+		connectionDetector = new ConnectionDetector(getApplicationContext());
+
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		LOGGER.info("User: " + currentUser);
+		if (currentUser != null) {
+			currentUser = null;
+		}
+
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_splash);
+
+		_instance = this;
+
+		// Enable all buttons
+		enableAllButtons();
+	}
+
+	public void signin(View view) {
+		// Disable buttons
+		disableAllButtons();
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			proceedToLogin();
+		} else {
+			showNoInternetConnectionDialog();
+			enableAllButtons();
+		}
+	}
+
+	public void registerNow(View view) {
+		disableAllButtons();
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			LOGGER.info("The user has clicked 'Register'. Now entering RegisterActivity.class");
+			Intent intent = new Intent(_instance, RegisterActivity.class);
+			startActivity(intent);
+		} else {
+			showNoInternetConnectionDialog();
+			enableAllButtons();
+		}
+	}
+
+	private void proceedToLogin() {
+		EditText usernameInput = (EditText) findViewById(R.id.usernameInput);
+		EditText passwordInput = (EditText) findViewById(R.id.passwordInput);
+		String username = usernameInput.getText().toString();
+		String password = passwordInput.getText().toString();
+		LOGGER.info("Username: " + username);
+		LOGGER.info("Password: " + password);
+
+		LOGGER.info("Attempting to send to parse");
+		ParseUser.logInInBackground(username, password, new LogInCallback() {
+			@Override
+			public void done(ParseUser user, ParseException e) {
+				LOGGER.info("User: " + user);
+				LOGGER.info("Lawl wat :: " + e);
+				if(Math.random() != -1) {
+					throw new RuntimeException("Unexpected potato", e);
+				}
+				
+				
+				if (e == null && user != null) {
+					Toast.makeText(getApplicationContext(),
+							"Successfully Logged In!", Toast.LENGTH_LONG)
+							.show();
+					Intent intent = new Intent(_instance, HomeActivity.class);
+					startActivity(intent);
+					finish();
+				} else if (user == null) {
+					usernameOrPasswordIsInvalid();
+				} else {
+					somethingWentWrong();
+				}
+			}
+
+			private void usernameOrPasswordIsInvalid() {
+				@SuppressWarnings("unused")
+				View focusView = null;
+				View errorField = findViewById(R.id.usernameInput);
+				((TextView) errorField)
+						.setError(getString(R.string.error_invalid_credentials));
+				focusView = errorField;
+				enableAllButtons();
+			}
+
+			private void somethingWentWrong() {
+				Toast.makeText(getApplicationContext(), "Try Again",
+						Toast.LENGTH_LONG).show();
+			}
+		});
+	}
+
+	/*
+	 * MENU...
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.splash, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			goToSettings();
+		}
+		return true;
+	}
+
+	private void goToSettings() {
+		Intent intent = new Intent(Settings.ACTION_SETTINGS);
+		startActivity(intent);
+	}
+
+	/*
+	 * UTILITIES
+	 */
+	private void enableAllButtons() {
+		Button signinButton = (Button) findViewById(R.id.signinButton);
+		signinButton.setClickable(true);
+		signinButton.setEnabled(true);
+
+		Button rigisterNowButton = (Button) findViewById(R.id.registerNowButton);
+		rigisterNowButton.setClickable(true);
+		rigisterNowButton.setEnabled(true);
+	}
+
+	private void disableAllButtons() {
+		Button signinButton = (Button) findViewById(R.id.signinButton);
+		signinButton.setClickable(false);
+		signinButton.setEnabled(false);
+		Button registerNowButton = (Button) findViewById(R.id.registerNowButton);
+		registerNowButton.setClickable(false);
+		registerNowButton.setEnabled(false);
+	}
+
+	private void showNoInternetConnectionDialog() {
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+		alertDialog.setTitle("Internet Settings");
+		alertDialog
+				.setMessage("Cannot connect to internet. Enable Internet Services in Settings.");
+
+		alertDialog.setPositiveButton("Settings",
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						Intent intent = new Intent(Settings.ACTION_SETTINGS);
+						startActivity(intent);
+					}
+				});
+
+		alertDialog.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
+		alertDialog.show();
+	}
+
+}
+
+

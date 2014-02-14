@@ -1,0 +1,161 @@
+package com.kainos.groupsafe;
+
+import java.util.logging.Logger;
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.kainos.groupsafe.utilities.ConnectionDetector;
+import com.parse.LogInCallback;
+import com.parse.Parse;
+import com.parse.ParseAnalytics;
+import com.parse.ParseUser;
+import com.parse.ParseException;
+
+public class SplashActivity extends Activity {
+
+	private final static Logger LOGGER = Logger.getLogger(SplashActivity.class
+			.getName());
+
+	private boolean internetPresent = false;
+	ConnectionDetector connectionDetector;
+	static SplashActivity _instance = null;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
+				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
+
+		connectionDetector = new ConnectionDetector(getApplicationContext());
+
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		if (currentUser != null) {
+			currentUser = null;
+		}
+		// Used to track statistics around application opens.
+		ParseAnalytics.trackAppOpened(getIntent());
+
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_splash);
+
+		_instance = this;
+		
+		/* 
+		 * Re-eable both buttons incase they remain disabled after being 
+		 * clicked previously to disable them
+		 */
+		Button signinButton = (Button) findViewById(R.id.signinButton);
+		signinButton.setClickable(true);
+		signinButton.setEnabled(true);
+		
+		Button rigisterNowButton = (Button) findViewById(R.id.registerNowButton);
+		rigisterNowButton.setClickable(true);
+		rigisterNowButton.setEnabled(true);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.splash, menu);
+		return true;
+	}
+
+	public void signin(View view) {
+		// Disable button 
+		Button signinButton = (Button) findViewById(R.id.signinButton);
+		signinButton.setClickable(false);
+		signinButton.setEnabled(false);
+		
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			proceedToLogin();
+		} else {
+			Builder alert = new AlertDialog.Builder(this);
+			alert.setTitle("No Internet Connection");
+			alert.setMessage("No Internet Connection has been found.");
+			alert.setNegativeButton("OK",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+						}
+					});
+
+			// Showing Alert Message
+			alert.show();
+		}
+	}
+
+	private void proceedToLogin() {
+		EditText usernameInput = (EditText) findViewById(R.id.usernameInput);
+		EditText passwordInput = (EditText) findViewById(R.id.passwordInput);
+
+		String username = usernameInput.getText().toString();
+		String password = passwordInput.getText().toString();
+
+		LOGGER.info("Username: "+username);
+		LOGGER.info("Password: "+password);
+		
+		LOGGER.info("Attempting to send to parse");
+		ParseUser.logInInBackground(username, password, new LogInCallback() {
+			public void done(ParseUser user, ParseException e) {
+				if (e == null && user != null) {
+					Toast.makeText(getApplicationContext(),
+							"Successfully Logged In!", Toast.LENGTH_LONG)
+							.show();
+					Intent intent = new Intent(_instance, HomeActivity.class);
+					startActivity(intent);
+					finish();
+				} else if (user == null) {
+					usernameOrPasswordIsInvalid();
+				} else {
+					somethingWentWrong();
+				}
+			}
+
+			private void usernameOrPasswordIsInvalid() {
+				@SuppressWarnings("unused")
+				View focusView = null;
+				View errorField = findViewById(R.id.usernameInput);
+				((TextView) errorField)
+						.setError(getString(R.string.error_invalid_credentials));
+				focusView = errorField;
+				
+				Button signinButton = (Button) findViewById(R.id.signinButton);
+				signinButton.setClickable(true);
+				signinButton.setEnabled(true);
+				Button registerButton = (Button) findViewById(R.id.registerNowButton);
+				registerButton.setClickable(true);
+				registerButton.setEnabled(true);
+			}
+
+			private void somethingWentWrong() {
+				Toast.makeText(getApplicationContext(), "Try Again",
+						Toast.LENGTH_LONG).show();
+			}
+		});
+
+	}
+
+	public void registerNow(View view) {
+		
+		Button rigisterNowButton = (Button) findViewById(R.id.registerNowButton);
+		rigisterNowButton.setClickable(false);
+		rigisterNowButton.setEnabled(false);
+		
+		LOGGER.info("The user has clicked 'Register'. Now entering RegisterActivity.class");
+		LOGGER.info("instance: " + _instance);
+
+		Intent intent = new Intent(_instance, RegisterActivity.class);
+		startActivity(intent);
+	}
+
+}

@@ -1,0 +1,60 @@
+package com.kainos.groupsafe.utilities;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class GroupParticipant implements Parcelable {
+
+	public static final Parcelable.Creator<GroupParticipant> CREATOR = new Parcelable.Creator<GroupParticipant>() {
+		public GroupParticipant createFromParcel(Parcel in){
+			return new GroupParticipant(in);
+		}
+		
+		public GroupParticipant[] newArray(int size){
+			return new GroupParticipant[size];
+		}
+	};
+	
+	String contactName = null;
+	String contactNumber = null;
+	String isChecked = null;
+
+	public String getContactName() {
+		return contactName;
+	}
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
+	public String getContactNumber() {
+		return contactNumber;
+	}
+	public void setContactNumber(String contactNumber) {
+		this.contactNumber = contactNumber;
+	}
+	public String getChecked() {
+		return isChecked;
+	}
+	public void setChecked(String isChecked) {
+		this.isChecked = isChecked;
+	}
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	public GroupParticipant(){};
+	
+	public GroupParticipant(Parcel in) {
+		contactName = in.readString();
+		contactNumber = in.readString();
+		isChecked = in.readString();
+	}
+	
+	@Override
+	public void writeToParcel(Parcel out, int flags) {
+		out.writeString(contactName);
+		out.writeString(contactNumber);
+		out.writeString(isChecked);
+	}
+
+}

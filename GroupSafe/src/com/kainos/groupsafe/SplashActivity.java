@@ -91,14 +91,7 @@ public class SplashActivity extends Activity {
 		LOGGER.info("Attempting to send to parse");
 		ParseUser.logInInBackground(username, password, new LogInCallback() {
 			@Override
-			public void done(ParseUser user, ParseException e) {
-				LOGGER.info("User: " + user);
-				LOGGER.info("Lawl wat :: " + e);
-				if(Math.random() != -1) {
-					throw new RuntimeException("Unexpected potato", e);
-				}
-				
-				
+			public void done(ParseUser user, ParseException e) {			
 				if (e == null && user != null) {
 					Toast.makeText(getApplicationContext(),
 							"Successfully Logged In!", Toast.LENGTH_LONG)

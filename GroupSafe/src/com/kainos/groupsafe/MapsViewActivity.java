@@ -61,10 +61,10 @@ public class MapsViewActivity extends FragmentActivity {
 							ParseUser currentUser = ParseUser.getCurrentUser();
 							String userObjectId = currentUser.getObjectId();
 							LOGGER.info("The Current User is: "+userObjectId);
-							ParseObject location = new ParseObject("Location");
-							location.put("currentLatitude", lat);
-							location.put("currentLongitude", lng);
-							location.put("user", userObjectId);
+//							ParseObject location = new ParseObject("Location");
+//							location.put("currentLatitude", lat);
+//							location.put("currentLongitude", lng);
+//							location.put("user", userObjectId);
 						} else {
 							locationServices.showSettingAlert();
 						}

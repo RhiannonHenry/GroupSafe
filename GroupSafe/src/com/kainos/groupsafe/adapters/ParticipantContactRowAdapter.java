@@ -20,8 +20,6 @@ public class ParticipantContactRowAdapter extends
 	private final static Logger LOGGER = Logger
 			.getLogger(ParticipantContactRowAdapter.class.getName());
 
-	private Context context;
-	private int layoutResourceId;
 	public ArrayList<ParticipantContact> participantContactList;
 
 	public ParticipantContactRowAdapter(Context context, int layoutResourceId,

@@ -43,6 +43,7 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -98,6 +99,18 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyANaWyed1CqHBvLjeIDQSXB8-yUyWy0Qe4" />
         <!-- END -->
+        <activity
+            android:name="com.kainos.groupsafe.SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.AddEmergencyContactActivity"
+            android:label="@string/title_activity_add_emergency_contact" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.EmergencyContactDetailsActivity"
+            android:label="@string/title_activity_emergency_contact_details" >
+        </activity>
     </application>
 
 </manifest>

@@ -182,6 +182,8 @@ public class RegisterActivity extends Activity {
 
 	private void signUp() {
 		ArrayList<String> contacts = new ArrayList<String>();
+		ArrayList<String> emergencyContacts = new ArrayList<String>();
+		ArrayList<String> currentLocation = new ArrayList<String>();
 		ParseUser user = new ParseUser();
 		user.setUsername(username);
 		user.setPassword(password);
@@ -190,6 +192,8 @@ public class RegisterActivity extends Activity {
 		user.put("groupLeader", false);
 		user.put("groupMember", false);
 		user.put("contacts", contacts);
+		user.put("emergencyContacts", emergencyContacts);
+		user.put("currentLocation", currentLocation);
 
 		user.signUpInBackground(new SignUpCallback() {
 			@Override

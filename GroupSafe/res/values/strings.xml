@@ -103,7 +103,29 @@
         <item>40</item>
     </string-array>
 
-    <string name="title_activity_invite_group_participants">InviteGroupParticipantsActivity</string>
+    <string name="title_activity_invite_group_participants">Invite Group Participants</string>
     <string name="hello_world">Hello world!</string>
+
+    <!-- Strings for SETTINGS page -->
+    <string name="title_activity_settings">Settings</string>
+    <string name="changePassword">Change Password</string>
+    <string name="addEmergencyContact"> Add Emergency Contact</string>
+
+    <!-- Strings for ADD EMERGENCY CONTACT page -->
+    <string name="title_activity_add_emergency_contact">Add Emergency Contact</string>
+    <string name="addEmergencyContactPageMessage">Add New Emergency Contact:</string>
+    <string name="emergencyContactNamePrompt">Name: </string>
+    <string name="emergencyContactNumberPrompt">Number: </string>
+    <string name="contactRelationshipPrompt">Relationship: </string>
+    <string name="emergencyContactNameHint">i.e. Jane</string>
+    <string name="emergencyContactNumberHint">i.e. 07712345678</string>
+    <string name="contactRelationshipHint">i.e. Mother</string>
+    
+    <!-- Strings for EMERGENCY CONTACT DETAILS page -->
+    <string name="title_activity_emergency_contact_details">Emergency Contact</string>
+    <string name="detailedEmergencyContactPageMessage">Emergecy Contact Information:</string>
+    <string name="detailedEmergencyContactNamePrompt">Name: </string>
+    <string name="detailedEmergencyContactNumberPrompt">Number: </string>
+    <string name="detailedEmergencyContactRelationshipPrompt">Relationship: </string>
 
 </resources>

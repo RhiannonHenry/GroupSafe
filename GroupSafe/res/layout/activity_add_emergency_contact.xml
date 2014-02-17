@@ -1,0 +1,113 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".AddEmergencyContactActivity" >
+
+    <TextView
+        android:id="@+id/addEmergencyContactPageMessage"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:text="@string/addEmergencyContactPageMessage"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/addEmergencyContactNamePrompt"
+        android:layout_width="@dimen/text_prompt_width"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/addEmergencyContactPageMessage"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:text="@string/emergencyContactNamePrompt"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/addEmergencyContactNameInput"
+        android:layout_width="@dimen/text_input_width"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/addEmergencyContactNamePrompt"
+        android:layout_alignBottom="@+id/addEmergencyContactNamePrompt"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/addEmergencyContactNamePrompt"
+        android:ems="10"
+        android:hint="@string/emergencyContactNameHint"
+        android:inputType="textPersonName" >
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/addEmergencyContactNumberPrompt"
+        android:layout_width="@dimen/text_prompt_width"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/addEmergencyContactNamePrompt"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/emergencyContactNumberPrompt"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/addEmergencyContactNumberInput"
+        android:layout_width="@dimen/text_input_width"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/addEmergencyContactNumberPrompt"
+        android:layout_alignBottom="@+id/addEmergencyContactNumberPrompt"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/addEmergencyContactNumberPrompt"
+        android:ems="10"
+        android:hint="@string/emergencyContactNumberHint"
+        android:inputType="phone" />
+
+        <TextView
+        android:id="@+id/addEmergencyContactRelationshipPrompt"
+        android:layout_width="@dimen/text_prompt_width"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/addEmergencyContactNumberPrompt"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/contactRelationshipPrompt"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/addEmergencyContactRelationshipInput"
+        android:layout_width="@dimen/text_input_width"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/addEmergencyContactRelationshipPrompt"
+        android:layout_alignBottom="@+id/addEmergencyContactRelationshipPrompt"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/addEmergencyContactRelationshipPrompt"
+        android:ems="10"
+        android:hint="@string/contactRelationshipHint"
+        android:inputType="textPersonName" />
+    
+    <Button
+        android:id="@+id/addEmergencyContactSaveButton"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/addEmergencyContactRelationshipPrompt"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/save" />
+
+    <Button
+        android:id="@+id/addEmergencyContactCancelButton"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/addEmergencyContactSaveButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:text="@string/cancel" />
+
+</RelativeLayout>

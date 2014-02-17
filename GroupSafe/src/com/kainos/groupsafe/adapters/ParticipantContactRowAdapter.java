@@ -44,7 +44,7 @@ public class ParticipantContactRowAdapter extends
 
 		LayoutInflater vi = (LayoutInflater) getContext().getSystemService(
 				Context.LAYOUT_INFLATER_SERVICE);
-		convertView = vi.inflate(R.layout.contact_select_row, null);
+		convertView = vi.inflate(R.layout.select_group_participant_row, null);
 		holder = new ViewHolder();
 
 		// Initialise all the UI elements from your GroupParticipantHolder

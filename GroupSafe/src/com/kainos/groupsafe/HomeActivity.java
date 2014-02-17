@@ -57,7 +57,7 @@ public class HomeActivity extends Activity {
 		_instance = this;
 
 		refreshContacts();
-		
+
 		setContentView(R.layout.activity_home);
 		contactListView = (ListView) findViewById(R.id.contactList);
 		contactRowAdapter = new ContactRowAdapter(this, retrievedContacts);
@@ -143,10 +143,12 @@ public class HomeActivity extends Activity {
 			viewMap();
 		} else if (id == R.id.action_createGroup) {
 			createGroup();
+		} else if (id == R.id.action_settings) {
+			settings();
 		}
 		return true;
 	}
-	
+
 	private void logCurrentUserOut() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
@@ -169,7 +171,7 @@ public class HomeActivity extends Activity {
 			showNoInternetConnectionDialog();
 		}
 	}
-	
+
 	private void addNewContact() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
@@ -182,7 +184,6 @@ public class HomeActivity extends Activity {
 			showNoInternetConnectionDialog();
 		}
 	}
-	
 
 	private void viewMap() {
 		internetPresent = connectionDetector.isConnectedToInternet();
@@ -196,7 +197,7 @@ public class HomeActivity extends Activity {
 			showNoInternetConnectionDialog();
 		}
 	}
-	
+
 	private void createGroup() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
@@ -210,6 +211,18 @@ public class HomeActivity extends Activity {
 		}
 	}
 	
+	private void settings() {
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			LOGGER.info("Going to Settings page... ");
+			Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+			startActivity(intent);
+			finish();
+		} else {
+			showNoInternetConnectionDialog();
+		}
+	}
+
 	private void showNoInternetConnectionDialog() {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setTitle("Internet Settings");
@@ -234,5 +247,5 @@ public class HomeActivity extends Activity {
 				});
 		alertDialog.show();
 	}
-	
+
 }

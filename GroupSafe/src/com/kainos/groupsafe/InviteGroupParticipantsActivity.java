@@ -58,12 +58,12 @@ public class InviteGroupParticipantsActivity extends Activity {
 		
 		// create an Array Adapter from the String Array
 		listView = (ListView) findViewById(R.id.participantsList);
-		View footer = getLayoutInflater().inflate(R.layout.footer, null);
-		View header = getLayoutInflater().inflate(R.layout.header, null);
+		View footer = getLayoutInflater().inflate(R.layout.footer_select_participants, null);
+		View header = getLayoutInflater().inflate(R.layout.header_invite_participants, null);
 		listView.addFooterView(footer);
 		listView.addHeaderView(header);
 		adapter = new ParticipantContactRowAdapter(this,
-		R.layout.contact_select_row, retrievedContacts);
+		R.layout.select_group_participant_row, retrievedContacts);
 		// assign adapter to ListView
 		listView.setAdapter(adapter);
 		

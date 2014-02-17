@@ -1,0 +1,18 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/emergencyContactListHolder"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".SettingsActivity" >
+
+    <ListView
+        android:id="@+id/emergencyContactList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="#ed88f0"
+        android:dividerHeight="@dimen/contact_row_text_spacing_top"
+        android:listSelector="@drawable/list_selector" >
+    </ListView>
+
+</LinearLayout>

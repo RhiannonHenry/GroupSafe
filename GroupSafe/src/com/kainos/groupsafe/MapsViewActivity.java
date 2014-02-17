@@ -60,11 +60,12 @@ public class MapsViewActivity extends FragmentActivity {
 							lng = getMyLng();
 							ParseUser currentUser = ParseUser.getCurrentUser();
 							String userObjectId = currentUser.getObjectId();
-							LOGGER.info("The Current User is: "+userObjectId);
-//							ParseObject location = new ParseObject("Location");
-//							location.put("currentLatitude", lat);
-//							location.put("currentLongitude", lng);
-//							location.put("user", userObjectId);
+							LOGGER.info("The Current User is: " + userObjectId);
+							// ParseObject location = new
+							// ParseObject("Location");
+							// location.put("currentLatitude", lat);
+							// location.put("currentLongitude", lng);
+							// location.put("user", userObjectId);
 						} else {
 							locationServices.showSettingAlert();
 						}
@@ -136,6 +137,13 @@ public class MapsViewActivity extends FragmentActivity {
 			LOGGER.info("Starting Home Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					HomeActivity.class);
+			startActivity(intent);
+			finish();
+		} else if (id == R.id.action_settings) {
+
+			LOGGER.info("Going to Settings page... ");
+			Intent intent = new Intent(getApplicationContext(),
+					SettingsActivity.class);
 			startActivity(intent);
 			finish();
 		}

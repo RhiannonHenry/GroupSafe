@@ -3,6 +3,7 @@ package com.kainos.groupsafe;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
 import com.kainos.groupsafe.adapters.ParticipantContactRowAdapter;
 import com.kainos.groupsafe.utilities.ParticipantContact;
 import com.parse.FindCallback;
@@ -33,7 +34,7 @@ public class SelectGroupParticipantsActivity extends Activity {
 	private ArrayList<ParticipantContact> retrievedContacts = new ArrayList<ParticipantContact>();
 	private ArrayList<String> chosenParticipants = new ArrayList<String>();
 	ListView listView = null;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
@@ -45,17 +46,19 @@ public class SelectGroupParticipantsActivity extends Activity {
 		_instance = this;
 
 		refreshContacts();
-		
+
 		// create an Array Adapter from the String Array
 		listView = (ListView) findViewById(R.id.contactGroupList);
-		View footer = getLayoutInflater().inflate(R.layout.footer, null);
+		View footer = getLayoutInflater().inflate(
+				R.layout.footer_select_participants, null);
 		listView.addFooterView(footer);
 		adapter = new ParticipantContactRowAdapter(this,
-				R.layout.contact_select_row, retrievedContacts);
+				R.layout.select_group_participant_row, retrievedContacts);
 		// assign adapter to ListView
 		listView.setAdapter(adapter);
 
-		Button button = (Button) footer.findViewById(R.id.selectGroupParticipantsNextButton);
+		Button button = (Button) footer
+				.findViewById(R.id.selectGroupParticipantsNextButton);
 		button.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -65,7 +68,7 @@ public class SelectGroupParticipantsActivity extends Activity {
 				selectParticipantsNextButton.setEnabled(false);
 
 				ArrayList<ParticipantContact> possibleParticipants = adapter.participantContactList;
-				
+
 				for (int i = 0; i < possibleParticipants.size(); i++) {
 					ParticipantContact possibleParticipant = possibleParticipants
 							.get(i);
@@ -79,7 +82,7 @@ public class SelectGroupParticipantsActivity extends Activity {
 				for (int j = 0; j < chosenParticipants.size(); j++) {
 					LOGGER.info(j + ". " + chosenParticipants.get(j));
 				}
-		
+
 				Intent intent = new Intent(_instance,
 						SetGroupGeoFenceActivity.class);
 				intent.putStringArrayListExtra("chosenParticipants",
@@ -147,6 +150,12 @@ public class SelectGroupParticipantsActivity extends Activity {
 			LOGGER.info("Starting Home Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					HomeActivity.class);
+			startActivity(intent);
+			finish();
+		} else if (id == R.id.action_settings) {
+			LOGGER.info("Going to Settings page... ");
+			Intent intent = new Intent(getApplicationContext(),
+					SettingsActivity.class);
 			startActivity(intent);
 			finish();
 		}
@@ -231,7 +240,7 @@ public class SelectGroupParticipantsActivity extends Activity {
 								contactName, contactNumber, false);
 						retrievedContacts.add(contact);
 						adapter.participantContactList.add(contact);
-                        adapter.notifyDataSetChanged();
+						adapter.notifyDataSetChanged();
 						listView.refreshDrawableState();
 					}
 				} else {

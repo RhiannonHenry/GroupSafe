@@ -232,6 +232,8 @@ public class AddContactActivity extends Activity {
 			createGroup();
 		} else if (id == R.id.action_home) {
 			home();
+		} else if (id == R.id.action_settings){
+			settings();
 		}
 		return true;
 	}
@@ -311,6 +313,18 @@ public class AddContactActivity extends Activity {
 		}
 	}
 
+	private void settings() {
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			LOGGER.info("Going to Settings page... ");
+			Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+			startActivity(intent);
+			finish();
+		} else {
+			showNoInternetConnectionDialog();
+		}
+	}
+	
 	/*
 	 * UTILITY METHODS ...
 	 */

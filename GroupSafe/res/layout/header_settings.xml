@@ -40,6 +40,24 @@
         android:layout_marginTop="@dimen/small_margin_top"
         android:layout_marginLeft="@dimen/margin_left"
         android:textAppearance="?android:attr/textAppearanceMedium" />
+    
+    <TextView
+        android:id="@+id/yourEmailPrompt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/userEmailPrompt"
+        android:layout_marginTop="@dimen/margin_top"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:textStyle="bold"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/yourCurrentEmail"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
         android:id="@+id/yourPasswordPrompt"
@@ -52,7 +70,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button
-        android:id="@+id/changePasswordButton"
+        android:id="@+id/resetPasswordButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"

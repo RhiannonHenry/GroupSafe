@@ -14,6 +14,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.RequestPasswordResetCallback;
 
 import android.os.Bundle;
 import android.provider.Settings;
@@ -50,7 +51,7 @@ public class SettingsActivity extends Activity {
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
 		ParseAnalytics.trackAppOpened(getIntent());
 		connectionDetector = new ConnectionDetector(getApplicationContext());
-				
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
 		_instance = this;
@@ -74,29 +75,70 @@ public class SettingsActivity extends Activity {
 		} else {
 			showNoInternetConnectionDialog();
 		}
-		
+
 		userClicksOnEmergencyContact();
 		userClicksOnAddEmergencyContact();
+		userClicksOnResetPassword();
 
+	}
+
+	private void userClicksOnResetPassword() {
+		Button passwordResetButton = (Button) findViewById(R.id.resetPasswordButton);
+		passwordResetButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				internetPresent = connectionDetector.isConnectedToInternet();
+				if (internetPresent) {
+					LOGGER.info("Starting Reset Password Functionality...");
+					sendResetEmail();
+				} else {
+					showNoInternetConnectionDialog();
+				}
+			}
+
+		});
+	}
+
+	protected void sendResetEmail() {
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		String email = currentUser.get("email").toString();
+		ParseUser.requestPasswordResetInBackground(email,
+				new RequestPasswordResetCallback() {
+					public void done(ParseException e) {
+						if (e == null) {
+							Toast.makeText(getApplicationContext(),
+									"Email has been sent!", Toast.LENGTH_SHORT)
+									.show();
+						} else {
+							Toast.makeText(getApplicationContext(),
+									"Error Sending Password Reset Email!", Toast.LENGTH_SHORT)
+									.show();
+						}
+					}
+				});
 	}
 
 	private void populatePage() {
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		String username = currentUser.get("username").toString();
 		String displayName = currentUser.get("displayName").toString();
-		
+		String email = currentUser.get("email").toString();
+
 		LOGGER.info("Trying to get Username and Display name Text view: ");
 		TextView userUsernameView = (TextView) findViewById(R.id.yourCurrentUserName);
 		TextView userDisplayNameView = (TextView) findViewById(R.id.yourCurrentDisplayName);
-		LOGGER.info("Username View: "+userUsernameView.toString());
-		LOGGER.info("Display Name View: "+userDisplayNameView.toString());
+		TextView userEmailView = (TextView) findViewById(R.id.yourCurrentEmail);
+		LOGGER.info("Username View: " + userUsernameView.toString());
+		LOGGER.info("Display Name View: " + userDisplayNameView.toString());
 
-		
 		LOGGER.info("Current Username: " + username);
 		LOGGER.info("Current Display Name: " + displayName);
+		LOGGER.info("Current Email: "+email);
 		userUsernameView.setText(username);
 		userDisplayNameView.setText(displayName);
-		
+		userEmailView.setText(email);
+
 	}
 
 	private void userClicksOnAddEmergencyContact() {
@@ -128,15 +170,18 @@ public class SettingsActivity extends Activity {
 
 				EmergencyContact selectedRecord = emergencyContacts
 						.get(position - 1);
-				String emergencyContactName = selectedRecord.getEmergencyContactName();
-				String emergencyContactNumber = selectedRecord.getEmergencyContactNumber();
-				String emergencyContactRelationship = selectedRecord.getEmergencyContactRelationship();
-				 Intent intent = new Intent(_instance,
-				 EmergencyContactDetailsActivity.class);
-				 intent.putExtra("name", emergencyContactName);
-				 intent.putExtra("number", emergencyContactNumber);
-				 intent.putExtra("relationship", emergencyContactRelationship);
-				 startActivity(intent);
+				String emergencyContactName = selectedRecord
+						.getEmergencyContactName();
+				String emergencyContactNumber = selectedRecord
+						.getEmergencyContactNumber();
+				String emergencyContactRelationship = selectedRecord
+						.getEmergencyContactRelationship();
+				Intent intent = new Intent(_instance,
+						EmergencyContactDetailsActivity.class);
+				intent.putExtra("name", emergencyContactName);
+				intent.putExtra("number", emergencyContactNumber);
+				intent.putExtra("relationship", emergencyContactRelationship);
+				startActivity(intent);
 			}
 		});
 	}
@@ -181,8 +226,9 @@ public class SettingsActivity extends Activity {
 						emergencyContact.setEmergencyContactNumber(number);
 						LOGGER.info("Emergency Contact Relationship: "
 								+ relationship);
-						emergencyContact.setEmergencyContactRelationship(relationship);
-						
+						emergencyContact
+								.setEmergencyContactRelationship(relationship);
+
 						emergencyContacts.add(emergencyContact);
 						adapter.emergencyContactList.add(emergencyContact);
 						adapter.notifyDataSetChanged();
@@ -202,7 +248,7 @@ public class SettingsActivity extends Activity {
 		getMenuInflater().inflate(R.menu.settings, menu);
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
@@ -297,19 +343,20 @@ public class SettingsActivity extends Activity {
 			showNoInternetConnectionDialog();
 		}
 	}
-	
+
 	private void settings() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
 			LOGGER.info("Going to Settings page... ");
-			Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+			Intent intent = new Intent(getApplicationContext(),
+					SettingsActivity.class);
 			startActivity(intent);
 			finish();
 		} else {
 			showNoInternetConnectionDialog();
 		}
 	}
-	
+
 	private void showNoInternetConnectionDialog() {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setTitle("Internet Settings");
@@ -334,6 +381,5 @@ public class SettingsActivity extends Activity {
 				});
 		alertDialog.show();
 	}
-	
 
 }

@@ -278,14 +278,14 @@ containing a value of this type.
         public static final int list_selector=0x7f02002a;
     }
     public static final class id {
-        public static final int action_addContact=0x7f050063;
-        public static final int action_createGroup=0x7f050066;
-        public static final int action_home=0x7f050060;
-        public static final int action_invitations=0x7f050062;
-        public static final int action_logout=0x7f050064;
-        public static final int action_notifications=0x7f050061;
-        public static final int action_settings=0x7f050065;
-        public static final int action_viewMap=0x7f050067;
+        public static final int action_addContact=0x7f050065;
+        public static final int action_createGroup=0x7f050068;
+        public static final int action_home=0x7f050062;
+        public static final int action_invitations=0x7f050064;
+        public static final int action_logout=0x7f050066;
+        public static final int action_notifications=0x7f050063;
+        public static final int action_settings=0x7f050067;
+        public static final int action_viewMap=0x7f050069;
         public static final int addContactCancelButton=0x7f05000b;
         public static final int addContactNameInput=0x7f050007;
         public static final int addContactNamePrompt=0x7f050006;
@@ -293,7 +293,7 @@ containing a value of this type.
         public static final int addContactNumberPrompt=0x7f050008;
         public static final int addContactPageMessage=0x7f050005;
         public static final int addContactSaveButton=0x7f05000a;
-        public static final int addEmergencyContactButton=0x7f05005c;
+        public static final int addEmergencyContactButton=0x7f05005e;
         public static final int addEmergencyContactCancelButton=0x7f050014;
         public static final int addEmergencyContactNameInput=0x7f05000e;
         public static final int addEmergencyContactNamePrompt=0x7f05000d;
@@ -303,16 +303,15 @@ containing a value of this type.
         public static final int addEmergencyContactRelationshipInput=0x7f050012;
         public static final int addEmergencyContactRelationshipPrompt=0x7f050011;
         public static final int addEmergencyContactSaveButton=0x7f050013;
-        public static final int changePasswordButton=0x7f05005b;
-        public static final int contactGroupCheckBox=0x7f05005f;
+        public static final int contactGroupCheckBox=0x7f050061;
         public static final int contactGroupList=0x7f05003c;
         public static final int contactGroupListHolder=0x7f05003b;
         public static final int contactList=0x7f05002a;
         public static final int contactListHolder=0x7f050029;
         public static final int contactName=0x7f05004d;
-        public static final int contactNameGroup=0x7f05005d;
+        public static final int contactNameGroup=0x7f05005f;
         public static final int contactNumber=0x7f05004e;
-        public static final int contactNumberGroup=0x7f05005e;
+        public static final int contactNumberGroup=0x7f050060;
         public static final int detailedContactDeleteButton=0x7f05001f;
         public static final int detailedContactGroupLeader=0x7f05001b;
         public static final int detailedContactGroupLeaderPrompt=0x7f05001a;
@@ -368,6 +367,7 @@ containing a value of this type.
         public static final int registerRetypePasswordPrompt=0x7f050033;
         public static final int registerUsernameInput=0x7f050030;
         public static final int registerUsernamePrompt=0x7f05002f;
+        public static final int resetPasswordButton=0x7f05005d;
         public static final int satellite=0x7f050002;
         public static final int selectGroupParticipantsNextButton=0x7f050054;
         public static final int setGeoFenceRadiusNextButton=0x7f05003f;
@@ -378,9 +378,11 @@ containing a value of this type.
         public static final int usernameInput=0x7f050047;
         public static final int usernamePrompt=0x7f050046;
         public static final int yourCurrentDisplayName=0x7f050057;
+        public static final int yourCurrentEmail=0x7f05005b;
         public static final int yourCurrentUserName=0x7f050059;
         public static final int yourDisplayNamePrompt=0x7f050056;
-        public static final int yourPasswordPrompt=0x7f05005a;
+        public static final int yourEmailPrompt=0x7f05005a;
+        public static final int yourPasswordPrompt=0x7f05005c;
         public static final int yourUserNamePrompt=0x7f050058;
     }
     public static final class integer {
@@ -428,7 +430,7 @@ containing a value of this type.
          */
         public static final int addContactPageMessage=0x7f060049;
         public static final int addEmergencyContact=0x7f060062;
-        public static final int addEmergencyContactPageMessage=0x7f060064;
+        public static final int addEmergencyContactPageMessage=0x7f060065;
         /**  Strings for LOGIN page 
          */
         public static final int app_name=0x7f060039;
@@ -532,8 +534,8 @@ containing a value of this type.
         public static final int contactNamePrompt=0x7f06004a;
         public static final int contactNumberHint=0x7f06002d;
         public static final int contactNumberPrompt=0x7f06004b;
-        public static final int contactRelationshipHint=0x7f06006a;
-        public static final int contactRelationshipPrompt=0x7f060067;
+        public static final int contactRelationshipHint=0x7f06006b;
+        public static final int contactRelationshipPrompt=0x7f060068;
         /**  Strings for CONTACT ROW 
          */
         public static final int contact_row_arrow_description=0x7f06004d;
@@ -541,10 +543,10 @@ containing a value of this type.
         /**  Strings for DETAILED CONTACT VIEW page 
          */
         public static final int detailedContactPageMessage=0x7f06004f;
-        public static final int detailedEmergencyContactNamePrompt=0x7f06006d;
-        public static final int detailedEmergencyContactNumberPrompt=0x7f06006e;
-        public static final int detailedEmergencyContactPageMessage=0x7f06006c;
-        public static final int detailedEmergencyContactRelationshipPrompt=0x7f06006f;
+        public static final int detailedEmergencyContactNamePrompt=0x7f06006e;
+        public static final int detailedEmergencyContactNumberPrompt=0x7f06006f;
+        public static final int detailedEmergencyContactPageMessage=0x7f06006d;
+        public static final int detailedEmergencyContactRelationshipPrompt=0x7f060070;
         public static final int detailed_contact_contact_name=0x7f060054;
         public static final int detailed_contact_contact_name_prompt=0x7f060050;
         public static final int detailed_contact_contact_number=0x7f060055;
@@ -560,10 +562,10 @@ containing a value of this type.
         public static final int emailExample=0x7f060046;
         public static final int emailHint=0x7f06002b;
         public static final int emailPrompt=0x7f060043;
-        public static final int emergencyContactNameHint=0x7f060068;
-        public static final int emergencyContactNamePrompt=0x7f060065;
-        public static final int emergencyContactNumberHint=0x7f060069;
-        public static final int emergencyContactNumberPrompt=0x7f060066;
+        public static final int emergencyContactNameHint=0x7f060069;
+        public static final int emergencyContactNamePrompt=0x7f060066;
+        public static final int emergencyContactNumberHint=0x7f06006a;
+        public static final int emergencyContactNumberPrompt=0x7f060067;
         public static final int error_invalidEmailAddress=0x7f06001e;
         public static final int error_invalidPassword=0x7f06001d;
         public static final int error_invalidUsername=0x7f06001c;
@@ -605,11 +607,11 @@ containing a value of this type.
         public static final int title_activity_add_contact=0x7f06004c;
         /**  Strings for ADD EMERGENCY CONTACT page 
          */
-        public static final int title_activity_add_emergency_contact=0x7f060063;
+        public static final int title_activity_add_emergency_contact=0x7f060064;
         public static final int title_activity_contact_details=0x7f06004e;
         /**  Strings for EMERGENCY CONTACT DETAILS page 
          */
-        public static final int title_activity_emergency_contact_details=0x7f06006b;
+        public static final int title_activity_emergency_contact_details=0x7f06006c;
         public static final int title_activity_home=0x7f060048;
         public static final int title_activity_invite_group_participants=0x7f06005e;
         /**  Strings for MAP VIEW page 
@@ -625,6 +627,7 @@ containing a value of this type.
         /**  Strings for SETTINGS page 
          */
         public static final int title_activity_settings=0x7f060060;
+        public static final int userEmailPrompt=0x7f060063;
         public static final int usernameExample=0x7f06002f;
         /**  HINT String 
          */

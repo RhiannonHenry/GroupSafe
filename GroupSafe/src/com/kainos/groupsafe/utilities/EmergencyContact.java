@@ -7,11 +7,11 @@ public class EmergencyContact {
 	String emergencyContactRelationship = null;
 
 	public EmergencyContact(String emergencyContactName,
-			String emergencyContactNumber, String emergencyConyactRelationship) {
+			String emergencyContactNumber, String emergencyContactRelationship) {
 		super();
 		this.emergencyContactName = emergencyContactName;
 		this.emergencyContactNumber = emergencyContactNumber;
-		this.emergencyContactRelationship = emergencyConyactRelationship;
+		this.emergencyContactRelationship = emergencyContactRelationship;
 	}
 
 	public String getEmergencyContactName() {
@@ -36,6 +36,14 @@ public class EmergencyContact {
 
 	public void setEmergencyContactRelationship(String emergencyContactRelationship) {
 		this.emergencyContactRelationship = emergencyContactRelationship;
+	}
+
+	@Override
+	public String toString() {
+		return "EmergencyContact [emergencyContactName=" + emergencyContactName
+				+ ", emergencyContactNumber=" + emergencyContactNumber
+				+ ", emergencyContactRelationship="
+				+ emergencyContactRelationship + "]";
 	}
 
 	

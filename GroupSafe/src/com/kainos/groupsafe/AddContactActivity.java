@@ -99,10 +99,17 @@ public class AddContactActivity extends Activity {
 			@Override
 			public void done(List<ParseUser> userList, ParseException e) {
 				if (e == null) {
+					if(userList.size()>0){
 					LOGGER.info("Successfully retrieved user: "
 							+ userList.get(0).getUsername());
 					addToContactsTable();
+					}else{
+						Toast.makeText(getApplicationContext(),
+								"User does not exist. Try Again!",
+								Toast.LENGTH_LONG).show();
+					}
 				} else {
+					enableAllButtons();
 					LOGGER.info("An error occurred retrieving the user!");
 					Toast.makeText(getApplicationContext(),
 							"User does not exist. Try Again!",

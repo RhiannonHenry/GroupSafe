@@ -10,12 +10,17 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/displayNamePrompt"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_marginTop="@dimen/margin_top"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/yourCurrentDisplayName"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:layout_marginLeft="@dimen/margin_left"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
@@ -23,12 +28,17 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/usernamePrompt"
+        android:layout_marginTop="@dimen/margin_top"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:textStyle="bold"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
         android:id="@+id/yourCurrentUserName"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:layout_marginLeft="@dimen/margin_left"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
@@ -36,19 +46,22 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/passwordPrompt"
+        android:layout_marginTop="@dimen/margin_top"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:textStyle="bold"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button
         android:id="@+id/changePasswordButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/margin_top"
+        android:layout_gravity="right"
+        android:layout_marginRight="@dimen/margin_left"
         android:text="@string/changePassword" />
     
     <Button 
         android:id="@+id/addEmergencyContactButton"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/margin_top"

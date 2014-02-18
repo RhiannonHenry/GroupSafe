@@ -28,6 +28,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class SettingsActivity extends Activity {
@@ -49,6 +50,7 @@ public class SettingsActivity extends Activity {
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
 		ParseAnalytics.trackAppOpened(getIntent());
 		connectionDetector = new ConnectionDetector(getApplicationContext());
+				
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
 		_instance = this;
@@ -65,9 +67,36 @@ public class SettingsActivity extends Activity {
 		// assign adapter to ListView
 		listView.setAdapter(adapter);
 
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			LOGGER.info("Populating page...");
+			populatePage();
+		} else {
+			showNoInternetConnectionDialog();
+		}
+		
 		userClicksOnEmergencyContact();
 		userClicksOnAddEmergencyContact();
 
+	}
+
+	private void populatePage() {
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		String username = currentUser.get("username").toString();
+		String displayName = currentUser.get("displayName").toString();
+		
+		LOGGER.info("Trying to get Username and Display name Text view: ");
+		TextView userUsernameView = (TextView) findViewById(R.id.yourCurrentUserName);
+		TextView userDisplayNameView = (TextView) findViewById(R.id.yourCurrentDisplayName);
+		LOGGER.info("Username View: "+userUsernameView.toString());
+		LOGGER.info("Display Name View: "+userDisplayNameView.toString());
+
+		
+		LOGGER.info("Current Username: " + username);
+		LOGGER.info("Current Display Name: " + displayName);
+		userUsernameView.setText(username);
+		userDisplayNameView.setText(displayName);
+		
 	}
 
 	private void userClicksOnAddEmergencyContact() {
@@ -96,8 +125,9 @@ public class SettingsActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
+
 				EmergencyContact selectedRecord = emergencyContacts
-						.get(position);
+						.get(position - 1);
 				String emergencyContactName = selectedRecord.getEmergencyContactName();
 				String emergencyContactNumber = selectedRecord.getEmergencyContactNumber();
 				String emergencyContactRelationship = selectedRecord.getEmergencyContactRelationship();
@@ -151,10 +181,13 @@ public class SettingsActivity extends Activity {
 						emergencyContact.setEmergencyContactNumber(number);
 						LOGGER.info("Emergency Contact Relationship: "
 								+ relationship);
-						emergencyContact.setEmergencyContactName(relationship);
+						emergencyContact.setEmergencyContactRelationship(relationship);
+						
 						emergencyContacts.add(emergencyContact);
-						listView.refreshDrawableState();
+						adapter.emergencyContactList.add(emergencyContact);
 						adapter.notifyDataSetChanged();
+						listView.refreshDrawableState();
+
 					}
 				} else {
 					LOGGER.info("SOMETHING WENT WRONG RETRIEVING EMERGENCY CONTACT");

@@ -1,77 +1,99 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     tools:context=".EmergencyContactDetailsActivity" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/detailedEmergencyContactPageMessage"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" 
-        >
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:gravity="center"
+        android:text="@string/detailedEmergencyContactPageMessage"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
-            android:id="@+id/detailedEmergencyContactPageMessage"
-            android:layout_width="fill_parent"
+    <TextView
+        android:id="@+id/detailedEmergencyContactNamePrompt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/detailedEmergencyContactNamePrompt"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/detailedEmergencyContactName"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/detailedEmergencyContactNumberPrompt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:text="@string/detailedEmergencyContactNumberPrompt"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/detailedEmergencyContactNumber"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/detailedEmergencyContactRelationshipPrompt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:text="@string/detailedEmergencyContactRelationshipPrompt"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/detailedEmergencyContactRelationship"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginTop="@dimen/small_margin_top"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/margin_left"
+        android:layout_marginRight="@dimen/margin_left" >
+
+        <Button
+            android:id="@+id/detailedEmergencyContactOKButton"
+            android:layout_width="@dimen/button_width"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/small_margin_top"
-            android:gravity="center"
-            android:text="@string/detailedEmergencyContactPageMessage"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="15dp"
+            android:onClick="OK"
+            android:text="@string/OK" />
 
-        <TextView
-            android:id="@+id/detailedEmergencyContactNamePrompt"
-            android:layout_width="fill_parent"
+        <Button
+            android:id="@+id/detailedEmergencyContactDeleteButton"
+            android:layout_width="@dimen/button_width"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_left"
-            android:layout_marginTop="@dimen/margin_top"
-            android:text="@string/detailedEmergencyContactNamePrompt"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textStyle="bold" />
+            android:layout_alignBaseline="@+id/detailedEmergencyContactOKButton"
+            android:layout_alignBottom="@+id/detailedEmergencyContactOKButton"
+            android:layout_alignParentRight="true"
+            android:layout_alignRight="@+id/detailedEmergencyContactOKButton"
+            android:layout_marginRight="14dp"
+            android:onClick="delete"
+            android:text="@string/delete" />
+    </RelativeLayout>
 
-        <TextView
-            android:id="@+id/detailedEmergencyContactName"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_left"
-            android:layout_marginTop="@dimen/small_margin_top"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <TextView
-            android:id="@+id/detailedEmergencyContactNumberPrompt"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_left"
-            android:layout_marginTop="@dimen/small_margin_top"
-            android:text="@string/detailedEmergencyContactNumberPrompt"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/detailedEmergencyContactNumber"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_left"
-            android:layout_marginTop="@dimen/small_margin_top"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <TextView
-            android:id="@+id/detailedEmergencyContactRelationshipPrompt"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_left"
-            android:layout_marginTop="@dimen/small_margin_top"
-            android:text="@string/detailedEmergencyContactRelationshipPrompt"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/detailedEmergencyContactRelationship"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_left"
-            android:layout_marginTop="@dimen/small_margin_top"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>

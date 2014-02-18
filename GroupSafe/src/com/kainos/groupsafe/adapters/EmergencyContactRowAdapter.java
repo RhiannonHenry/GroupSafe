@@ -42,7 +42,7 @@ public class EmergencyContactRowAdapter extends ArrayAdapter<EmergencyContact> {
 
 		LayoutInflater vi = (LayoutInflater) getContext().getSystemService(
 				Context.LAYOUT_INFLATER_SERVICE);
-		convertView = vi.inflate(R.layout.select_group_participant_row, null);
+		convertView = vi.inflate(R.layout.emergency_contact_row, null);
 		holder = new ViewHolder();
 
 		// Initialise all the UI elements from your ViewHolder here...
@@ -56,6 +56,11 @@ public class EmergencyContactRowAdapter extends ArrayAdapter<EmergencyContact> {
 		convertView.setTag(holder);
 
 		EmergencyContact eContact = emergencyContactList.get(position);
+		LOGGER.info("Creating View with Emergency Contact:");
+		LOGGER.info("Name: "+eContact.getEmergencyContactName());
+		LOGGER.info("Number: "+eContact.getEmergencyContactNumber());
+		LOGGER.info("Relationship: "+eContact.getEmergencyContactRelationship());
+		
 		holder.emergencyContactName
 				.setText(eContact.getEmergencyContactName());
 		holder.emergencyContactNumber.setText(eContact
@@ -65,5 +70,6 @@ public class EmergencyContactRowAdapter extends ArrayAdapter<EmergencyContact> {
 
 		return convertView;
 	}
+	
 
 }

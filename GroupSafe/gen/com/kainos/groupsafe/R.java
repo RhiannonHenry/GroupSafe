@@ -345,13 +345,13 @@ containing a value of this type.
         public static final int inviteParticipantsPrevButton=0x7f050053;
         public static final int logoImage=0x7f050044;
         public static final int logoWrapper=0x7f050043;
+        public static final int map=0x7f05002d;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
         public static final int notRegistered=0x7f05004b;
         public static final int participantsList=0x7f05002c;
         public static final int passwordInput=0x7f050049;
         public static final int passwordPrompt=0x7f050048;
-        public static final int personalMap=0x7f05002d;
         public static final int radiusSpinner=0x7f05003e;
         public static final int registerButton=0x7f050039;
         public static final int registerCancelButton=0x7f05003a;

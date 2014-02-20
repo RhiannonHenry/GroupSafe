@@ -2,38 +2,29 @@ package com.kainos.groupsafe;
 
 import java.util.logging.Logger;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.kainos.groupsafe.utilities.GPSTracker;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
-import com.parse.ParseObject;
 import com.parse.ParseUser;
+import com.google.android.gms.maps.MapFragment;
 
-public class MapsViewActivity extends FragmentActivity {
+public class MapsViewActivity extends Activity {
 
 	private final static Logger LOGGER = Logger
 			.getLogger(MapsViewActivity.class.getName());
 
+	private GoogleMap googleMap;
 	GPSTracker locationServices;
 	double lat;
 	double lng;
-	View activityRoot;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,62 +35,30 @@ public class MapsViewActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_maps_view);
 
-		activityRoot = this.findViewById(android.R.id.content);
-		activityRoot.getViewTreeObserver().addOnGlobalLayoutListener(
-				new OnGlobalLayoutListener() {
-					@Override
-					public void onGlobalLayout() {
-
-						GoogleMap mMap = ((SupportMapFragment) getSupportFragmentManager()
-								.findFragmentById(R.id.personalMap)).getMap();
-						enableMyLocationOnMap(mMap);
-
-						locationServices = new GPSTracker(MapsViewActivity.this);
-						if (locationServices.canGetLocation()) {
-							lat = getMyLat();
-							lng = getMyLng();
-							ParseUser currentUser = ParseUser.getCurrentUser();
-							String userObjectId = currentUser.getObjectId();
-							LOGGER.info("The Current User is: " + userObjectId);
-							// ParseObject location = new
-							// ParseObject("Location");
-							// location.put("currentLatitude", lat);
-							// location.put("currentLongitude", lng);
-							// location.put("user", userObjectId);
-						} else {
-							locationServices.showSettingAlert();
-						}
-
-						Marker marker = mMap.addMarker(new MarkerOptions()
-								.position(new LatLng(lat, lng))
-								.title("My Location").draggable(false));
-
-						LatLngBounds.Builder builder = new LatLngBounds.Builder();
-						builder.include(marker.getPosition());
-						LatLngBounds bounds = builder.build();
-						int padding = 100;
-
-						CameraUpdate updatedView = CameraUpdateFactory
-								.newLatLngBounds(bounds, padding);
-						mMap.animateCamera(updatedView);
-
-					}
-				});
-
+		try {
+			// Loading Map
+			initialiseMap();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	private double getMyLat() {
-		double latitude = locationServices.getLat();
-		return latitude;
-	}
+	private void initialiseMap() {
+		if (googleMap == null) {
+			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
+					R.id.map)).getMap();
+			if (googleMap == null) {
+				Toast.makeText(getApplicationContext(),
+						"Unable to create map..", Toast.LENGTH_SHORT).show();
 
-	private double getMyLng() {
-		double longitude = locationServices.getLng();
-		return longitude;
+			}
+		}
 	}
-
-	private void enableMyLocationOnMap(GoogleMap mMap) {
-		mMap.setMyLocationEnabled(true);
+	
+	@Override
+	protected void onResume(){
+		super.onResume();
+		initialiseMap();
 	}
 
 	@Override

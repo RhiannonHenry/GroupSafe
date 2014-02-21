@@ -191,46 +191,47 @@ containing a value of this type.
          */
         public static final int activity_horizontal_margin=0x7f080000;
         public static final int activity_vertical_margin=0x7f080001;
-        /**   Layout Dimensions for ADD CONTACT Page 
+        /**  Layout Dimensions for ADD CONTACT Page 
          */
-        public static final int add_contact_message_margin_top=0x7f080016;
+        public static final int add_contact_message_margin_top=0x7f080017;
         public static final int button_width=0x7f080003;
-        /**   Layout Dimensions for CONTACT ROW 
+        /**  Layout Dimensions for CONTACT ROW 
          */
-        public static final int contact_row_padding=0x7f080017;
-        public static final int contact_row_text_spacing_top=0x7f080018;
+        public static final int contact_row_padding=0x7f080018;
+        public static final int contact_row_text_spacing_top=0x7f080019;
         /**  Layout Dimensions for DETAILED CONTACT Page 
          */
-        public static final int detailed_contact_margin_top=0x7f080019;
-        public static final int geo_fence_radius_message_margin_bottom=0x7f08001b;
+        public static final int detailed_contact_margin_top=0x7f08001a;
+        public static final int geo_fence_radius_message_margin_bottom=0x7f08001c;
         /**  Layout Dimensions for GEO-FENCE RADIUS Page 
          */
-        public static final int geo_fence_radius_message_margin_top=0x7f08001a;
+        public static final int geo_fence_radius_message_margin_top=0x7f08001b;
         /**  Layout Dimensions for SPLASH Page 
          */
-        public static final int logo_bottom_margin=0x7f080006;
-        public static final int logo_height=0x7f08000a;
-        public static final int logo_margin_top=0x7f080007;
-        public static final int logo_padding=0x7f080008;
-        public static final int logo_width=0x7f080009;
-        public static final int margin_left=0x7f080005;
+        public static final int logo_bottom_margin=0x7f080007;
+        public static final int logo_height=0x7f08000b;
+        public static final int logo_margin_top=0x7f080008;
+        public static final int logo_padding=0x7f080009;
+        public static final int logo_width=0x7f08000a;
+        public static final int margin_bottom=0x7f080005;
+        public static final int margin_left=0x7f080006;
         public static final int margin_top=0x7f080004;
-        public static final int password_prompt_margin_top=0x7f080010;
-        public static final int register_message_margin_top=0x7f080015;
+        public static final int password_prompt_margin_top=0x7f080011;
+        public static final int register_message_margin_top=0x7f080016;
         /**  Layout Dimensions for REGISTER Page 
          */
-        public static final int register_page_padding=0x7f080014;
-        public static final int registered_text_margin_top=0x7f080013;
-        public static final int registered_text_width=0x7f080012;
-        public static final int signin_button_magin_top=0x7f080011;
+        public static final int register_page_padding=0x7f080015;
+        public static final int registered_text_margin_top=0x7f080014;
+        public static final int registered_text_width=0x7f080013;
+        public static final int signin_button_magin_top=0x7f080012;
         /**  GENERIC Layout Dimensions 
          */
         public static final int small_margin_top=0x7f080002;
-        public static final int splash_message_margin_top=0x7f08000b;
-        public static final int text_input_width=0x7f08000e;
-        public static final int text_prompt_margin_left=0x7f08000d;
-        public static final int text_prompt_width=0x7f08000c;
-        public static final int username_prompt_margin_top=0x7f08000f;
+        public static final int splash_message_margin_top=0x7f08000c;
+        public static final int text_input_width=0x7f08000f;
+        public static final int text_prompt_margin_left=0x7f08000e;
+        public static final int text_prompt_width=0x7f08000d;
+        public static final int username_prompt_margin_top=0x7f080010;
     }
     public static final class drawable {
         public static final int arrow=0x7f020000;

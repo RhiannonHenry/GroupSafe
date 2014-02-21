@@ -1,158 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:paddingLeft="@dimen/register_page_padding"
-    android:paddingRight="@dimen/register_page_padding" >
+    android:layout_height="fill_parent" >
 
-    <TextView
-        android:id="@+id/registerPageMessage"
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/register_message_margin_top"
-        android:gravity="center"
-        android:text="@string/registerPageMessage"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:paddingLeft="@dimen/register_page_padding"
+        android:paddingRight="@dimen/register_page_padding" >
 
-    <TextView
-        android:id="@+id/registerUsernamePrompt"
-        android:layout_width="@dimen/text_prompt_width"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/registerPageMessage"
-        android:layout_marginLeft="@dimen/margin_left"
-        android:layout_marginTop="@dimen/margin_top"
-        android:text="@string/usernamePrompt"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        <TextView
+            android:id="@+id/registerPageMessage"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/register_message_margin_top"
+            android:gravity="center"
+            android:text="@string/registerPageMessage"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <EditText
-        android:id="@+id/registerUsernameInput"
-        android:layout_width="@dimen/text_input_width"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/registerUsernamePrompt"
-        android:layout_alignBottom="@+id/registerUsernamePrompt"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/registerUsernamePrompt"
-        android:ems="10"
-        android:hint="@string/usernameExample"
-        android:inputType="phone" >
+        <TextView
+            android:id="@+id/registerUsernamePrompt"
+            android:layout_width="@dimen/text_prompt_width"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/registerPageMessage"
+            android:layout_marginLeft="@dimen/margin_left"
+            android:layout_marginTop="@dimen/margin_top"
+            android:text="@string/usernamePrompt"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <requestFocus />
-    </EditText>
+        <EditText
+            android:id="@+id/registerUsernameInput"
+            android:layout_width="@dimen/text_input_width"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/registerUsernamePrompt"
+            android:layout_alignBottom="@+id/registerUsernamePrompt"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/registerUsernamePrompt"
+            android:ems="10"
+            android:hint="@string/usernameExample"
+            android:inputType="phone" >
 
-    <TextView
-        android:id="@+id/registerPasswordPrompt"
-        android:layout_width="@dimen/text_prompt_width"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/registerUsernamePrompt"
-        android:layout_marginLeft="@dimen/margin_left"
-        android:layout_marginTop="@dimen/margin_top"
-        android:text="@string/passwordPrompt"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+            <requestFocus />
+        </EditText>
 
-    <EditText
-        android:id="@+id/registerPasswordInput"
-        android:layout_width="@dimen/text_input_width"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/registerPasswordPrompt"
-        android:layout_alignBottom="@+id/registerPasswordPrompt"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/registerPasswordPrompt"
-        android:ems="10"
-        android:hint="@string/passwordHint"
-        android:inputType="textVisiblePassword" />
+        <TextView
+            android:id="@+id/registerPasswordPrompt"
+            android:layout_width="@dimen/text_prompt_width"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/registerUsernamePrompt"
+            android:layout_marginLeft="@dimen/margin_left"
+            android:layout_marginTop="@dimen/margin_top"
+            android:text="@string/passwordPrompt"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <TextView
-        android:id="@+id/registerRetypePasswordPrompt"
-        android:layout_width="@dimen/text_prompt_width"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/registerPasswordPrompt"
-        android:layout_marginLeft="@dimen/margin_left"
-        android:layout_marginTop="@dimen/margin_top"
-        android:text="@string/retypePasswordPrompt"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        <EditText
+            android:id="@+id/registerPasswordInput"
+            android:layout_width="@dimen/text_input_width"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/registerPasswordPrompt"
+            android:layout_alignBottom="@+id/registerPasswordPrompt"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/registerPasswordPrompt"
+            android:ems="10"
+            android:hint="@string/passwordHint"
+            android:inputType="textVisiblePassword" />
 
-    <EditText
-        android:id="@+id/registerRetypePasswordInput"
-        android:layout_width="@dimen/text_input_width"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/registerRetypePasswordPrompt"
-        android:layout_alignBottom="@+id/registerRetypePasswordPrompt"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/registerRetypePasswordPrompt"
-        android:ems="10"
-        android:hint="@string/passwordExampleRegister"
-        android:inputType="textVisiblePassword" />
+        <TextView
+            android:id="@+id/registerRetypePasswordPrompt"
+            android:layout_width="@dimen/text_prompt_width"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/registerPasswordPrompt"
+            android:layout_marginLeft="@dimen/margin_left"
+            android:layout_marginTop="@dimen/margin_top"
+            android:text="@string/retypePasswordPrompt"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <TextView
-        android:id="@+id/registerDisplayNamePrompt"
-        android:layout_width="@dimen/text_prompt_width"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/registerRetypePasswordPrompt"
-        android:layout_marginLeft="@dimen/margin_left"
-        android:layout_marginTop="@dimen/margin_top"
-        android:text="@string/displayNamePrompt"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        <EditText
+            android:id="@+id/registerRetypePasswordInput"
+            android:layout_width="@dimen/text_input_width"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/registerRetypePasswordPrompt"
+            android:layout_alignBottom="@+id/registerRetypePasswordPrompt"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/registerRetypePasswordPrompt"
+            android:ems="10"
+            android:hint="@string/passwordExampleRegister"
+            android:inputType="textVisiblePassword" />
 
-    <EditText
-        android:id="@+id/registerDisplayNameInput"
-        android:layout_width="@dimen/text_input_width"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/registerDisplayNamePrompt"
-        android:layout_alignBottom="@+id/registerDisplayNamePrompt"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/registerDisplayNamePrompt"
-        android:ems="10"
-        android:hint="@string/displayNameHint"
-        android:inputType="textPersonName" />
+        <TextView
+            android:id="@+id/registerDisplayNamePrompt"
+            android:layout_width="@dimen/text_prompt_width"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/registerRetypePasswordPrompt"
+            android:layout_marginLeft="@dimen/margin_left"
+            android:layout_marginTop="@dimen/margin_top"
+            android:text="@string/displayNamePrompt"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <TextView
-        android:id="@+id/registerEmailPrompt"
-        android:layout_width="@dimen/text_prompt_width"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/registerDisplayNamePrompt"
-        android:layout_marginLeft="@dimen/margin_left"
-        android:layout_marginTop="@dimen/margin_top"
-        android:text="@string/emailPrompt"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        <EditText
+            android:id="@+id/registerDisplayNameInput"
+            android:layout_width="@dimen/text_input_width"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/registerDisplayNamePrompt"
+            android:layout_alignBottom="@+id/registerDisplayNamePrompt"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/registerDisplayNamePrompt"
+            android:ems="10"
+            android:hint="@string/displayNameHint"
+            android:inputType="textPersonName" />
 
-    <EditText
-        android:id="@+id/registerEmailInput"
-        android:layout_width="@dimen/text_input_width"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/registerEmailPrompt"
-        android:layout_alignBottom="@+id/registerEmailPrompt"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/registerEmailPrompt"
-        android:ems="10"
-        android:hint="@string/emailExample"
-        android:inputType="textEmailAddress"
-        android:lines="3" />
+        <TextView
+            android:id="@+id/registerEmailPrompt"
+            android:layout_width="@dimen/text_prompt_width"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/registerDisplayNamePrompt"
+            android:layout_marginLeft="@dimen/margin_left"
+            android:layout_marginTop="@dimen/margin_top"
+            android:text="@string/emailPrompt"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <Button
-        android:id="@+id/registerButton"
-        android:layout_width="@dimen/button_width"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/registerEmailInput"
-        android:layout_marginTop="@dimen/margin_top"
-        android:onClick="register"
-        android:text="@string/register" />
+        <EditText
+            android:id="@+id/registerEmailInput"
+            android:layout_width="@dimen/text_input_width"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/registerEmailPrompt"
+            android:layout_alignBottom="@+id/registerEmailPrompt"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/registerEmailPrompt"
+            android:ems="10"
+            android:hint="@string/emailExample"
+            android:inputType="textEmailAddress"
+            android:lines="3" />
 
-    <Button
-        android:id="@+id/registerCancelButton"
-        android:layout_width="@dimen/button_width"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/registerEmailInput"
-        android:layout_marginTop="@dimen/margin_top"
-        android:onClick="registerCancel"
-        android:text="@string/cancel" />
+        <Button
+            android:id="@+id/registerButton"
+            android:layout_width="@dimen/button_width"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/registerEmailInput"
+            android:layout_marginBottom="@dimen/margin_bottom"
+            android:layout_marginTop="@dimen/margin_top"
+            android:onClick="register"
+            android:text="@string/register" />
 
-</RelativeLayout>
+        <Button
+            android:id="@+id/registerCancelButton"
+            android:layout_width="@dimen/button_width"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/registerEmailInput"
+            android:layout_marginBottom="@dimen/margin_bottom"
+            android:layout_marginTop="@dimen/margin_top"
+            android:onClick="registerCancel"
+            android:text="@string/cancel" />
+    </RelativeLayout>
+
+</ScrollView>

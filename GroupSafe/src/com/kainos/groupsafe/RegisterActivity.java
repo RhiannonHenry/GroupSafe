@@ -183,7 +183,7 @@ public class RegisterActivity extends Activity {
 	private void signUp() {
 		ArrayList<String> contacts = new ArrayList<String>();
 		ArrayList<String> emergencyContacts = new ArrayList<String>();
-		ArrayList<String> currentLocation = new ArrayList<String>();
+		String currentLocation = "";
 		ParseUser user = new ParseUser();
 		user.setUsername(username);
 		user.setPassword(password);
@@ -209,11 +209,13 @@ public class RegisterActivity extends Activity {
 					startActivity(intent);
 					finish();
 				} else {
+					enableAllButtons();
 					LOGGER.info("A user with username: {" + username
 							+ "} already exists");
 					Toast.makeText(getApplicationContext(),
 							"Username already exists!", Toast.LENGTH_LONG)
 							.show();
+					e.printStackTrace();
 				}
 			}
 		});

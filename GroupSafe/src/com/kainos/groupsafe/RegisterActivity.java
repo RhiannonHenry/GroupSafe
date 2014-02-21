@@ -7,6 +7,7 @@ import com.kainos.groupsafe.utilities.ConnectionDetector;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 
@@ -63,7 +64,7 @@ public class RegisterActivity extends Activity {
 
 		enableAllButtons();
 	}
-	
+
 	public void registerCancel(View view) {
 		disableAllButtons();
 
@@ -201,6 +202,7 @@ public class RegisterActivity extends Activity {
 				if (e == null) {
 					LOGGER.info("Account Created Successfully");
 					// Show a simple Toast message upon successful registration
+					registerParseDevice();
 					Toast.makeText(getApplicationContext(),
 							"Successfully Registered!", Toast.LENGTH_LONG)
 							.show();
@@ -217,6 +219,10 @@ public class RegisterActivity extends Activity {
 							.show();
 					e.printStackTrace();
 				}
+			}
+
+			private void registerParseDevice() {
+				ParseInstallation.getCurrentInstallation().saveInBackground();
 			}
 		});
 	}
@@ -251,7 +257,7 @@ public class RegisterActivity extends Activity {
 		Intent intent = new Intent(Settings.ACTION_SETTINGS);
 		startActivity(intent);
 	}
-	
+
 	/*
 	 * UTILITIES...
 	 */

@@ -105,6 +105,7 @@ public class SettingsActivity extends Activity {
 		String email = currentUser.get("email").toString();
 		ParseUser.requestPasswordResetInBackground(email,
 				new RequestPasswordResetCallback() {
+					@Override
 					public void done(ParseException e) {
 						if (e == null) {
 							Toast.makeText(getApplicationContext(),

@@ -121,12 +121,13 @@
     <string name="emergencyContactNameHint">i.e. Jane</string>
     <string name="emergencyContactNumberHint">i.e. 07712345678</string>
     <string name="contactRelationshipHint">i.e. Mother</string>
-    
+
     <!-- Strings for EMERGENCY CONTACT DETAILS page -->
     <string name="title_activity_emergency_contact_details">Emergency Contact</string>
     <string name="detailedEmergencyContactPageMessage">Emergecy Contact Information:</string>
     <string name="detailedEmergencyContactNamePrompt">Name: </string>
     <string name="detailedEmergencyContactNumberPrompt">Number: </string>
     <string name="detailedEmergencyContactRelationshipPrompt">Relationship: </string>
+    <string name="title_activity_notification">NotificationActivity</string>
 
 </resources>

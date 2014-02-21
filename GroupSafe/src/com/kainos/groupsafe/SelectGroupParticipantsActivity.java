@@ -74,7 +74,7 @@ public class SelectGroupParticipantsActivity extends Activity {
 							.get(i);
 					if (possibleParticipant.isSelected()) {
 						chosenParticipants.add(possibleParticipant
-								.getParticipantContactNumber());
+								.getObjectId());
 					}
 				}
 
@@ -234,10 +234,11 @@ public class SelectGroupParticipantsActivity extends Activity {
 						ParseObject current = contactList.get(i);
 						String contactName = current.get("name").toString();
 						String contactNumber = current.get("number").toString();
+						String objectId = current.getObjectId();
 						LOGGER.info("Contact Name: " + contactName);
 						LOGGER.info("Contact Number: " + contactNumber);
 						ParticipantContact contact = new ParticipantContact(
-								contactName, contactNumber, false);
+								contactName, contactNumber, objectId, false);
 						retrievedContacts.add(contact);
 						adapter.participantContactList.add(contact);
 						adapter.notifyDataSetChanged();

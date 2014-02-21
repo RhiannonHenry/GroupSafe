@@ -1,5 +1,6 @@
 package com.kainos.groupsafe;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import android.app.Activity;
@@ -12,11 +13,14 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.kainos.groupsafe.utilities.GPSTracker;
+import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -30,6 +34,10 @@ public class MapsViewActivity extends Activity {
 	private GoogleMap googleMap;
 	MarkerOptions currentLocationMarker;
 	GPSTracker locationServices;
+	private String userObjectId;
+	private String userLocationObjectId;
+	private double lat;
+	private double lng;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,65 +49,116 @@ public class MapsViewActivity extends Activity {
 		setContentView(R.layout.activity_maps_view);
 
 		try {
+			// Get User Location : Lat, Lng...
+			getCurrentLocation();
+			// Check if User has a pre-existing location in the database...
+			checkForExistingEntry();
 			// Loading Map
 			initialiseMap();
 			createCurrentLocationMarker();
+			setMarker(lat, lng);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	private void createCurrentLocationMarker() {
-		if (currentLocationMarker == null) {
-			currentLocationMarker = new MarkerOptions();
-			getCurrentLocation();
-		} else {
-			getCurrentLocation();
-		}
 
 	}
 
-	private void getCurrentLocation() {
-		locationServices = new GPSTracker(MapsViewActivity.this);
-		if (locationServices.canGetLocation()) {
-			double lat = getMyLat();
-			double lng = getMyLng();
-			ParseUser currentUser = ParseUser.getCurrentUser();
-			String userObjectId = currentUser.getObjectId();
-			LOGGER.info("The Current User is: " + userObjectId);
-			LOGGER.info("" + userObjectId + ": Lat: " + lat + " Lng: " + lng);
+	private void checkForExistingEntry() {
+		userObjectId = ParseUser.getCurrentUser().getObjectId();
 
-			String latitude = String.valueOf(lat);
-			String longitude = String.valueOf(lng);
-
-			
-			
-			ParseObject currentLocation = new ParseObject("Location");
-			currentLocation.put("currentLat", latitude);
-			currentLocation.put("currentLng", longitude);
-			currentLocation.put("userId", userObjectId);
-			try {
-				currentLocation.save();
-			} catch (ParseException e2) {
-				LOGGER.info("UNABLE TO SAVE NEW EMERGENCY CONTACT AT THIS TIME...");
-				e2.printStackTrace();
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("Location");
+		query.whereEqualTo("userId", userObjectId);
+		query.findInBackground(new FindCallback<ParseObject>() {
+			@Override
+			public void done(List<ParseObject> foundExistingLocation,
+					ParseException e) {
+				if (e == null) {
+					if (foundExistingLocation.size() != 0) {
+						ParseObject currentData = foundExistingLocation.get(0);
+						LOGGER.info("A LOCATION ENTRY ALREADY EXISTS FOR USER");
+						LOGGER.info("EXISTING LOCATION ObjectID: "
+								+ currentData.getObjectId());
+						LOGGER.info("UPDATING LAT and LNG FOR CURRENT USER");
+						currentData.put("currentLat", String.valueOf(lat));
+						currentData.put("currentLng", String.valueOf(lng));
+						try {
+							currentData.save();
+							LOGGER.info("Success:: UPDATED USER LOCATION DATA SUCCESSFULLY");
+						} catch (ParseException e1) {
+							LOGGER.info("UNABLE TO UPDATE USER LOCATION DATA");
+							e1.printStackTrace();
+						}
+					} else {
+						LOGGER.info("THIS IS A NEW LOCATION ENTRY");
+						createNewLocationInTable();
+					}
+				}
 			}
-			setMarker(lat, lng);
-		} else {
-			locationServices.showSettingAlert();
-		}
+		});
 	}
 
-	private void setMarker(double lat, double lng) {
-		LatLng currentPosition = new LatLng(lat, lng);
-		googleMap.addMarker(currentLocationMarker.position(currentPosition).title("Current Location").draggable(false));
-		
-		CameraPosition cameraPosition = new CameraPosition.Builder().target(currentPosition).zoom(12).build();
-		googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-		
+	protected void createNewLocationInTable() {
+		ParseObject location = new ParseObject("Location");
+		location.put("currentLat", String.valueOf(lat));
+		location.put("currentLng", String.valueOf(lng));
+		location.put("userId", ParseUser.getCurrentUser().getObjectId());
+		try {
+			LOGGER.info("Success:: saved new user location to Location Table");
+			location.save();
+		} catch (ParseException e2) {
+			LOGGER.info("UNABLE TO SAVE NEW LOCATION AT THIS TIME...");
+			e2.printStackTrace();
+		}
+		retrieveObjectID();
+	}
+
+	private void retrieveObjectID() {
+		LOGGER.info("RETRIEVING LOCATION OBJECT ID FOR EXISTING USER");
+		ParseQuery<ParseObject> locationID = ParseQuery.getQuery("Location");
+		locationID.whereEqualTo("userId", userObjectId);
+		locationID.findInBackground(new FindCallback<ParseObject>() {
+			@Override
+			public void done(List<ParseObject> locationList, ParseException e) {
+				if (e == null) {
+					for (int i = 0; i < locationList.size(); i++) {
+						ParseObject current = locationList.get(i);
+						LOGGER.info("Location: " + current.get("currentLat")
+								+ "," + current.get("currentLng")
+								+ " for user: " + userObjectId);
+						if (current.get("userId").equals(userObjectId)) {
+							userLocationObjectId = current.getObjectId();
+							addLocationToUserCurrentLocation(userLocationObjectId);
+						} else {
+							LOGGER.info("NO MATCH FOR LOCATION");
+						}
+					}
+				} else {
+					LOGGER.info("UNABLE TO RETRIEVE LOCATION FROM LOCATION TABLE");
+				}
+			}
+
+			private void addLocationToUserCurrentLocation(
+					String userLocationObjectId) {
+				LOGGER.info("UPDATING USER TABLE WITH CURRENT LOCATION OBJECT ID");
+				LOGGER.info("New Location ObjectID: " + userLocationObjectId);
+				ParseUser currentUser = ParseUser.getCurrentUser();
+				currentUser.put("currentLocation", userLocationObjectId);
+				currentUser.saveInBackground(new SaveCallback() {
+					@Override
+					public void done(ParseException e) {
+						if (e == null) {
+							LOGGER.info("UPDATED USER SUCCESSFULLY");
+						} else {
+							LOGGER.info("ERROR SAVING LOCATION FOR USER");
+						}
+					}
+				});
+			}
+		});
 	}
 
 	private void initialiseMap() {
+		LOGGER.info("Entering Initialise Map...");
 		if (googleMap == null) {
 			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
 					R.id.map)).getMap();
@@ -108,6 +167,39 @@ public class MapsViewActivity extends Activity {
 						"Unable to create map..", Toast.LENGTH_SHORT).show();
 			}
 		}
+	}
+
+	private void createCurrentLocationMarker() {
+		LOGGER.info("Entering Create Location Marker...");
+		if (currentLocationMarker == null) {
+			currentLocationMarker = new MarkerOptions();
+		}
+	}
+
+	private void getCurrentLocation() {
+		LOGGER.info("Entering Get Current Location...");
+		locationServices = new GPSTracker(MapsViewActivity.this);
+		if (locationServices.canGetLocation()) {
+			lat = getMyLat();
+			lng = getMyLng();
+			LOGGER.info("Location: Lat: " + lat + " Lng: " + lng);
+		} else {
+			locationServices.showSettingAlert();
+		}
+	}
+
+	private void setMarker(double lat, double lng) {
+		LOGGER.info("Entering Set Marker...");
+
+		LatLng currentPosition = new LatLng(lat, lng);
+		googleMap.addMarker(currentLocationMarker.position(currentPosition)
+				.title("Current Location").draggable(false));
+
+		CameraPosition cameraPosition = new CameraPosition.Builder()
+				.target(currentPosition).zoom(12).build();
+		googleMap.animateCamera(CameraUpdateFactory
+				.newCameraPosition(cameraPosition));
+
 	}
 
 	private double getMyLat() {
@@ -124,6 +216,8 @@ public class MapsViewActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		initialiseMap();
+		createCurrentLocationMarker();
+		setMarker(lat, lng);
 	}
 
 	@Override

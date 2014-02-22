@@ -3,7 +3,6 @@ package com.kainos.groupsafe;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.kainos.groupsafe.utilities.ConnectionDetector;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.kainos.groupsafe.adapters.ParticipantContactRowAdapter;
-import com.kainos.groupsafe.utilities.ParticipantContact;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;

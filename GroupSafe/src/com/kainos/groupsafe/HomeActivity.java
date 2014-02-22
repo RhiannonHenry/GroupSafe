@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.kainos.groupsafe.adapters.ContactRowAdapter;
-import com.kainos.groupsafe.utilities.ConnectionDetector;
-import com.kainos.groupsafe.utilities.Contact;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
@@ -14,6 +11,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.PushService;
 
 import android.os.Bundle;
 import android.provider.Settings;
@@ -49,6 +47,8 @@ public class HomeActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
+		PushService.setDefaultPushCallback(this, NotificationActivity.class);
+		//ParseInstallation.getCurrentInstallation().saveInBackground();
 
 		connectionDetector = new ConnectionDetector(getApplicationContext());
 		ParseAnalytics.trackAppOpened(getIntent());

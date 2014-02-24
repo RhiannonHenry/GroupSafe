@@ -12,6 +12,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.RequestPasswordResetCallback;
+import com.parse.SaveCallback;
 
 import android.os.Bundle;
 import android.provider.Settings;
@@ -85,19 +86,91 @@ public class SettingsActivity extends Activity {
 	}
 
 	private void userClicksOnDeleteOrganization() {
-		ParseUser currentUser = ParseUser.getCurrentUser();
-		currentUser.put("organizationId", "");
-		try {
-			currentUser.save();
-			Intent intent = new Intent(getApplicationContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			finish();
-		} catch (ParseException e) {
-			LOGGER.info("UNABLE TO REMOVE ORGANIZATION FROM USER");
-			e.printStackTrace();
-		}
-		
+
+		Button deleteOrganization = (Button) findViewById(R.id.editOrganizationDeleteButton);
+		deleteOrganization.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				ParseUser currentUser = ParseUser.getCurrentUser();
+				final String currentOrganizationId = currentUser.get(
+						"organizationId").toString();
+
+				currentUser.put("organizationId", "");
+				currentUser.saveInBackground(new SaveCallback() {
+
+					@Override
+					public void done(ParseException e) {
+						if (e == null) {
+							LOGGER.info("Success: Removed Organization from User");
+							removeUserFromMembersArray(currentOrganizationId);
+						} else {
+							LOGGER.info("UNABLE TO REMOVE ORGANIZATION FROM USER");
+							e.printStackTrace();
+						}
+					}
+
+					private void removeUserFromMembersArray(
+							String currentOrganizationId) {
+						ParseQuery<ParseObject> query = ParseQuery
+								.getQuery("Organization");
+						query.whereEqualTo("objectId", currentOrganizationId);
+						query.findInBackground(new FindCallback<ParseObject>() {
+
+							@Override
+							public void done(List<ParseObject> organizations,
+									ParseException e) {
+								if (e == null) {
+									if (organizations.size() > 0) {
+										ParseObject current = organizations
+												.get(0);
+										@SuppressWarnings("unchecked")
+										ArrayList<String> membersArray = (ArrayList<String>) current
+												.get("organizationMembers");
+										LOGGER.info("GOT MEMBERS:");
+										for (int i = 0; i < membersArray.size(); i++) {
+											LOGGER.info(""
+													+ membersArray.get(i));
+										}
+										membersArray.remove(ParseUser
+												.getCurrentUser().getObjectId()
+												.toString());
+										LOGGER.info("MEMBERS AFTER REMOVAL:");
+										for (int i = 0; i < membersArray.size(); i++) {
+											LOGGER.info(""
+													+ membersArray.get(i));
+										}
+										current.put("organizationMembers",
+												membersArray);
+										current.saveInBackground(new SaveCallback() {
+
+											@Override
+											public void done(ParseException e) {
+												if (e == null) {
+													LOGGER.info("Success: Removed User from Organization Members");
+													Intent intent = new Intent(
+															getApplicationContext(),
+															SettingsActivity.class);
+													startActivity(intent);
+													finish();
+												} else {
+													LOGGER.info("UNABLE TO REMOVE USER FROM ORGANIZATION");
+												}
+											}
+										});
+									}
+								} else {
+									LOGGER.info("ERROR:");
+									e.printStackTrace();
+								}
+							}
+						});
+					}
+				});
+
+			}
+		});
+
 	}
 
 	private void userClicksOnEditOrganizationId() {
@@ -163,9 +236,9 @@ public class SettingsActivity extends Activity {
 		String displayName = currentUser.get("displayName").toString();
 		String email = currentUser.get("email").toString();
 		String organization = "";
-		try{
+		try {
 			organization = currentUser.get("organizationId").toString();
-		}catch (NullPointerException e){
+		} catch (NullPointerException e) {
 			e.printStackTrace();
 		}
 

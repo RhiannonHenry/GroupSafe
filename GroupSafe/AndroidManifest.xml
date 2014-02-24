@@ -38,7 +38,7 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.kainos.groupsafe.permission.C2D_MESSAGE" />
-    
+
     <!-- To allow Testing on phone set android:debuggable="true" -->
     <application
         android:allowBackup="true"
@@ -82,7 +82,6 @@
             android:name="com.kainos.groupsafe.InviteGroupParticipantsActivity"
             android:label="@string/title_activity_invite_group_participants" >
         </activity>
-
         <activity
             android:name="com.kainos.groupsafe.SettingsActivity"
             android:label="@string/title_activity_settings" >
@@ -99,7 +98,7 @@
             android:name="com.kainos.groupsafe.NotificationActivity"
             android:label="@string/title_activity_notification" >
         </activity>
-        
+
         <!-- THIS IS TO INTEGRATE GOOGLE PLAY (FOR MAPS) -->
         <meta-data
             android:name="com.google.android.gms.version"
@@ -111,7 +110,8 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyANaWyed1CqHBvLjeIDQSXB8-yUyWy0Qe4" />
         <!-- END -->
-        
+
+
         <!-- THIS IS FOR PARSE PUSH NOTIFICATIONS -->
         <service android:name="com.parse.PushService" />
 
@@ -132,7 +132,15 @@
                 <category android:name="com.kainos.groupsafe" />
             </intent-filter>
         </receiver>
-        <!-- END --> 
+        <!-- END -->
+        <activity
+            android:name="com.kainos.groupsafe.AcceptDeclineInvitationActivity"
+            android:label="@string/title_activity_accept_decline_invitation" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.EditOrganizationActivity"
+            android:label="@string/title_activity_edit_organization" >
+        </activity>
     </application>
 
 </manifest>

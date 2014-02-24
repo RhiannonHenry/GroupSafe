@@ -1,5 +1,6 @@
 package com.kainos.groupsafe;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 import com.parse.LogInCallback;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.ParseException;
 
@@ -50,8 +52,25 @@ public class SplashActivity extends Activity {
 
 		_instance = this;
 
+//		createTestOrganization();
+		
 		// Enable all buttons
 		enableAllButtons();
+	}
+
+	@SuppressWarnings("unused")
+	private void createTestOrganization() {
+		ArrayList<String> organizationMembers = new ArrayList<String>();
+		
+		ParseObject organization = new ParseObject("Organization");
+		organization.put("organizationName", "Test Organization");
+		organization.put("organizationMembers", organizationMembers);
+		try {
+			organization.save();
+		} catch (ParseException e2) {
+			LOGGER.info("UNABLE TO CREATE NEW ORGANIZATION...");
+			e2.printStackTrace();
+		}
 	}
 
 	public void signin(View view) {

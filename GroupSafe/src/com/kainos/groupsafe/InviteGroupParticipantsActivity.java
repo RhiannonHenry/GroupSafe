@@ -37,6 +37,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 	// Array of contacts passed through from before
 	ArrayList<String> participants;
 	int radius;
+	String groupName, groupOrganization;
 	
 
 	@Override
@@ -52,8 +53,8 @@ public class InviteGroupParticipantsActivity extends Activity {
 		Intent intent = getIntent();
 		participants = intent.getStringArrayListExtra("chosenParticipants");
 		radius = Integer.parseInt(intent.getStringExtra("geoFenceRadius"));
-		
-		
+		groupName = intent.getStringExtra("groupName");
+		groupOrganization = intent.getStringExtra("groupOrganization");		
 		
 		// create an Array Adapter from the String Array
 		listView = (ListView) findViewById(R.id.inviteeList);
@@ -72,12 +73,15 @@ public class InviteGroupParticipantsActivity extends Activity {
 			getParticipantInformation(participants.get(i));	
 		}
 		LOGGER.info("Got Radius size: "+radius);
+		LOGGER.info("Got Group Name: "+groupName);
+		LOGGER.info("Got Group Organization: "+groupOrganization);
 		
 		Button invite = (Button) header.findViewById(R.id.inviteGroupParticipantsButton);
 		invite.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				//TODO: send push notifications to selected group participants
+				//TODO: create group in DB
+				//TODO: send push notification invite to group participants
 			}
 		});
 		

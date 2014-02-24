@@ -14,10 +14,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/geo_fence_radius_message_margin_bottom"
         android:layout_marginTop="@dimen/geo_fence_radius_message_margin_top"
-        android:gravity="center"
         android:text="@string/detailed_radius_prompt"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -28,7 +26,41 @@
         android:layout_below="@id/geoFenceRadiusMessage"
         android:entries="@array/radius_options"
         android:prompt="@string/radius_prompt" />
+    
+    <TextView
+        android:id="@+id/groupOrganizationPrompt"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/radiusSpinner"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/group_organization_prompt"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
+    <Spinner
+        android:id="@+id/organizationSpinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/groupOrganizationPrompt"/>
+
+    <TextView
+        android:id="@+id/groupNameMessage"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/organizationSpinner"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/group_name_prompt"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/groupNameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/groupNameMessage"
+        android:ems="10"
+        android:hint="@string/groupNameHint"
+        android:inputType="textPersonName" />
+    
+ 
     <Button
         android:id="@+id/setGeoFenceRadiusNextButton"
         android:layout_width="@dimen/button_width"

@@ -22,6 +22,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 public class EditOrganizationActivity extends Activity {
 
@@ -108,18 +109,23 @@ public class EditOrganizationActivity extends Activity {
 	}
 
 	protected void saveOrganizationForUser() {
+		LOGGER.info("Saving Organization ID: "+organizationId+" to User");
 		ParseUser user = ParseUser.getCurrentUser();
 		user.put("organizationId", organizationId);
-		try {
-			user.save();
-			updateOrganizationMembers();
-			Toast.makeText(getApplicationContext(),
-					"Saved User Organization Successfully!", Toast.LENGTH_LONG)
-					.show();
-		} catch (ParseException e) {
-			LOGGER.info("UNABLE TO SAVE USER:: Reason:");
-			e.printStackTrace();
-		}
+		user.saveInBackground(new SaveCallback() {
+			@Override
+			public void done(ParseException e) {
+				if (e == null) {
+					Toast.makeText(getApplicationContext(),
+							"Saved User Organization Successfully!",
+							Toast.LENGTH_LONG).show();
+					LOGGER.info("UPDATING ORGANIZATION MEMBERS:");
+					updateOrganizationMembers();
+				} else {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 	private void updateOrganizationMembers() {
@@ -140,16 +146,23 @@ public class EditOrganizationActivity extends Activity {
 						currentOrganization.addUnique("organizationMembers",
 								ParseUser.getCurrentUser().getObjectId()
 										.toString());
-						try {
-							currentOrganization.save();
-							Intent intent = new Intent(_instance,
-									SettingsActivity.class);
-							startActivity(intent);
-							finish();
-						} catch (ParseException e1) {
-							LOGGER.info("UNABLE TO SAVE ORGANIZATION WITH UPDATED MEMEBERS");
-							e1.printStackTrace();
-						}
+						currentOrganization
+								.saveInBackground(new SaveCallback() {
+
+									@Override
+									public void done(ParseException e) {
+										if (e == null) {
+											LOGGER.info("Success: Successfully updated Organization Members!");
+											Intent intent = new Intent(_instance,
+													SettingsActivity.class);
+											startActivity(intent);
+											finish();
+										} else {
+											LOGGER.info("UNABLE TO SAVE ORGANIZATION WITH UPDATED MEMEBERS");
+											e.printStackTrace();
+										}
+									}
+								});
 					} else {
 						enableAllButtons();
 						Toast.makeText(getApplicationContext(),

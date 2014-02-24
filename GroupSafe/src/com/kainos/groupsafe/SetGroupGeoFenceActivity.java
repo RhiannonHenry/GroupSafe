@@ -1,10 +1,15 @@
 package com.kainos.groupsafe;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
+import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import android.os.Bundle;
@@ -16,7 +21,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -26,9 +33,11 @@ public class SetGroupGeoFenceActivity extends Activity {
 			.getLogger(SetGroupGeoFenceActivity.class.getName());
 	static SetGroupGeoFenceActivity _instance = null;
 
-	private Spinner radiusSpinner;
+	private Spinner radiusSpinner, organizationSpinner;
 	private Button nextButton;
 	private Button previousButton;
+	private String organizationName;
+	private List<String> list;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +49,63 @@ public class SetGroupGeoFenceActivity extends Activity {
 		setContentView(R.layout.activity_set_group_geo_fence);
 		_instance = this;
 
+		addItemsToOrganizationSpinner();
 		addListenerOnNextButton();
 		addListenerOnPrevButton();
-		addListenerOnSpinnerItemSelect();
+		addListenerOnRadiusSpinnerItemSelect();
+		addListenerOnOrganizationSpinnerItemSelect();
+	}
+
+	@SuppressWarnings("null")
+	private void addItemsToOrganizationSpinner() {
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		String userOrganization = "";
+		try {
+			userOrganization = currentUser.get("organizationId").toString();
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+		}
+
+		organizationSpinner = (Spinner) findViewById(R.id.organizationSpinner);
+		list = new ArrayList<String>();
+		list.add("None");
+
+		if (userOrganization != null || !userOrganization.equals("")) {
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("Organization");
+			query.whereEqualTo("objectId", userOrganization);
+			query.findInBackground(new FindCallback<ParseObject>() {
+				
+				@Override
+				public void done(List<ParseObject> organizations, ParseException e) {
+					if(e == null){
+						if(organizations.size() > 0){
+							LOGGER.info("FOUND ORGANIZATION: ");
+							ParseObject current = organizations.get(0);
+							organizationName = current.get("organizationName").toString();
+							LOGGER.info(organizationName);
+							list.add(organizationName);
+						} else {
+							LOGGER.info("NO ORGANIZATIONS FOUND");
+						}
+					} else {
+						e.printStackTrace();
+					}
+				}
+			});
+		}
+
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item, list);
+		dataAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		organizationSpinner.setAdapter(dataAdapter);
 	}
 
 	private void addListenerOnNextButton() {
-		// TODO pass through to next activity
 
 		radiusSpinner = (Spinner) findViewById(R.id.radiusSpinner);
+		organizationSpinner = (Spinner) findViewById(R.id.organizationSpinner);
+
 		nextButton = (Button) findViewById(R.id.setGeoFenceRadiusNextButton);
 
 		nextButton.setOnClickListener(new OnClickListener() {
@@ -58,8 +115,15 @@ public class SetGroupGeoFenceActivity extends Activity {
 				ArrayList<String> selectedParticipants = getSelectedParticipants();
 				String selectedRadius = String.valueOf(radiusSpinner
 						.getSelectedItem());
+				String selectedOrgaization = String.valueOf(organizationSpinner
+						.getSelectedItem());
+				EditText groupNameInput = (EditText) findViewById(R.id.groupNameInput);
+				String groupName = groupNameInput.getText().toString();
+				
 				LOGGER.info("GOING TO STEP 3 WITH:");
 				LOGGER.info("Radius: " + selectedRadius + " meters");
+				LOGGER.info("Organization: " + selectedOrgaization);
+				LOGGER.info("Group Name: " + groupName);
 				LOGGER.info("Participants: ");
 				for (int i = 0; i < selectedParticipants.size(); i++) {
 					LOGGER.info("" + selectedParticipants.get(i));
@@ -69,6 +133,8 @@ public class SetGroupGeoFenceActivity extends Activity {
 				intent.putStringArrayListExtra("chosenParticipants",
 						selectedParticipants);
 				intent.putExtra("geoFenceRadius", selectedRadius);
+				intent.putExtra("groupOrganization", selectedOrgaization);
+				intent.putExtra("groupName", groupName);
 				startActivity(intent);
 			}
 		});
@@ -98,7 +164,7 @@ public class SetGroupGeoFenceActivity extends Activity {
 		return chosenGroupParticipants;
 	}
 
-	private void addListenerOnSpinnerItemSelect() {
+	private void addListenerOnRadiusSpinnerItemSelect() {
 		radiusSpinner = (Spinner) findViewById(R.id.radiusSpinner);
 		radiusSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
@@ -111,10 +177,29 @@ public class SetGroupGeoFenceActivity extends Activity {
 
 			@Override
 			public void onNothingSelected(AdapterView<?> parentView) {
-				// TODO: Default Radius setting
+				LOGGER.info("You have not selected a Radius. Resorting to Default Setting [10]");
 			}
 
 		});
+	}
+
+	private void addListenerOnOrganizationSpinnerItemSelect() {
+		organizationSpinner = (Spinner) findViewById(R.id.organizationSpinner);
+		organizationSpinner
+				.setOnItemSelectedListener(new OnItemSelectedListener() {
+					@Override
+					public void onItemSelected(AdapterView<?> parentView,
+							View selectedItemView, int position, long id) {
+						String tempRadius = parentView.getItemAtPosition(
+								position).toString();
+						LOGGER.info("You have selected: " + tempRadius);
+					}
+
+					@Override
+					public void onNothingSelected(AdapterView<?> parentView) {
+						LOGGER.info("You have not selected an Organization. Resorting to Default Setting [NONE]");
+					}
+				});
 	}
 
 	@Override

@@ -39,6 +39,9 @@ public class SettingsActivity extends Activity {
 	private ArrayList<EmergencyContact> emergencyContacts = new ArrayList<EmergencyContact>();
 	ListView listView = null;
 
+	TextView userUsernameView, userDisplayNameView, userEmailView,
+			userOrganization;
+
 	private boolean internetPresent = false;
 	ConnectionDetector connectionDetector;
 
@@ -76,7 +79,45 @@ public class SettingsActivity extends Activity {
 		userClicksOnEmergencyContact();
 		userClicksOnAddEmergencyContact();
 		userClicksOnResetPassword();
+		userClicksOnEditOrganizationId();
+		userClicksOnDeleteOrganization();
 
+	}
+
+	private void userClicksOnDeleteOrganization() {
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		currentUser.put("organizationId", "");
+		try {
+			currentUser.save();
+			Intent intent = new Intent(getApplicationContext(),
+					SettingsActivity.class);
+			startActivity(intent);
+			finish();
+		} catch (ParseException e) {
+			LOGGER.info("UNABLE TO REMOVE ORGANIZATION FROM USER");
+			e.printStackTrace();
+		}
+		
+	}
+
+	private void userClicksOnEditOrganizationId() {
+		Button editOrganisationButton = (Button) findViewById(R.id.editOrganizationButton);
+		editOrganisationButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				internetPresent = connectionDetector.isConnectedToInternet();
+				if (internetPresent) {
+					LOGGER.info("Going to Edit Organization Activity...");
+					Intent intent = new Intent(getApplicationContext(),
+							EditOrganizationActivity.class);
+					startActivity(intent);
+					finish();
+				} else {
+					showNoInternetConnectionDialog();
+				}
+			}
+		});
 	}
 
 	private void userClicksOnResetPassword() {
@@ -93,7 +134,6 @@ public class SettingsActivity extends Activity {
 					showNoInternetConnectionDialog();
 				}
 			}
-
 		});
 	}
 
@@ -110,8 +150,8 @@ public class SettingsActivity extends Activity {
 									.show();
 						} else {
 							Toast.makeText(getApplicationContext(),
-									"Error Sending Password Reset Email!", Toast.LENGTH_SHORT)
-									.show();
+									"Error Sending Password Reset Email!",
+									Toast.LENGTH_SHORT).show();
 						}
 					}
 				});
@@ -122,21 +162,52 @@ public class SettingsActivity extends Activity {
 		String username = currentUser.get("username").toString();
 		String displayName = currentUser.get("displayName").toString();
 		String email = currentUser.get("email").toString();
+		String organization = "";
+		try{
+			organization = currentUser.get("organizationId").toString();
+		}catch (NullPointerException e){
+			e.printStackTrace();
+		}
 
 		LOGGER.info("Trying to get Username and Display name Text view: ");
-		TextView userUsernameView = (TextView) findViewById(R.id.yourCurrentUserName);
-		TextView userDisplayNameView = (TextView) findViewById(R.id.yourCurrentDisplayName);
-		TextView userEmailView = (TextView) findViewById(R.id.yourCurrentEmail);
+		userUsernameView = (TextView) findViewById(R.id.yourCurrentUserName);
+		userDisplayNameView = (TextView) findViewById(R.id.yourCurrentDisplayName);
+		userEmailView = (TextView) findViewById(R.id.yourCurrentEmail);
+		userOrganization = (TextView) findViewById(R.id.yourCurrentOrganization);
 		LOGGER.info("Username View: " + userUsernameView.toString());
 		LOGGER.info("Display Name View: " + userDisplayNameView.toString());
 
 		LOGGER.info("Current Username: " + username);
 		LOGGER.info("Current Display Name: " + displayName);
-		LOGGER.info("Current Email: "+email);
+		LOGGER.info("Current Email: " + email);
+		LOGGER.info("Current Organization: " + organization);
+
 		userUsernameView.setText(username);
 		userDisplayNameView.setText(displayName);
 		userEmailView.setText(email);
 
+		if (!organization.equals("")) {
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("Organization");
+			query.whereEqualTo("objectId", organization);
+			query.findInBackground(new FindCallback<ParseObject>() {
+				@Override
+				public void done(List<ParseObject> foundContacts,
+						ParseException e) {
+					if (e == null) {
+						if (foundContacts.size() != 0) {
+							LOGGER.info("AN ORGANIZATION WAS FOUND");
+							ParseObject found = foundContacts.get(0);
+							userOrganization.setText(found.get(
+									"organizationName").toString());
+						} else {
+							LOGGER.info("NO ORGANIZATION WITH THAT ID FOUND");
+						}
+					}
+				}
+			});
+		} else {
+			userOrganization.setText("n/a");
+		}
 	}
 
 	private void userClicksOnAddEmergencyContact() {

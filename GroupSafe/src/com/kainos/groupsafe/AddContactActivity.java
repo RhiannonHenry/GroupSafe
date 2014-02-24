@@ -103,6 +103,7 @@ public class AddContactActivity extends Activity {
 							+ userList.get(0).getUsername());
 					addToContactsTable();
 					}else{
+						enableAllButtons();
 						Toast.makeText(getApplicationContext(),
 								"User does not exist. Try Again!",
 								Toast.LENGTH_LONG).show();

@@ -92,6 +92,10 @@
     <string name="title_activity_set_group_geo_fence">SetGroupGeoFenceActivity</string>
     <string name="detailed_radius_prompt">Select Geo-Fence Radius(meters): </string>
     <string name="radius_prompt">Radius(m): </string>
+    <string name="group_name_prompt">Set Group Name:</string>
+    <string name="groupNameHint">Group Name</string>
+    <string name="group_organization_prompt">Set Organization: </string>
+    <string name="organisation_prompt">Organization ID: </string>
 
     <string-array name="radius_options">
         <item>2</item>
@@ -111,6 +115,9 @@
     <string name="changePassword">Reset Password</string>
     <string name="addEmergencyContact"> Add Emergency Contact</string>
     <string name="userEmailPrompt">Email: </string>
+    <string name="organizationPrompt">Organization: </string>
+    <string name="editOrganization">Edit Organization</string>
+    <string name="deleteOrganization">Delete Organization</string>
 
     <!-- Strings for ADD EMERGENCY CONTACT page -->
     <string name="title_activity_add_emergency_contact">Add Emergency Contact</string>
@@ -129,5 +136,11 @@
     <string name="detailedEmergencyContactNumberPrompt">Number: </string>
     <string name="detailedEmergencyContactRelationshipPrompt">Relationship: </string>
     <string name="title_activity_notification">NotificationActivity</string>
+    <string name="title_activity_accept_decline_invitation">AcceptDeclineInvitationActivity</string>
+    <string name="title_activity_edit_organization">EditOrganizationActivity</string>
 
+    <!-- Strings for EDIT ORGANIZATION page -->
+    <string name="editOrganizationPageMessage">Enter the OrganizationID of the Organization you want to join:</string>
+    <string name="organizationIdHint">organizationID</string>
+	<string name="organizationIdInfo">You can retrieve this ID from the Organization Administrator</string>
 </resources>

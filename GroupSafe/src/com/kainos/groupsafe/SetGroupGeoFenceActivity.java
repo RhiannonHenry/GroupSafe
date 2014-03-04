@@ -33,11 +33,17 @@ public class SetGroupGeoFenceActivity extends Activity {
 			.getLogger(SetGroupGeoFenceActivity.class.getName());
 	static SetGroupGeoFenceActivity _instance = null;
 
+	static final String SAVED_GROUP_ORGANIZATION = "groupOrganization";
+	static final String SAVED_GROUP_NAME = "groupName";
+	static final String SAVED_GEO_FENCE_RADIUS = "radius";
+	
 	private Spinner radiusSpinner, organizationSpinner;
 	private Button nextButton;
 	private Button previousButton;
 	private String organizationName;
 	private List<String> list;
+	
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

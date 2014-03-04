@@ -122,6 +122,13 @@
             </intent-filter>
         </receiver>
         <receiver
+            android:name="com.kainos.groupsafe.InvitationResponseReceiver"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.kainos.groupsafe.AcceptDeclineInvitationActivity" />
+            </intent-filter>
+        </receiver>
+        <receiver
             android:name="com.parse.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>

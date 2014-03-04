@@ -1,16 +1,23 @@
 package com.kainos.groupsafe;
 
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 import java.util.logging.Logger;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -27,25 +34,25 @@ public class InviteGroupParticipantsActivity extends Activity {
 	static InviteGroupParticipantsActivity _instance = null;
 	private final static Logger LOGGER = Logger
 			.getLogger(InviteGroupParticipantsActivity.class.getName());
-	
+
 	InviteesAdapter adapter = null;
 	ListView listView = null;
-	
-	// TODO: populate this with contact name and number [Parse call]
+
+	// populate this with contact name and number [Parse call]
+	// getParticipantInformation method
 	private ArrayList<InviteeContact> invitedContacts = new ArrayList<InviteeContact>();
-	
+
 	// Array of contacts passed through from before
 	ArrayList<String> participants;
 	int radius;
-	String groupName, groupOrganization;
-	
+	String groupName, groupOrganization, participantUserObjectID;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
 		ParseAnalytics.trackAppOpened(getIntent());
-				
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_invite_group_participants);
 		_instance = this;
@@ -54,39 +61,138 @@ public class InviteGroupParticipantsActivity extends Activity {
 		participants = intent.getStringArrayListExtra("chosenParticipants");
 		radius = Integer.parseInt(intent.getStringExtra("geoFenceRadius"));
 		groupName = intent.getStringExtra("groupName");
-		groupOrganization = intent.getStringExtra("groupOrganization");		
-		
+		groupOrganization = intent.getStringExtra("groupOrganization");
+
 		// create an Array Adapter from the String Array
 		listView = (ListView) findViewById(R.id.inviteeList);
-		View footer = getLayoutInflater().inflate(R.layout.footer_invite_participants, null);
-		View header = getLayoutInflater().inflate(R.layout.header_invite_participants, null);
+		View footer = getLayoutInflater().inflate(
+				R.layout.footer_invite_participants, null);
+		View header = getLayoutInflater().inflate(
+				R.layout.header_invite_participants, null);
 		listView.addFooterView(footer);
 		listView.addHeaderView(header);
-		adapter = new InviteesAdapter(this,
-		R.layout.invitee_row, invitedContacts);
+		adapter = new InviteesAdapter(this, R.layout.invitee_row,
+				invitedContacts);
 		// assign adapter to ListView
 		listView.setAdapter(adapter);
-		
+
 		LOGGER.info("Got Participants: ");
-		for(int i = 0; i<participants.size(); i++){
-			LOGGER.info(""+participants.get(i));
-			getParticipantInformation(participants.get(i));	
+		for (int i = 0; i < participants.size(); i++) {
+			LOGGER.info("" + participants.get(i));
+			getParticipantInformation(participants.get(i));
 		}
-		LOGGER.info("Got Radius size: "+radius);
-		LOGGER.info("Got Group Name: "+groupName);
-		LOGGER.info("Got Group Organization: "+groupOrganization);
-		
-		Button invite = (Button) header.findViewById(R.id.inviteGroupParticipantsButton);
+		LOGGER.info("Got Radius size: " + radius);
+		LOGGER.info("Got Group Name: " + groupName);
+		LOGGER.info("Got Group Organization: " + groupOrganization);
+
+		Button invite = (Button) header
+				.findViewById(R.id.inviteGroupParticipantsButton);
 		invite.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				//TODO: create group in DB
-				//TODO: send push notification invite to group participants
+				// create group in DB
+				ArrayList<String> groupParticipants = new ArrayList<String>();
+				ParseObject newGroup = new ParseObject("Group");
+				newGroup.put("groupName", groupName);
+				newGroup.put("groupLeaderId", ParseUser.getCurrentUser()
+						.getObjectId().toString());
+				newGroup.put("groupGeoFenceRadius", radius);
+				newGroup.put("groupParticipants", groupParticipants);
+				try {
+					newGroup.save();
+				} catch (ParseException e) {
+					LOGGER.info("Unable to save group in DB");
+					e.printStackTrace();
+				}
+
+				// Send PushNotification using Advanced Targeting (Unable to use
+				// Advanced Targeting, Have to pay for this)
+
+				// Send push notification using CHANNEL
+				// "user_[userObjectID]"
+
+				// TODO: TEST PUSH NOTIFICATIONS!!!!
+				JSONObject data = generateJSON();
+
+				// Send Push Notification to each participant.
+				for (int i = 0; i < invitedContacts.size(); i++) {
+					String currentParticipant = invitedContacts.get(i)
+							.getObjectId();
+					ParseQuery<ParseUser> getParticpantInformation = ParseUser
+							.getQuery();
+					getParticpantInformation.whereEqualTo("objectId",
+							currentParticipant);
+					getParticpantInformation
+							.findInBackground(new FindCallback<ParseUser>() {
+
+								@Override
+								public void done(List<ParseUser> foundUsers,
+										ParseException e) {
+									if (e == null) {
+										if (foundUsers.size() > 0) {
+											ParseUser user = foundUsers.get(0);
+											String installationId = user.get(
+													"installationId")
+													.toString();
+											LOGGER.info("Installation ID: "
+													+ installationId);
+										} else {
+											LOGGER.info("ID: 001 Search Returned No Results.");
+										}
+									} else {
+										LOGGER.info("Error Getting Participant Data.");
+										e.printStackTrace();
+									}
+								}
+							});
+					
+					LOGGER.info("Sending Push Notification to User: "
+							+ invitedContacts.get(i).getInviteeContactName());
+					getParticipantUserObjectID(invitedContacts.get(i)
+							.getInviteeContactNumber(), data);
+				}
+			}
+
+			protected void getParticipantUserObjectID(String number, final JSONObject data) {
+				ParseQuery<ParseUser> query = ParseUser.getQuery();
+				query.whereEqualTo("username", number);
+				query.findInBackground(new FindCallback<ParseUser>() {
+					@Override
+					public void done(List<ParseUser> userList, ParseException e) {
+						if (e == null) {
+							if (userList.size() > 0) {
+								ParseUser current = userList.get(0);
+								LOGGER.info("Successfully retrieved participant user account: "
+										+ current.getUsername()
+										+ " ObjectID: "
+										+ current.getObjectId()
+												.toString());
+								participantUserObjectID = current.getObjectId().toString();
+								sendPushInvitation(data);
+
+							} else {
+								LOGGER.info("An error occurred retrieving the participant user account!");
+							}
+						}else{
+							LOGGER.info("ERROR: ");
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+
+			private void sendPushInvitation(JSONObject data) {
+				String channel = "user_" + participantUserObjectID;
+				LOGGER.info("#003: Channel = " + channel);
+				ParsePush push = new ParsePush();
+				push.setData(data);
+				push.setChannel(channel);
+				push.sendInBackground();
 			}
 		});
-		
-		
-		Button next = (Button) footer.findViewById(R.id.inviteParticipantsNextButton);
+
+		Button next = (Button) footer
+				.findViewById(R.id.inviteParticipantsNextButton);
 		next.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -96,12 +202,13 @@ public class InviteGroupParticipantsActivity extends Activity {
 				nextButton.setEnabled(false);
 				prevButton.setClickable(false);
 				prevButton.setEnabled(false);
-				
-				//TODO: proceed to group map view
+
+				// TODO: proceed to group map view
 			}
 		});
-		
-		Button prev = (Button) footer.findViewById(R.id.inviteParticipantsPrevButton);
+
+		Button prev = (Button) footer
+				.findViewById(R.id.inviteParticipantsPrevButton);
 		prev.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -111,8 +218,8 @@ public class InviteGroupParticipantsActivity extends Activity {
 				nextButton.setEnabled(false);
 				prevButton.setClickable(false);
 				prevButton.setEnabled(false);
-				
-				//Go back to setRadiusView
+
+				// Go back to setRadiusView
 				Intent intent = new Intent(_instance,
 						SetGroupGeoFenceActivity.class);
 				intent.putStringArrayListExtra("chosenParticipants",
@@ -122,10 +229,29 @@ public class InviteGroupParticipantsActivity extends Activity {
 		});
 	}
 
+	protected JSONObject generateJSON() {
+		String groupLeaderDisplayName = ParseUser.getCurrentUser()
+				.get("displayName").toString();
+		JSONObject data = null;
+		try {
+			data = new JSONObject(
+					"{"
+							+ "\"alert\":\""
+							+ groupLeaderDisplayName
+							+ " has invited you to join their group. Accept or Decline now.\", "
+							+ "\"title\": \"Group Invitation!\", "
+							+ "\"action\": \"com.kainos.groupsafe.AcceptDeclineInvitationActivity\"}");
+		} catch (JSONException e) {
+			LOGGER.info("INVALID JSON!!!");
+			e.printStackTrace();
+		}
+		return data;
+	}
+
 	private void getParticipantInformation(String participantObjectId) {
-		// TODO: Get name and number for contact
-		LOGGER.info("Getting Name for Participant with id: "+participantObjectId);
-		
+		LOGGER.info("Getting Name for Participant with id: "
+				+ participantObjectId);
+
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Contact");
 		query.whereEqualTo("objectId", participantObjectId);
 		query.findInBackground(new FindCallback<ParseObject>() {
@@ -135,13 +261,17 @@ public class InviteGroupParticipantsActivity extends Activity {
 				if (e == null) {
 					if (foundContactInformation.size() != 0) {
 						LOGGER.info("FOUND CONTACT");
-						ParseObject currentData = foundContactInformation.get(0);
+						ParseObject currentData = foundContactInformation
+								.get(0);
 						String contactName = currentData.get("name").toString();
-						String contactNumber = currentData.get("number").toString();
+						String contactNumber = currentData.get("number")
+								.toString();
 						String objectId = currentData.getObjectId();
-						LOGGER.info("CONTACT NAME: "+contactName);
-						LOGGER.info("CONTACT NUMBER: "+contactNumber);
-						InviteeContact contact = new InviteeContact(contactName, contactNumber, objectId, Status.PENDING);
+						LOGGER.info("CONTACT NAME: " + contactName);
+						LOGGER.info("CONTACT NUMBER: " + contactNumber);
+						InviteeContact contact = new InviteeContact(
+								contactName, contactNumber, objectId,
+								Status.PENDING);
 						invitedContacts.add(contact);
 						adapter.inviteeList.add(contact);
 						adapter.notifyDataSetChanged();
@@ -152,7 +282,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 				}
 			}
 		});
-		
+
 	}
 
 	@Override
@@ -161,7 +291,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 		getMenuInflater().inflate(R.menu.invite_group_participants, menu);
 		return true;
 	}
-	
+
 	/**
 	 * This is a Javadoc example. It explains the working of Javadoc comments.
 	 * 
@@ -241,6 +371,5 @@ public class InviteGroupParticipantsActivity extends Activity {
 		}
 
 	}
-
 
 }

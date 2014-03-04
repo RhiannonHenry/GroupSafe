@@ -8,6 +8,7 @@ import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.Menu;
@@ -40,6 +42,9 @@ public class HomeActivity extends Activity {
 	static ListView contactListView = null;
 	View activityRoot;
 
+	private String currentUserId;
+	private ParseUser currentUser;
+
 	private boolean internetPresent = false;
 	ConnectionDetector connectionDetector;
 
@@ -48,7 +53,23 @@ public class HomeActivity extends Activity {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
 		PushService.setDefaultPushCallback(this, NotificationActivity.class);
-		//ParseInstallation.getCurrentInstallation().saveInBackground();
+		currentUserId = ParseUser.getCurrentUser().getObjectId().toString();
+
+		if (getApplicationContext() != null) {
+			PushService.subscribe(getApplicationContext(), "user_"
+					+ currentUserId, AcceptDeclineInvitationActivity.class);
+		}
+		ParseInstallation installation = ParseInstallation
+				.getCurrentInstallation();
+		LOGGER.info("Got Installation: "
+				+ installation.getObjectId().toString());
+		installation.put("owner", currentUserId);
+		installation.saveInBackground();
+
+		currentUser = ParseUser.getCurrentUser();
+		currentUser
+				.put("installationId", installation.getObjectId().toString());
+		currentUser.saveInBackground();
 
 		connectionDetector = new ConnectionDetector(getApplicationContext());
 		ParseAnalytics.trackAppOpened(getIntent());
@@ -210,12 +231,13 @@ public class HomeActivity extends Activity {
 			showNoInternetConnectionDialog();
 		}
 	}
-	
+
 	private void settings() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
 			LOGGER.info("Going to Settings page... ");
-			Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+			Intent intent = new Intent(getApplicationContext(),
+					SettingsActivity.class);
 			startActivity(intent);
 			finish();
 		} else {

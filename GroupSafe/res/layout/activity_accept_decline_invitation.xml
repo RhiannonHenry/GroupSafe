@@ -9,8 +9,40 @@
     tools:context=".AcceptDeclineInvitationActivity" >
 
     <TextView
+        android:id="@+id/notificationTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_centerHorizontal="true"
+        android:text="@string/notification_title"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/notificationMessage"
+        android:layout_width="@dimen/message_width"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/notificationTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/notification_message" />
+
+    <Button
+        android:id="@+id/acceptButton"
+        android:layout_width="@dimen/button_width"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/notificationMessage"
+        android:layout_marginBottom="@dimen/margin_bottom"
+        android:layout_marginTop="@dimen/margin_top"
+        android:text="@string/accept" />
+
+    <Button
+        android:id="@+id/declineButton"
+        android:layout_width="@dimen/button_width"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/acceptButton"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="@dimen/margin_bottom"
+        android:text="@string/decline" />
 
 </RelativeLayout>

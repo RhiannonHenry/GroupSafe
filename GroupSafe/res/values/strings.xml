@@ -143,4 +143,14 @@
     <string name="editOrganizationPageMessage">Enter the OrganizationID of the Organization you want to join:</string>
     <string name="organizationIdHint">organizationID</string>
 	<string name="organizationIdInfo">You can retrieve this ID from the Organization Administrator</string>
+
+	<!-- Strings for ACCEPT/DECLINE NOTIFICATION page -->
+	<string name="notification_title">Notification</string>
+	<string name="notification_message">Notififcation Message goes HERE</string>
+	<string name="accept">Accept</string>
+	<string name="decline">Decline</string>
+
+
+
+
 </resources>

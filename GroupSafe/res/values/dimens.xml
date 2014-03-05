@@ -44,5 +44,7 @@
     <!-- Layout Dimensions for GEO-FENCE RADIUS Page -->
     <dimen name="geo_fence_radius_message_margin_top">30dp</dimen>
     <dimen name="geo_fence_radius_message_margin_bottom">10dp</dimen>
-
+    
+    <!-- Layout Dimenstions for INVITATION ACCEPT DECLINE Page -->
+	<dimen name="message_width">220dp</dimen>
 </resources>

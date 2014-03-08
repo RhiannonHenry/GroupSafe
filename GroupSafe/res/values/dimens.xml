@@ -7,6 +7,7 @@
     <!-- GENERIC Layout Dimensions -->
     <dimen name="small_margin_top">10dp</dimen>
     <dimen name="button_width">120dp</dimen>
+    <dimen name="small_button_width">100dp</dimen>
     <dimen name="margin_top">30dp</dimen>
     <dimen name="margin_bottom">40dp</dimen>
     <dimen name="margin_left">10dp</dimen>

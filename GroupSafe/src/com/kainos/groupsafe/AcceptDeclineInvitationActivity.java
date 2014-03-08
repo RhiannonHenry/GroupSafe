@@ -1,5 +1,6 @@
 package com.kainos.groupsafe;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -33,7 +34,8 @@ public class AcceptDeclineInvitationActivity extends Activity {
 			.getLogger(AcceptDeclineInvitationActivity.class.getName());
 	private static final String STATUS_ACCEPT = "ACCEPTED";
 	private static final String STATUS_DECLINE = "DECLINED";
-	private String action, channel, key, userId, groupLeaderId, groupId;
+	private String action, channel, key, userId, groupLeaderId, groupId,
+			participantId, removeParticipant;
 	private JSONObject json;
 	private TextView pageTitle, pageMessage;
 	private Button accept, decline;
@@ -93,6 +95,9 @@ public class AcceptDeclineInvitationActivity extends Activity {
 				} else if (key.equals("groupId")) {
 					groupId = json.getString(key);
 					LOGGER.info("GroupID: " + groupId);
+				} else if (key.equals("participantId")) {
+					participantId = json.getString(key);
+					LOGGER.info("ParticipantID: " + participantId);
 				}
 			}
 		} catch (JSONException e) {
@@ -122,9 +127,10 @@ public class AcceptDeclineInvitationActivity extends Activity {
 							ParseException e) {
 						if (e == null) {
 							if (foundParticipants.size() > 0) {
-								ParseObject current = foundParticipants.get(0);
+								final ParseObject current = foundParticipants.get(0);
 								LOGGER.info("SUCCESS:: Found Participant: "
 										+ current.getObjectId());
+								removeParticipant = current.getObjectId().toString();
 								current.put("status", STATUS_DECLINE);
 								current.saveInBackground(new SaveCallback() {
 									@Override
@@ -135,10 +141,73 @@ public class AcceptDeclineInvitationActivity extends Activity {
 													getApplicationContext(),
 													"You Have Declined!",
 													Toast.LENGTH_SHORT).show();
+											removeFromParticipantsArrayInDb();
 										} else {
 											LOGGER.info("ERROR:: Unable to Save Updated Participant (Decline)");
 											e.printStackTrace();
 										}
+									}
+
+									private void removeFromParticipantsArrayInDb() {
+										LOGGER.info("Removing from Participant Array: "
+												+ removeParticipant);
+										ParseQuery<ParseObject> getGroupQuery = ParseQuery
+												.getQuery("Group");
+										getGroupQuery.whereEqualTo("objectId",
+												groupId);
+										getGroupQuery
+												.findInBackground(new FindCallback<ParseObject>() {
+													@Override
+													public void done(
+															List<ParseObject> foundGroups,
+															ParseException e) {
+														if (e == null) {
+															if (foundGroups
+																	.size() > 0) {
+																LOGGER.info("SUCCESS:: Found Group with id: "
+																		+ groupId);
+																ParseObject currentGroup = foundGroups
+																		.get(0);
+																@SuppressWarnings("unchecked")
+																ArrayList<String> currentParticipants = (ArrayList<String>) currentGroup
+																		.get("groupParticipants");
+																LOGGER.info("Got Participants: ");
+																for(String participant: currentParticipants){
+																	LOGGER.info(""+participant+",");
+																}
+																LOGGER.info("from DB.");
+																
+																currentParticipants
+																		.remove(removeParticipant);
+																
+																LOGGER.info("Sending Participants: ");
+																for(String participant: currentParticipants){
+																	LOGGER.info(""+participant+",");
+																}
+																LOGGER.info("to DB.");
+																
+																currentGroup
+																		.put("groupParticipants",
+																				currentParticipants);
+																try {
+																	currentGroup
+																			.save();
+																	LOGGER.info("SUCCESS: Successfully removed participant from array");
+																	finish();
+																} catch (ParseException e1) {
+																	LOGGER.info("ERROR::");
+																	e1.printStackTrace();
+																}
+															} else {
+																LOGGER.info("FAILURE:: Unable to Find Group with id: "
+																		+ groupId);
+															}
+														} else {
+															LOGGER.info("ERROR:: ");
+															e.printStackTrace();
+														}
+													}
+												});
 									}
 								});
 							}
@@ -147,7 +216,7 @@ public class AcceptDeclineInvitationActivity extends Activity {
 							e.printStackTrace();
 						}
 					}
-				});				
+				});
 			}
 		});
 	}
@@ -158,6 +227,7 @@ public class AcceptDeclineInvitationActivity extends Activity {
 			public void onClick(View v) {
 				disableAllButtons();
 				getParticipantAndUpdateStatusAccept();
+				updateUserGroupMemberStatus(true);
 			}
 
 			private void getParticipantAndUpdateStatusAccept() {
@@ -185,6 +255,7 @@ public class AcceptDeclineInvitationActivity extends Activity {
 													getApplicationContext(),
 													"You Have Accepted!",
 													Toast.LENGTH_SHORT).show();
+											finish();
 										} else {
 											LOGGER.info("ERROR:: Unable to Save Updated Participant (Accept)");
 											e.printStackTrace();
@@ -201,6 +272,22 @@ public class AcceptDeclineInvitationActivity extends Activity {
 			}
 		});
 
+	}
+
+	protected void updateUserGroupMemberStatus(boolean groupMemberStatus) {
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		currentUser.put("groupMember", groupMemberStatus);
+		currentUser.saveInBackground(new SaveCallback() {
+			@Override
+			public void done(ParseException e) {
+				if (e == null) {
+					LOGGER.info("SUCCESS:: Updated User groupMember status.");
+				} else {
+					LOGGER.info("FAILURE:: Encountered Error: ");
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 	private void enableAllButtons() {

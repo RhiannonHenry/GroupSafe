@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
@@ -25,6 +26,7 @@ import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -47,7 +49,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 	private int radius;
 	private String groupName, groupOrganization, participantUserObjectID,
 			groupId, groupLeaderId, participantId, participantObjectId;
-	private Button invite, prev, next;
+	private Button invite, prev, next, cancel;
 	private View header, footer;
 	private Timer autoUpdate;
 
@@ -89,11 +91,182 @@ public class InviteGroupParticipantsActivity extends Activity {
 				.findViewById(R.id.inviteGroupParticipantsButton);
 		next = (Button) footer.findViewById(R.id.inviteParticipantsNextButton);
 		prev = (Button) footer.findViewById(R.id.inviteParticipantsPrevButton);
+		cancel = (Button) footer
+				.findViewById(R.id.inviteParticipantsCancelButton);
+
+		enableAllButtons();
+		cancel.setClickable(false);
+		cancel.setEnabled(false);
 
 		inviteButtonClicked();
 		nextButtonClicked();
 		previousButtonClicked();
+		cancelButtonClicked();
 
+	}
+
+	private void cancelButtonClicked() {
+		cancel.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				disableAllButtons();
+				setGroupLeaderStatus(false);
+				setGroupMembersStatus(false);
+			}
+
+			private void setGroupMembersStatus(boolean groupMemberStatus) {
+				ParseQuery<ParseObject> getGroupQuery = ParseQuery
+						.getQuery("Group");
+				getGroupQuery.whereEqualTo("objectId", groupId);
+				try {
+					List<ParseObject> foundGroups = getGroupQuery.find();
+					LOGGER.info("SUCCESS:: Found Group");
+					if (foundGroups.size() > 0) {
+						ParseObject group = foundGroups.get(0);
+						@SuppressWarnings("unchecked")
+						ArrayList<String> currentGroupParticipants = (ArrayList<String>) group
+								.get("groupParticipants");
+						for (int i = 0; i < currentGroupParticipants.size(); i++) {
+							findParticipantInParticipantTable(currentGroupParticipants
+									.get(i));
+						}
+					} else {
+						LOGGER.info("FAILURE:: Cannot access group");
+					}
+				} catch (ParseException e) {
+					LOGGER.info("ERROR:: Unable to Find Group...");
+					e.printStackTrace();
+				}
+
+				deleteGroup();
+			}
+
+			private void deleteGroup() {
+				ParseQuery<ParseObject> query = ParseQuery.getQuery("Group");
+				query.whereEqualTo("objectId", groupId);
+				query.findInBackground(new FindCallback<ParseObject>() {
+					@Override
+					public void done(List<ParseObject> foundGroups,
+							ParseException e) {
+						if (e == null) {
+							if (foundGroups.size() > 0) {
+								LOGGER.info("SUCCESS:: Found Group!");
+								ParseObject group = foundGroups.get(0);
+								group.deleteEventually(new DeleteCallback() {
+									@Override
+									public void done(ParseException e) {
+										if (e == null) {
+											LOGGER.info("SUCCESS:: Deleted Group From DB");
+										} else {
+											LOGGER.info("ERROR:: Failed to Delete Group");
+											e.printStackTrace();
+										}
+									}
+								});
+							} else {
+								LOGGER.info("FAILURE:: Failed to Find Group");
+							}
+						} else {
+							LOGGER.info("ERROR::");
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+
+			private void findParticipantInParticipantTable(String participant) {
+				ParseQuery<ParseObject> getParticipant = ParseQuery
+						.getQuery("Participant");
+				getParticipant.whereEqualTo("objectId", participant);
+				getParticipant
+						.findInBackground(new FindCallback<ParseObject>() {
+							@Override
+							public void done(
+									List<ParseObject> foundParticipants,
+									ParseException e) {
+								if (e == null) {
+									if (foundParticipants.size() > 0) {
+										LOGGER.info("SUCCESS:: Found Participant");
+										ParseObject current = foundParticipants
+												.get(0);
+										String number = current.get(
+												"participantNumber").toString();
+										LOGGER.info("Got username: " + number
+												+ " for participant");
+										findUserInDb(number);
+									} else {
+										LOGGER.info("FAILURE:: Failed to get Participant");
+									}
+								} else {
+									LOGGER.info("ERROR::");
+									e.printStackTrace();
+								}
+							}
+
+							private void findUserInDb(String number) {
+								ParseQuery<ParseUser> userQuery = ParseUser
+										.getQuery();
+								userQuery.whereEqualTo("username", number);
+								userQuery
+										.findInBackground(new FindCallback<ParseUser>() {
+											@Override
+											public void done(
+													List<ParseUser> userList,
+													ParseException e) {
+												if (e == null) {
+													if (userList.size() > 0) {
+														ParseUser user = userList
+																.get(0);
+														LOGGER.info("SUCCESS:: Found User "
+																+ user.get("displayName"));
+															String groupLeaderDisplayName = ParseUser
+																	.getCurrentUser()
+																	.get("displayName")
+																	.toString();
+															JSONObject terminationData = null;
+															try {
+																terminationData = new JSONObject(
+																		"{"
+																				+ "\"alert\":\""
+																				+ groupLeaderDisplayName
+																				+ " has Terminated the group.\", "
+																				+ "\"action\":\" com.kainos.groupsafe.HomeActivity\", "
+																				+ "\"title\": \"Group Termination!\"}");
+																sendNotification(
+																		user.getObjectId()
+																				.toString(),
+																		terminationData);
+															} catch (JSONException e1) {
+																LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
+																e1.printStackTrace();
+															}
+													} else {
+														LOGGER.info("FAILURE:: Unable to find User");
+													}
+												} else {
+													LOGGER.info("ERROR::");
+													e.printStackTrace();
+												}
+											}
+
+											private void sendNotification(
+													String userObjectId,
+													JSONObject terminationData) {
+												String notificationChannel = "user_"
+														+ userObjectId;
+												LOGGER.info("#004: Channel = "
+														+ notificationChannel);
+												ParsePush push = new ParsePush();
+												push.setData(terminationData);
+												push.setChannel(notificationChannel);
+												push.sendInBackground();
+											}
+										});
+							}
+
+						});
+			}
+		});
 	}
 
 	@Override
@@ -126,7 +299,6 @@ public class InviteGroupParticipantsActivity extends Activity {
 
 	private void updateParticipantStatus(InviteeContact currentParticipant,
 			int position) {
-		// TODO: Update Participant Information
 		String participantId = currentParticipant.getObjectId();
 		String displayedStatus = currentParticipant.getStatus().toString();
 		String participantName = currentParticipant.getInviteeContactName();
@@ -155,7 +327,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 					listView.refreshDrawableState();
 				} else {
 					LOGGER.info("NO CHANGES TO PARTICIPANT STATE!");
-				}	
+				}
 			} else {
 				LOGGER.info("FAILURE:: Could Not Find Participant.");
 			}
@@ -169,13 +341,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 		prev.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Button nextButton = (Button) findViewById(R.id.inviteParticipantsNextButton);
-				Button prevButton = (Button) findViewById(R.id.inviteParticipantsPrevButton);
-				nextButton.setClickable(false);
-				nextButton.setEnabled(false);
-				prevButton.setClickable(false);
-				prevButton.setEnabled(false);
-
+				disableAllButtons();
 				// Go back to setRadiusView
 				Intent intent = new Intent(_instance,
 						SetGroupGeoFenceActivity.class);
@@ -190,13 +356,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 		next.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Button nextButton = (Button) findViewById(R.id.inviteParticipantsNextButton);
-				Button prevButton = (Button) findViewById(R.id.inviteParticipantsPrevButton);
-				nextButton.setClickable(false);
-				nextButton.setEnabled(false);
-				prevButton.setClickable(false);
-				prevButton.setEnabled(false);
-
+				disableAllButtons();
 				// TODO: proceed to group map view
 			}
 		});
@@ -206,8 +366,10 @@ public class InviteGroupParticipantsActivity extends Activity {
 		invite.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				disableAllButtons();
 				// create group in DB
 				createGroupInDB();
+				setGroupLeaderStatus(true);
 			}
 
 			private void createGroupInDB() {
@@ -309,6 +471,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 								participantObjectId = foundParticipants.get(0)
 										.getObjectId().toString();
 								addParticipantObjectIdToGroup();
+								
 							} catch (ParseException e) {
 								LOGGER.info("ERROR:: ");
 								e.printStackTrace();
@@ -328,11 +491,14 @@ public class InviteGroupParticipantsActivity extends Activity {
 									current.addUnique("groupParticipants",
 											participantObjectId);
 									current.saveInBackground(new SaveCallback() {
-
 										@Override
 										public void done(ParseException e) {
 											if (e == null) {
 												LOGGER.info("SUCCESS:: Updated Group with NEW Participant!");
+												next.setClickable(true);
+												next.setEnabled(true);
+												cancel.setClickable(true);
+												cancel.setEnabled(true);
 											} else {
 												LOGGER.info("ERROR:: Updating Group with NEW Participant FAILED");
 												e.printStackTrace();
@@ -357,10 +523,10 @@ public class InviteGroupParticipantsActivity extends Activity {
 			private void sendPushNotifications() {
 				// Send push notification using CHANNEL
 				// "user_[userObjectID]"
-				JSONObject data = generateJSON();
 
 				// Send Push Notification to each participant.
 				for (int i = 0; i < invitedContacts.size(); i++) {
+					JSONObject data = generateJSON(i);
 					String currentParticipant = invitedContacts.get(i)
 							.getObjectId();
 					ParseQuery<ParseUser> getParticpantInformation = ParseUser
@@ -438,6 +604,18 @@ public class InviteGroupParticipantsActivity extends Activity {
 		});
 	}
 
+	protected void setGroupLeaderStatus(boolean groupLeaderStatus) {
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		currentUser.put("groupLeader", true);
+		try {
+			currentUser.save();
+			LOGGER.info("SUCCESS:: Updated 'groupLeader' value for user!");
+		} catch (ParseException e) {
+			LOGGER.info("ERROR:: Updating 'groupLeader' value for user!");
+			e.printStackTrace();
+		}
+	}
+
 	private void initializeVariables() {
 		Intent intent = getIntent();
 		participants = intent.getStringArrayListExtra("chosenParticipants");
@@ -447,7 +625,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 		groupLeaderId = ParseUser.getCurrentUser().getObjectId().toString();
 	}
 
-	protected JSONObject generateJSON() {
+	protected JSONObject generateJSON(int position) {
 		String groupLeaderDisplayName = ParseUser.getCurrentUser()
 				.get("displayName").toString();
 		JSONObject data = null;
@@ -463,6 +641,9 @@ public class InviteGroupParticipantsActivity extends Activity {
 							+ "\", "
 							+ "\"groupId\": \""
 							+ groupId
+							+ "\", "
+							+ "\"participantId\": \""
+							+ participants.get(position)
 							+ "\", "
 							+ "\"action\": \"com.kainos.groupsafe.AcceptDeclineInvitationActivity\"}");
 		} catch (JSONException e) {
@@ -594,6 +775,26 @@ public class InviteGroupParticipantsActivity extends Activity {
 					Toast.LENGTH_LONG).show();
 		}
 
+	}
+
+	private void enableAllButtons() {
+		invite.setClickable(true);
+		invite.setEnabled(true);
+		next.setClickable(true);
+		next.setEnabled(true);
+		prev.setClickable(true);
+		prev.setEnabled(true);
+	}
+
+	private void disableAllButtons() {
+		invite.setClickable(false);
+		invite.setEnabled(false);
+		next.setClickable(false);
+		next.setEnabled(false);
+		prev.setClickable(false);
+		prev.setEnabled(false);
+		cancel.setClickable(false);
+		cancel.setEnabled(false);
 	}
 
 }

@@ -13,6 +13,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.PushService;
+import com.parse.SaveCallback;
 
 import android.os.Bundle;
 import android.provider.Settings;
@@ -44,6 +45,7 @@ public class HomeActivity extends Activity {
 
 	private String currentUserId;
 	private ParseUser currentUser;
+	private ParseInstallation installation;
 
 	private boolean internetPresent = false;
 	ConnectionDetector connectionDetector;
@@ -52,19 +54,35 @@ public class HomeActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
-		PushService.setDefaultPushCallback(this, NotificationActivity.class);
+		PushService.setDefaultPushCallback(this, HomeActivity.class);
 		currentUserId = ParseUser.getCurrentUser().getObjectId().toString();
 
 		if (getApplicationContext() != null) {
 			PushService.subscribe(getApplicationContext(), "user_"
-					+ currentUserId, AcceptDeclineInvitationActivity.class);
+					+ currentUserId, HomeActivity.class);
 		}
-		ParseInstallation installation = ParseInstallation
-				.getCurrentInstallation();
-		LOGGER.info("Got Installation: "
-				+ installation.getObjectId().toString());
-		installation.put("owner", currentUserId);
-		installation.saveInBackground();
+		if (ParseInstallation.getCurrentInstallation() == null) {
+			ParseInstallation.getCurrentInstallation().saveInBackground(
+					new SaveCallback() {
+						@Override
+						public void done(ParseException e) {
+							if (e == null) {
+								installation = ParseInstallation
+										.getCurrentInstallation();
+								LOGGER.info("Got Installation: "
+										+ installation.getObjectId().toString());
+								installation.put("owner", currentUserId);
+								installation.saveInBackground();
+							}
+						}
+					});
+		} else {
+			installation = ParseInstallation.getCurrentInstallation();
+			LOGGER.info("Got Installation: "
+					+ installation.getObjectId().toString());
+			installation.put("owner", currentUserId);
+			installation.saveInBackground();
+		}
 
 		currentUser = ParseUser.getCurrentUser();
 		currentUser

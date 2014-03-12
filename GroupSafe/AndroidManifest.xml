@@ -121,11 +121,13 @@
                 <action android:name="android.intent.action.USER_PRESENT" />
             </intent-filter>
         </receiver>
+        <!-- Parse Notification Receiver for: GROUP INVITATION -->
         <receiver
-            android:name="com.kainos.groupsafe.InvitationResponseReceiver"
+            android:name="com.kainos.groupsafe.NotificationResponseReceiver"
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.kainos.groupsafe.AcceptDeclineInvitationActivity" />
+                <action android:name="com.kainos.groupsafe.GroupTerminationNotificationActivity" />
             </intent-filter>
         </receiver>
         <receiver
@@ -147,6 +149,10 @@
         <activity
             android:name="com.kainos.groupsafe.EditOrganizationActivity"
             android:label="@string/title_activity_edit_organization" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.GroupTerminationNotificationActivity"
+            android:label="@string/title_activity_group_termination_notification" >
         </activity>
     </application>
 

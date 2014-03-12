@@ -43,12 +43,13 @@ public class InviteGroupParticipantsActivity extends Activity {
 	// populate this with contact name and number [Parse call]
 	// getParticipantInformation method
 	private ArrayList<InviteeContact> invitedContacts = new ArrayList<InviteeContact>();
-
+	private ArrayList<String> groupParticipants_participantId = new ArrayList<String>();
 	// Array of contacts passed through from before
 	private ArrayList<String> participants;
 	private int radius;
+	private boolean participantsInvited = false;
 	private String groupName, groupOrganization, participantUserObjectID,
-			groupId, groupLeaderId, participantId, participantObjectId;
+			groupId, groupLeaderId, participantId;
 	private Button invite, prev, next, cancel;
 	private View header, footer;
 	private Timer autoUpdate;
@@ -111,10 +112,10 @@ public class InviteGroupParticipantsActivity extends Activity {
 			public void onClick(View v) {
 				disableAllButtons();
 				setGroupLeaderStatus(false);
-				setGroupMembersStatus(false);
+				notifyGroupMembers();
 			}
 
-			private void setGroupMembersStatus(boolean groupMemberStatus) {
+			private void notifyGroupMembers() {
 				ParseQuery<ParseObject> getGroupQuery = ParseQuery
 						.getQuery("Group");
 				getGroupQuery.whereEqualTo("objectId", groupId);
@@ -219,27 +220,27 @@ public class InviteGroupParticipantsActivity extends Activity {
 																.get(0);
 														LOGGER.info("SUCCESS:: Found User "
 																+ user.get("displayName"));
-															String groupLeaderDisplayName = ParseUser
-																	.getCurrentUser()
-																	.get("displayName")
-																	.toString();
-															JSONObject terminationData = null;
-															try {
-																terminationData = new JSONObject(
-																		"{"
-																				+ "\"alert\":\""
-																				+ groupLeaderDisplayName
-																				+ " has Terminated the group.\", "
-																				+ "\"action\":\" com.kainos.groupsafe.HomeActivity\", "
-																				+ "\"title\": \"Group Termination!\"}");
-																sendNotification(
-																		user.getObjectId()
-																				.toString(),
-																		terminationData);
-															} catch (JSONException e1) {
-																LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
-																e1.printStackTrace();
-															}
+														String groupLeaderDisplayName = ParseUser
+																.getCurrentUser()
+																.get("displayName")
+																.toString();
+														JSONObject terminationData = null;
+														try {
+															terminationData = new JSONObject(
+																	"{"
+																			+ "\"alert\":\""
+																			+ groupLeaderDisplayName
+																			+ " has Terminated the group.\", "
+																			+ "\"action\":\"com.kainos.groupsafe.GroupTerminationNotificationActivity\", "
+																			+ "\"title\": \"Group Termination!\"}");
+															sendNotification(
+																	user.getObjectId()
+																			.toString(),
+																	terminationData);
+														} catch (JSONException e1) {
+															LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
+															e1.printStackTrace();
+														}
 													} else {
 														LOGGER.info("FAILURE:: Unable to find User");
 													}
@@ -260,6 +261,12 @@ public class InviteGroupParticipantsActivity extends Activity {
 												push.setData(terminationData);
 												push.setChannel(notificationChannel);
 												push.sendInBackground();
+
+												Intent intent = new Intent(
+														_instance,
+														HomeActivity.class);
+												startActivity(intent);
+												finish();
 											}
 										});
 							}
@@ -279,16 +286,21 @@ public class InviteGroupParticipantsActivity extends Activity {
 			public void run() {
 				runOnUiThread(new Runnable() {
 					public void run() {
-						for (int i = 0; i < invitedContacts.size(); i++) {
-							LOGGER.info("Updating Participant: "
-									+ invitedContacts.get(i)
-											.getInviteeContactName());
-							updateParticipantStatus(invitedContacts.get(i), i);
+						if (participantsInvited) {
+							for (int i = 0; i < invitedContacts.size(); i++) {
+								LOGGER.info("Updating Participant: "
+										+ invitedContacts.get(i)
+												.getInviteeContactName());
+								updateParticipantStatus(invitedContacts.get(i),
+										i);
+							}
+						} else {
+							LOGGER.info("NOTHING TO UPDATE");
 						}
 					}
 				});
 			}
-		}, 0, 60000); // updates every 60 seconds
+		}, 0, 30000); // updates every 30 seconds
 	}
 
 	@Override
@@ -451,73 +463,87 @@ public class InviteGroupParticipantsActivity extends Activity {
 						public void done(ParseException e) {
 							if (e == null) {
 								LOGGER.info("SUCCESS:: Created Participant Successfully");
-								getNewParticipantInformation();
 							} else {
 								LOGGER.info("ERROR:: ");
 								e.printStackTrace();
 							}
 						}
-
-						private void getNewParticipantInformation() {
-							ParseQuery<ParseObject> query = ParseQuery
-									.getQuery("Participant");
-							query.whereEqualTo("groupLeaderId", groupLeaderId);
-							query.whereEqualTo("groupId", groupId);
-							query.whereEqualTo("participantId", participantId);
-							try {
-								List<ParseObject> foundParticipants = query
-										.find();
-								LOGGER.info("SUCCESS:: Found Participant!");
-								participantObjectId = foundParticipants.get(0)
-										.getObjectId().toString();
-								addParticipantObjectIdToGroup();
-								
-							} catch (ParseException e) {
-								LOGGER.info("ERROR:: ");
-								e.printStackTrace();
-							}
-						}
-
-						private void addParticipantObjectIdToGroup() {
-							ParseQuery<ParseObject> query = ParseQuery
-									.getQuery("Group");
-							query.whereEqualTo("groupLeaderId", groupLeaderId);
-							query.whereEqualTo("groupName", groupName);
-							try {
-								List<ParseObject> foundGroups = query.find();
-								if (foundGroups.size() > 0) {
-									LOGGER.info("SUCCESS:: Group Found!");
-									ParseObject current = foundGroups.get(0);
-									current.addUnique("groupParticipants",
-											participantObjectId);
-									current.saveInBackground(new SaveCallback() {
-										@Override
-										public void done(ParseException e) {
-											if (e == null) {
-												LOGGER.info("SUCCESS:: Updated Group with NEW Participant!");
-												next.setClickable(true);
-												next.setEnabled(true);
-												cancel.setClickable(true);
-												cancel.setEnabled(true);
-											} else {
-												LOGGER.info("ERROR:: Updating Group with NEW Participant FAILED");
-												e.printStackTrace();
-											}
-										}
-									});
-								} else {
-									LOGGER.info("FAILURE:: Could Not Find Any Groups...");
-								}
-							} catch (ParseException e) {
-								LOGGER.info("ERROR Finding Group: ");
-								e.printStackTrace();
-							}
-						}
 					});
-
+					if (i == invitedContacts.size() - 1) {
+						LOGGER.info("Finished Creating the last Participant...");
+						LOGGER.info("Fetching all the Participant 'objectId' fields...");
+						populateGroupParticipantsArray();
+					}
 				}
 				// send push notifications to participants
 				sendPushNotifications();
+				participantsInvited = true;
+			}
+
+			private void populateGroupParticipantsArray() {
+				ParseQuery<ParseObject> query = ParseQuery
+						.getQuery("Participant");
+				query.whereEqualTo("groupLeaderId", groupLeaderId);
+				query.whereEqualTo("groupId", groupId);
+				query.findInBackground(new FindCallback<ParseObject>() {
+					@Override
+					public void done(List<ParseObject> participantsInGroup,
+							ParseException e) {
+						if (e == null) {
+							if (participantsInGroup.size() > 0) {
+								LOGGER.info("SUCCESS:: Found Participants for Group!");
+								for (int i = 0; i < participantsInGroup.size(); i++) {
+									String currentObjectId = participantsInGroup
+											.get(i).getObjectId().toString();
+									LOGGER.info(i + ": " + currentObjectId);
+									groupParticipants_participantId
+											.add(currentObjectId);
+									if (i == participantsInGroup.size() - 1) {
+										LOGGER.info("That's the last Participant in the group!");
+										addParticipantsArrayToGroupTableDB();
+									}
+								}
+							} else {
+								LOGGER.info("FAILURE:: Unable to find Participants for Group!");
+							}
+						} else {
+							LOGGER.info("ERROR: ");
+							e.printStackTrace();
+						}
+					}
+
+					private void addParticipantsArrayToGroupTableDB() {
+						ParseQuery<ParseObject> query = ParseQuery
+								.getQuery("Group");
+						query.whereEqualTo("groupLeaderId", groupLeaderId);
+						query.whereEqualTo("groupName", groupName);
+						try {
+							List<ParseObject> foundGroups = query.find();
+							if (foundGroups.size() > 0) {
+								LOGGER.info("SUCCESS:: Group Found!");
+								ParseObject current = foundGroups.get(0);
+								current.put("groupParticipants",
+										groupParticipants_participantId);
+								current.saveInBackground(new SaveCallback() {
+									@Override
+									public void done(ParseException e) {
+										if (e == null) {
+											LOGGER.info("SUCCESS:: Updated Group with Participants!");
+										} else {
+											LOGGER.info("ERROR:: Updating Group with Participants FAILED");
+											e.printStackTrace();
+										}
+									}
+								});
+							} else {
+								LOGGER.info("FAILURE:: Could Not Find Any Groups...");
+							}
+						} catch (ParseException e) {
+							LOGGER.info("ERROR Finding Group: ");
+							e.printStackTrace();
+						}
+					}
+				});
 			}
 
 			private void sendPushNotifications() {
@@ -600,13 +626,18 @@ public class InviteGroupParticipantsActivity extends Activity {
 				push.setData(data);
 				push.setChannel(channel);
 				push.sendInBackground();
+				
+				next.setClickable(true);
+				next.setEnabled(true);
+				cancel.setClickable(true);
+				cancel.setEnabled(true);
 			}
 		});
 	}
 
 	protected void setGroupLeaderStatus(boolean groupLeaderStatus) {
 		ParseUser currentUser = ParseUser.getCurrentUser();
-		currentUser.put("groupLeader", true);
+		currentUser.put("groupLeader", groupLeaderStatus);
 		try {
 			currentUser.save();
 			LOGGER.info("SUCCESS:: Updated 'groupLeader' value for user!");

@@ -1,12 +1,8 @@
 package com.kainos.groupsafe;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.parse.FindCallback;
 import com.parse.Parse;
@@ -34,9 +30,8 @@ public class AcceptDeclineInvitationActivity extends Activity {
 			.getLogger(AcceptDeclineInvitationActivity.class.getName());
 	private static final String STATUS_ACCEPT = "ACCEPTED";
 	private static final String STATUS_DECLINE = "DECLINED";
-	private String action, channel, key, userId, groupLeaderId, groupId,
+	private String channel, userId, groupLeaderId, groupId,
 			participantId, removeParticipant;
-	private JSONObject json;
 	private TextView pageTitle, pageMessage;
 	private Button accept, decline;
 	private ParseUser myself;
@@ -63,47 +58,61 @@ public class AcceptDeclineInvitationActivity extends Activity {
 
 	private void populatePage() {
 		Intent intent = getIntent();
-		try {
-			action = intent.getAction();
-			channel = intent.getExtras().getString("com.parse.Channel");
-			userId = channel.substring(4);
-			LOGGER.info("User ID: " + userId);
+		channel = intent.getStringExtra("com.parse.Channel");
+		userId = channel.substring(4);
+		groupLeaderId = intent.getStringExtra("groupLeaderId");
+		groupId = intent.getStringExtra("groupId");
+		participantId = intent.getStringExtra("participantId");
+		pageTitle = (TextView) findViewById(R.id.notificationTitle);
+		pageTitle.setText(intent.getStringExtra("title"));
+		pageMessage = (TextView) findViewById(R.id.notificationMessage);
+		pageMessage.setText(intent.getStringExtra("alert"));
 
-			json = new JSONObject(intent.getExtras()
-					.getString("com.parse.Data"));
+		LOGGER.info("Starting with: channel = " + channel + " userId = "
+				+ userId + " groupLeaderId = " + groupLeaderId + " groupId = "
+				+ groupId + " participantId = " + participantId);
 
-			LOGGER.info(" Got Action: " + action + "on channel " + channel
-					+ " with: ");
-
-			@SuppressWarnings("rawtypes")
-			Iterator itr = json.keys();
-			while (itr.hasNext()) {
-				key = itr.next().toString();
-				LOGGER.info(" ... " + key + " => " + json.getString(key));
-				if (key.equals("title")) {
-					pageTitle = (TextView) findViewById(R.id.notificationTitle);
-					pageTitle.setText(json.getString(key));
-					LOGGER.info("Setting Page Title to: " + json.getString(key));
-				} else if (key.equals("alert")) {
-					pageMessage = (TextView) findViewById(R.id.notificationMessage);
-					pageMessage.setText(json.getString(key));
-					LOGGER.info("Setting Page Message to: "
-							+ json.getString(key));
-				} else if (key.equals("groupLeaderId")) {
-					groupLeaderId = json.getString(key);
-					LOGGER.info("GroupLeaderID: " + groupLeaderId);
-				} else if (key.equals("groupId")) {
-					groupId = json.getString(key);
-					LOGGER.info("GroupID: " + groupId);
-				} else if (key.equals("participantId")) {
-					participantId = json.getString(key);
-					LOGGER.info("ParticipantID: " + participantId);
-				}
-			}
-		} catch (JSONException e) {
-			LOGGER.info("ERROR in JSON: " + e.getMessage());
-			e.printStackTrace();
-		}
+		// try {
+		// action = intent.getAction();
+		// channel = intent.getExtras().getString("com.parse.Channel");
+		// userId = channel.substring(4);
+		// LOGGER.info("User ID: " + userId);
+		//
+		// json = new JSONObject(intent.getExtras()
+		// .getString("com.parse.Data"));
+		//
+		// LOGGER.info(" Got Action: " + action + "on channel " + channel
+		// + " with: ");
+		//
+		// @SuppressWarnings("rawtypes")
+		// Iterator itr = json.keys();
+		// while (itr.hasNext()) {
+		// key = itr.next().toString();
+		// LOGGER.info(" ... " + key + " => " + json.getString(key));
+		// if (key.equals("title")) {
+		// pageTitle = (TextView) findViewById(R.id.notificationTitle);
+		// pageTitle.setText(json.getString(key));
+		// LOGGER.info("Setting Page Title to: " + json.getString(key));
+		// } else if (key.equals("alert")) {
+		// pageMessage = (TextView) findViewById(R.id.notificationMessage);
+		// pageMessage.setText(json.getString(key));
+		// LOGGER.info("Setting Page Message to: "
+		// + json.getString(key));
+		// } else if (key.equals("groupLeaderId")) {
+		// groupLeaderId = json.getString(key);
+		// LOGGER.info("GroupLeaderID: " + groupLeaderId);
+		// } else if (key.equals("groupId")) {
+		// groupId = json.getString(key);
+		// LOGGER.info("GroupID: " + groupId);
+		// } else if (key.equals("participantId")) {
+		// participantId = json.getString(key);
+		// LOGGER.info("ParticipantID: " + participantId);
+		// }
+		// }
+		// } catch (JSONException e) {
+		// LOGGER.info("ERROR in JSON: " + e.getMessage());
+		// e.printStackTrace();
+		// }
 	}
 
 	private void declineButtonClicked() {
@@ -127,10 +136,12 @@ public class AcceptDeclineInvitationActivity extends Activity {
 							ParseException e) {
 						if (e == null) {
 							if (foundParticipants.size() > 0) {
-								final ParseObject current = foundParticipants.get(0);
+								final ParseObject current = foundParticipants
+										.get(0);
 								LOGGER.info("SUCCESS:: Found Participant: "
 										+ current.getObjectId());
-								removeParticipant = current.getObjectId().toString();
+								removeParticipant = current.getObjectId()
+										.toString();
 								current.put("status", STATUS_DECLINE);
 								current.saveInBackground(new SaveCallback() {
 									@Override
@@ -172,20 +183,24 @@ public class AcceptDeclineInvitationActivity extends Activity {
 																ArrayList<String> currentParticipants = (ArrayList<String>) currentGroup
 																		.get("groupParticipants");
 																LOGGER.info("Got Participants: ");
-																for(String participant: currentParticipants){
-																	LOGGER.info(""+participant+",");
+																for (String participant : currentParticipants) {
+																	LOGGER.info(""
+																			+ participant
+																			+ ",");
 																}
 																LOGGER.info("from DB.");
-																
+
 																currentParticipants
 																		.remove(removeParticipant);
-																
+
 																LOGGER.info("Sending Participants: ");
-																for(String participant: currentParticipants){
-																	LOGGER.info(""+participant+",");
+																for (String participant : currentParticipants) {
+																	LOGGER.info(""
+																			+ participant
+																			+ ",");
 																}
 																LOGGER.info("to DB.");
-																
+
 																currentGroup
 																		.put("groupParticipants",
 																				currentParticipants);

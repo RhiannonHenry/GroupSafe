@@ -49,7 +49,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 	private int radius;
 	private boolean participantsInvited = false;
 	private String groupName, groupOrganization, participantUserObjectID,
-			groupId, groupLeaderId, participantId;
+			groupId, groupLeaderId, groupLeaderDisplayName, participantId;
 	private Button invite, prev, next, cancel;
 	private View header, footer;
 	private Timer autoUpdate;
@@ -98,12 +98,46 @@ public class InviteGroupParticipantsActivity extends Activity {
 		enableAllButtons();
 		cancel.setClickable(false);
 		cancel.setEnabled(false);
+		next.setClickable(false);
+		next.setEnabled(false);
 
 		inviteButtonClicked();
 		nextButtonClicked();
 		previousButtonClicked();
 		cancelButtonClicked();
+	}
+	
+	@Override
+	public void onResume() {
+		LOGGER.info("UPDATING...");
+		super.onResume();
+		autoUpdate = new Timer();
+		autoUpdate.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					public void run() {
+						if (participantsInvited) {
+							for (int i = 0; i < invitedContacts.size(); i++) {
+								LOGGER.info("Updating Participant: "
+										+ invitedContacts.get(i)
+												.getInviteeContactName());
+								updateParticipantStatus(invitedContacts.get(i),
+										i);
+							}
+						} else {
+							LOGGER.info("NOTHING TO UPDATE");
+						}
+					}
+				});
+			}
+		}, 0, 30000); // updates every 30 seconds
+	}
 
+	@Override
+	public void onPause() {
+		autoUpdate.cancel();
+		super.onPause();
 	}
 
 	private void cancelButtonClicked() {
@@ -276,39 +310,6 @@ public class InviteGroupParticipantsActivity extends Activity {
 		});
 	}
 
-	@Override
-	public void onResume() {
-		LOGGER.info("UPDATING...");
-		super.onResume();
-		autoUpdate = new Timer();
-		autoUpdate.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				runOnUiThread(new Runnable() {
-					public void run() {
-						if (participantsInvited) {
-							for (int i = 0; i < invitedContacts.size(); i++) {
-								LOGGER.info("Updating Participant: "
-										+ invitedContacts.get(i)
-												.getInviteeContactName());
-								updateParticipantStatus(invitedContacts.get(i),
-										i);
-							}
-						} else {
-							LOGGER.info("NOTHING TO UPDATE");
-						}
-					}
-				});
-			}
-		}, 0, 30000); // updates every 30 seconds
-	}
-
-	@Override
-	public void onPause() {
-		autoUpdate.cancel();
-		super.onPause();
-	}
-
 	private void updateParticipantStatus(InviteeContact currentParticipant,
 			int position) {
 		String participantId = currentParticipant.getObjectId();
@@ -369,9 +370,139 @@ public class InviteGroupParticipantsActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				disableAllButtons();
-				// TODO: proceed to group map view
+				sendStartPushNotificationToParticipants();
 			}
 		});
+	}
+
+	protected void sendStartPushNotificationToParticipants() {
+		ParseQuery<ParseObject> getGroupQuery = ParseQuery
+				.getQuery("Group");
+		getGroupQuery.whereEqualTo("objectId", groupId);
+		try {
+			List<ParseObject> foundGroups = getGroupQuery.find();
+			LOGGER.info("SUCCESS:: Found Group");
+			if (foundGroups.size() > 0) {
+				ParseObject group = foundGroups.get(0);
+				@SuppressWarnings("unchecked")
+				ArrayList<String> currentGroupParticipants = (ArrayList<String>) group
+						.get("groupParticipants");
+				for (int i = 0; i < currentGroupParticipants.size(); i++) {
+					findParticipantInParticipantTable(currentGroupParticipants
+							.get(i));
+				}
+			} else {
+				LOGGER.info("FAILURE:: Cannot access group");
+			}
+		} catch (ParseException e) {
+			LOGGER.info("ERROR:: Unable to Find Group...");
+			e.printStackTrace();
+		}		
+	}
+
+	private void findParticipantInParticipantTable(String participant) {
+		ParseQuery<ParseObject> getParticipant = ParseQuery
+				.getQuery("Participant");
+		getParticipant.whereEqualTo("objectId", participant);
+		getParticipant
+				.findInBackground(new FindCallback<ParseObject>() {
+					@Override
+					public void done(
+							List<ParseObject> foundParticipants,
+							ParseException e) {
+						if (e == null) {
+							if (foundParticipants.size() > 0) {
+								LOGGER.info("SUCCESS:: Found Participant");
+								ParseObject current = foundParticipants
+										.get(0);
+								String number = current.get(
+										"participantNumber").toString();
+								LOGGER.info("Got username: " + number
+										+ " for participant");
+								findUserInDb(number);
+							} else {
+								LOGGER.info("FAILURE:: Failed to get Participant");
+							}
+						} else {
+							LOGGER.info("ERROR::");
+							e.printStackTrace();
+						}
+					}
+
+					private void findUserInDb(String number) {
+						ParseQuery<ParseUser> userQuery = ParseUser
+								.getQuery();
+						userQuery.whereEqualTo("username", number);
+						userQuery
+								.findInBackground(new FindCallback<ParseUser>() {
+									@Override
+									public void done(
+											List<ParseUser> userList,
+											ParseException e) {
+										if (e == null) {
+											if (userList.size() > 0) {
+												ParseUser user = userList
+														.get(0);
+												LOGGER.info("SUCCESS:: Found User "
+														+ user.get("displayName"));
+												String groupLeaderDisplayName = ParseUser
+														.getCurrentUser()
+														.get("displayName")
+														.toString();
+												JSONObject startData = null;
+												try {
+													startData = new JSONObject(
+															"{"
+																	+ "\"alert\":\""
+																	+ groupLeaderDisplayName
+																	+ " has started the Group!\", "
+																	+ "\"title\": \"Group Started!\", "
+																	+ "\"groupLeaderId\": \""
+																	+ groupLeaderId
+																	+ "\", "
+																	+ "\"groupId\": \""
+																	+ groupId
+																	+ "\", "
+																	+ "\"action\": \"com.kainos.groupsafe.GroupGeoFenceMapActivity\"}");
+													sendNotification(
+															user.getObjectId()
+																	.toString(),
+															startData);
+												} catch (JSONException e1) {
+													LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
+													e1.printStackTrace();
+												}
+											} else {
+												LOGGER.info("FAILURE:: Unable to find User");
+											}
+										} else {
+											LOGGER.info("ERROR::");
+											e.printStackTrace();
+										}
+									}
+
+									private void sendNotification(
+											String userObjectId,
+											JSONObject terminationData) {
+										String notificationChannel = "user_"
+												+ userObjectId;
+										LOGGER.info("#004: Channel = "
+												+ notificationChannel);
+										ParsePush push = new ParsePush();
+										push.setData(terminationData);
+										push.setChannel(notificationChannel);
+										push.sendInBackground();
+										
+										Intent intent = new Intent(_instance,
+												GroupGeoFenceMapActivity.class);
+										intent.putExtra("groupId", groupId);
+										intent.putExtra("groupLeaderId", groupLeaderId);
+										intent.putExtra("radius", radius);
+										startActivity(intent);
+									}
+								});
+					}
+				});		
 	}
 
 	private void inviteButtonClicked() {
@@ -626,7 +757,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 				push.setData(data);
 				push.setChannel(channel);
 				push.sendInBackground();
-				
+
 				next.setClickable(true);
 				next.setEnabled(true);
 				cancel.setClickable(true);
@@ -657,7 +788,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 	}
 
 	protected JSONObject generateJSON(int position) {
-		String groupLeaderDisplayName = ParseUser.getCurrentUser()
+		groupLeaderDisplayName = ParseUser.getCurrentUser()
 				.get("displayName").toString();
 		JSONObject data = null;
 		try {

@@ -68,6 +68,12 @@ public class NotificationResponseReceiver extends BroadcastReceiver {
 				i.putExtra("participantId", participantId);
 				
 				context.startActivity(i);
+			}else if(action.equalsIgnoreCase("com.kainos.groupsafe.GroupGeoFenceMapActivity")){
+				Intent i = new Intent(context, GroupGeoFenceMapActivity.class);
+				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				i.putExtra("groupId", groupId);
+				i.putExtra("groupLeaderId", groupLeaderId);
+				context.startActivity(i);
 			}
 
 		} catch (JSONException e) {

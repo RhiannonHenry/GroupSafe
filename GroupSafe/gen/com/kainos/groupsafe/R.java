@@ -283,16 +283,17 @@ containing a value of this type.
         public static final int list_selector=0x7f02002a;
     }
     public static final class id {
-        public static final int OKButton=0x7f050033;
+        public static final int OKButton=0x7f050034;
         public static final int acceptButton=0x7f050007;
-        public static final int action_addContact=0x7f05007d;
-        public static final int action_createGroup=0x7f05007f;
-        public static final int action_home=0x7f05007a;
-        public static final int action_invitations=0x7f05007c;
-        public static final int action_logout=0x7f05007e;
-        public static final int action_notifications=0x7f05007b;
-        public static final int action_settings=0x7f050079;
-        public static final int action_viewMap=0x7f050080;
+        public static final int action_addContact=0x7f05007e;
+        public static final int action_createGroup=0x7f050080;
+        public static final int action_home=0x7f05007b;
+        public static final int action_invitations=0x7f05007d;
+        public static final int action_logout=0x7f05007f;
+        public static final int action_notifications=0x7f05007c;
+        public static final int action_settings=0x7f05007a;
+        public static final int action_terminateGroup=0x7f050082;
+        public static final int action_viewMap=0x7f050081;
         public static final int addContactCancelButton=0x7f05000f;
         public static final int addContactNameInput=0x7f05000b;
         public static final int addContactNamePrompt=0x7f05000a;
@@ -300,7 +301,7 @@ containing a value of this type.
         public static final int addContactNumberPrompt=0x7f05000c;
         public static final int addContactPageMessage=0x7f050009;
         public static final int addContactSaveButton=0x7f05000e;
-        public static final int addEmergencyContactButton=0x7f050072;
+        public static final int addEmergencyContactButton=0x7f050073;
         public static final int addEmergencyContactCancelButton=0x7f050018;
         public static final int addEmergencyContactNameInput=0x7f050012;
         public static final int addEmergencyContactNamePrompt=0x7f050011;
@@ -310,15 +311,15 @@ containing a value of this type.
         public static final int addEmergencyContactRelationshipInput=0x7f050016;
         public static final int addEmergencyContactRelationshipPrompt=0x7f050015;
         public static final int addEmergencyContactSaveButton=0x7f050017;
-        public static final int contactGroupCheckBox=0x7f050078;
-        public static final int contactGroupList=0x7f050047;
-        public static final int contactGroupListHolder=0x7f050046;
-        public static final int contactList=0x7f050035;
-        public static final int contactListHolder=0x7f050034;
-        public static final int contactName=0x7f05005c;
-        public static final int contactNameGroup=0x7f050076;
-        public static final int contactNumber=0x7f05005d;
-        public static final int contactNumberGroup=0x7f050077;
+        public static final int contactGroupCheckBox=0x7f050079;
+        public static final int contactGroupList=0x7f050048;
+        public static final int contactGroupListHolder=0x7f050047;
+        public static final int contactList=0x7f050036;
+        public static final int contactListHolder=0x7f050035;
+        public static final int contactName=0x7f05005d;
+        public static final int contactNameGroup=0x7f050077;
+        public static final int contactNumber=0x7f05005e;
+        public static final int contactNumberGroup=0x7f050078;
         public static final int declineButton=0x7f050008;
         public static final int detailedContactDeleteButton=0x7f050023;
         public static final int detailedContactGroupLeader=0x7f05001f;
@@ -340,78 +341,79 @@ containing a value of this type.
         public static final int detailedEmergencyContactPageMessage=0x7f050028;
         public static final int detailedEmergencyContactRelationship=0x7f05002e;
         public static final int detailedEmergencyContactRelationshipPrompt=0x7f05002d;
-        public static final int editOrganizationButton=0x7f050070;
+        public static final int editOrganizationButton=0x7f050071;
         public static final int editOrganizationCancelButton=0x7f050027;
-        public static final int editOrganizationDeleteButton=0x7f050071;
+        public static final int editOrganizationDeleteButton=0x7f050072;
         public static final int editOrganizationSaveButton=0x7f050026;
-        public static final int emergencyContactList=0x7f050051;
-        public static final int emergencyContactListHolder=0x7f050050;
-        public static final int emergencyContactName=0x7f05005e;
-        public static final int emergencyContactNumber=0x7f05005f;
-        public static final int emergencyContactRelationship=0x7f050060;
-        public static final int geoFenceRadiusMessage=0x7f050048;
-        public static final int groupNameInput=0x7f05004d;
-        public static final int groupNameMessage=0x7f05004c;
-        public static final int groupOrganizationPrompt=0x7f05004a;
+        public static final int emergencyContactList=0x7f050052;
+        public static final int emergencyContactListHolder=0x7f050051;
+        public static final int emergencyContactName=0x7f05005f;
+        public static final int emergencyContactNumber=0x7f050060;
+        public static final int emergencyContactRelationship=0x7f050061;
+        public static final int geoFenceRadiusMessage=0x7f050049;
+        public static final int groupMap=0x7f050031;
+        public static final int groupNameInput=0x7f05004e;
+        public static final int groupNameMessage=0x7f05004d;
+        public static final int groupOrganizationPrompt=0x7f05004b;
         public static final int hybrid=0x7f050004;
-        public static final int inviteGroupParticipantsButton=0x7f050065;
-        public static final int inviteParticipantsCancelButton=0x7f050063;
-        public static final int inviteParticipantsNextButton=0x7f050061;
-        public static final int inviteParticipantsPrevButton=0x7f050062;
-        public static final int inviteeList=0x7f050037;
-        public static final int inviteeListHolder=0x7f050036;
-        public static final int inviteeName=0x7f050073;
-        public static final int inviteeNumber=0x7f050074;
-        public static final int inviteeStatus=0x7f050075;
-        public static final int logoImage=0x7f050053;
-        public static final int logoWrapper=0x7f050052;
-        public static final int map=0x7f050038;
+        public static final int inviteGroupParticipantsButton=0x7f050066;
+        public static final int inviteParticipantsCancelButton=0x7f050064;
+        public static final int inviteParticipantsNextButton=0x7f050062;
+        public static final int inviteParticipantsPrevButton=0x7f050063;
+        public static final int inviteeList=0x7f050038;
+        public static final int inviteeListHolder=0x7f050037;
+        public static final int inviteeName=0x7f050074;
+        public static final int inviteeNumber=0x7f050075;
+        public static final int inviteeStatus=0x7f050076;
+        public static final int logoImage=0x7f050054;
+        public static final int logoWrapper=0x7f050053;
+        public static final int map=0x7f050039;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
-        public static final int notRegistered=0x7f05005a;
+        public static final int notRegistered=0x7f05005b;
         public static final int notificationMessage=0x7f050006;
         public static final int notificationTitle=0x7f050005;
         public static final int organizationIdInfo=0x7f050025;
         public static final int organizationIdInput=0x7f050024;
-        public static final int organizationSpinner=0x7f05004b;
-        public static final int passwordInput=0x7f050058;
-        public static final int passwordPrompt=0x7f050057;
-        public static final int radiusSpinner=0x7f050049;
-        public static final int registerButton=0x7f050044;
-        public static final int registerCancelButton=0x7f050045;
-        public static final int registerDisplayNameInput=0x7f050041;
-        public static final int registerDisplayNamePrompt=0x7f050040;
-        public static final int registerEmailInput=0x7f050043;
-        public static final int registerEmailPrompt=0x7f050042;
-        public static final int registerNowButton=0x7f05005b;
-        public static final int registerPageMessage=0x7f050039;
-        public static final int registerPasswordInput=0x7f05003d;
-        public static final int registerPasswordPrompt=0x7f05003c;
-        public static final int registerRetypePasswordInput=0x7f05003f;
-        public static final int registerRetypePasswordPrompt=0x7f05003e;
-        public static final int registerUsernameInput=0x7f05003b;
-        public static final int registerUsernamePrompt=0x7f05003a;
-        public static final int resetPasswordButton=0x7f05006d;
+        public static final int organizationSpinner=0x7f05004c;
+        public static final int passwordInput=0x7f050059;
+        public static final int passwordPrompt=0x7f050058;
+        public static final int radiusSpinner=0x7f05004a;
+        public static final int registerButton=0x7f050045;
+        public static final int registerCancelButton=0x7f050046;
+        public static final int registerDisplayNameInput=0x7f050042;
+        public static final int registerDisplayNamePrompt=0x7f050041;
+        public static final int registerEmailInput=0x7f050044;
+        public static final int registerEmailPrompt=0x7f050043;
+        public static final int registerNowButton=0x7f05005c;
+        public static final int registerPageMessage=0x7f05003a;
+        public static final int registerPasswordInput=0x7f05003e;
+        public static final int registerPasswordPrompt=0x7f05003d;
+        public static final int registerRetypePasswordInput=0x7f050040;
+        public static final int registerRetypePasswordPrompt=0x7f05003f;
+        public static final int registerUsernameInput=0x7f05003c;
+        public static final int registerUsernamePrompt=0x7f05003b;
+        public static final int resetPasswordButton=0x7f05006e;
         public static final int satellite=0x7f050002;
-        public static final int selectGroupParticipantsNextButton=0x7f050064;
-        public static final int setGeoFenceRadiusNextButton=0x7f05004e;
-        public static final int setGeoFenceRadiusPrevButton=0x7f05004f;
-        public static final int signinButton=0x7f050059;
-        public static final int splashMessage=0x7f050054;
-        public static final int terminationNotificationMessage=0x7f050032;
-        public static final int terminationNotificationTitle=0x7f050031;
+        public static final int selectGroupParticipantsNextButton=0x7f050065;
+        public static final int setGeoFenceRadiusNextButton=0x7f05004f;
+        public static final int setGeoFenceRadiusPrevButton=0x7f050050;
+        public static final int signinButton=0x7f05005a;
+        public static final int splashMessage=0x7f050055;
+        public static final int terminationNotificationMessage=0x7f050033;
+        public static final int terminationNotificationTitle=0x7f050032;
         public static final int terrain=0x7f050003;
-        public static final int usernameInput=0x7f050056;
-        public static final int usernamePrompt=0x7f050055;
-        public static final int yourCurrentDisplayName=0x7f050067;
-        public static final int yourCurrentEmail=0x7f05006b;
-        public static final int yourCurrentOrganization=0x7f05006f;
-        public static final int yourCurrentUserName=0x7f050069;
-        public static final int yourDisplayNamePrompt=0x7f050066;
-        public static final int yourEmailPrompt=0x7f05006a;
-        public static final int yourOrganizationPrompt=0x7f05006e;
-        public static final int yourPasswordPrompt=0x7f05006c;
-        public static final int yourUserNamePrompt=0x7f050068;
+        public static final int usernameInput=0x7f050057;
+        public static final int usernamePrompt=0x7f050056;
+        public static final int yourCurrentDisplayName=0x7f050068;
+        public static final int yourCurrentEmail=0x7f05006c;
+        public static final int yourCurrentOrganization=0x7f050070;
+        public static final int yourCurrentUserName=0x7f05006a;
+        public static final int yourDisplayNamePrompt=0x7f050067;
+        public static final int yourEmailPrompt=0x7f05006b;
+        public static final int yourOrganizationPrompt=0x7f05006f;
+        public static final int yourPasswordPrompt=0x7f05006d;
+        public static final int yourUserNamePrompt=0x7f050069;
     }
     public static final class integer {
         public static final int google_play_services_version=0x7f070000;
@@ -423,24 +425,25 @@ containing a value of this type.
         public static final int activity_contact_details=0x7f030003;
         public static final int activity_edit_organization=0x7f030004;
         public static final int activity_emergency_contact_details=0x7f030005;
-        public static final int activity_group_termination_notification=0x7f030006;
-        public static final int activity_home=0x7f030007;
-        public static final int activity_invite_group_participants=0x7f030008;
-        public static final int activity_maps_view=0x7f030009;
-        public static final int activity_notification=0x7f03000a;
-        public static final int activity_register=0x7f03000b;
-        public static final int activity_select_group_participants=0x7f03000c;
-        public static final int activity_set_group_geo_fence=0x7f03000d;
-        public static final int activity_settings=0x7f03000e;
-        public static final int activity_splash=0x7f03000f;
-        public static final int contact_row=0x7f030010;
-        public static final int emergency_contact_row=0x7f030011;
-        public static final int footer_invite_participants=0x7f030012;
-        public static final int footer_select_participants=0x7f030013;
-        public static final int header_invite_participants=0x7f030014;
-        public static final int header_settings=0x7f030015;
-        public static final int invitee_row=0x7f030016;
-        public static final int select_group_participant_row=0x7f030017;
+        public static final int activity_group_geo_fence_map=0x7f030006;
+        public static final int activity_group_termination_notification=0x7f030007;
+        public static final int activity_home=0x7f030008;
+        public static final int activity_invite_group_participants=0x7f030009;
+        public static final int activity_maps_view=0x7f03000a;
+        public static final int activity_notification=0x7f03000b;
+        public static final int activity_register=0x7f03000c;
+        public static final int activity_select_group_participants=0x7f03000d;
+        public static final int activity_set_group_geo_fence=0x7f03000e;
+        public static final int activity_settings=0x7f03000f;
+        public static final int activity_splash=0x7f030010;
+        public static final int contact_row=0x7f030011;
+        public static final int emergency_contact_row=0x7f030012;
+        public static final int footer_invite_participants=0x7f030013;
+        public static final int footer_select_participants=0x7f030014;
+        public static final int header_invite_participants=0x7f030015;
+        public static final int header_settings=0x7f030016;
+        public static final int invitee_row=0x7f030017;
+        public static final int select_group_participant_row=0x7f030018;
     }
     public static final class menu {
         public static final int accept_decline_invitation=0x7f0b0000;
@@ -449,29 +452,30 @@ containing a value of this type.
         public static final int contact_details=0x7f0b0003;
         public static final int edit_organization=0x7f0b0004;
         public static final int emergency_contact_details=0x7f0b0005;
-        public static final int group_termination_notification=0x7f0b0006;
-        public static final int home=0x7f0b0007;
-        public static final int invite_group_participants=0x7f0b0008;
-        public static final int maps_view=0x7f0b0009;
-        public static final int notification=0x7f0b000a;
-        public static final int register=0x7f0b000b;
-        public static final int select_group_participants=0x7f0b000c;
-        public static final int set_group_geo_fence=0x7f0b000d;
-        public static final int settings=0x7f0b000e;
-        public static final int splash=0x7f0b000f;
+        public static final int group_geo_fence_map=0x7f0b0006;
+        public static final int group_termination_notification=0x7f0b0007;
+        public static final int home=0x7f0b0008;
+        public static final int invite_group_participants=0x7f0b0009;
+        public static final int maps_view=0x7f0b000a;
+        public static final int notification=0x7f0b000b;
+        public static final int register=0x7f0b000c;
+        public static final int select_group_participants=0x7f0b000d;
+        public static final int set_group_geo_fence=0x7f0b000e;
+        public static final int settings=0x7f0b000f;
+        public static final int splash=0x7f0b0010;
     }
     public static final class string {
-        public static final int OK=0x7f060034;
-        public static final int accept=0x7f060080;
-        public static final int action_settings=0x7f06003a;
+        public static final int OK=0x7f060035;
+        public static final int accept=0x7f060081;
+        public static final int action_settings=0x7f06003b;
         /**  Strings for ADD CONTACT page 
          */
-        public static final int addContactPageMessage=0x7f060049;
-        public static final int addEmergencyContact=0x7f060066;
-        public static final int addEmergencyContactPageMessage=0x7f06006c;
+        public static final int addContactPageMessage=0x7f06004a;
+        public static final int addEmergencyContact=0x7f060067;
+        public static final int addEmergencyContactPageMessage=0x7f06006d;
         /**  Strings for LOGIN page 
          */
-        public static final int app_name=0x7f060039;
+        public static final int app_name=0x7f06003a;
         /**   Title for notification shown when GooglePlayServices needs to be
         enabled for a application to work. [CHAR LIMIT=70] 
          */
@@ -495,8 +499,8 @@ containing a value of this type.
         [CHAR LIMIT=70] 
          */
         public static final int auth_client_using_bad_version_title=0x7f060014;
-        public static final int cancel=0x7f060033;
-        public static final int changePassword=0x7f060065;
+        public static final int cancel=0x7f060034;
+        public static final int changePassword=0x7f060066;
         /**  Button in confirmation dialog to enable Google Play services.  Clicking it
         will direct user to application settings of Google Play services where they
         can enable it [CHAR LIMIT=40] 
@@ -568,48 +572,48 @@ containing a value of this type.
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
         public static final int common_signin_button_text_long=0x7f060013;
-        public static final int contactNameHint=0x7f06002c;
-        public static final int contactNamePrompt=0x7f06004a;
-        public static final int contactNumberHint=0x7f06002d;
-        public static final int contactNumberPrompt=0x7f06004b;
-        public static final int contactRelationshipHint=0x7f060072;
-        public static final int contactRelationshipPrompt=0x7f06006f;
+        public static final int contactNameHint=0x7f06002d;
+        public static final int contactNamePrompt=0x7f06004b;
+        public static final int contactNumberHint=0x7f06002e;
+        public static final int contactNumberPrompt=0x7f06004c;
+        public static final int contactRelationshipHint=0x7f060073;
+        public static final int contactRelationshipPrompt=0x7f060070;
         /**  Strings for CONTACT ROW 
          */
-        public static final int contact_row_arrow_description=0x7f06004d;
-        public static final int decline=0x7f060081;
-        public static final int delete=0x7f060035;
-        public static final int deleteOrganization=0x7f06006a;
+        public static final int contact_row_arrow_description=0x7f06004e;
+        public static final int decline=0x7f060082;
+        public static final int delete=0x7f060036;
+        public static final int deleteOrganization=0x7f06006b;
         /**  Strings for DETAILED CONTACT VIEW page 
          */
-        public static final int detailedContactPageMessage=0x7f06004f;
-        public static final int detailedEmergencyContactNamePrompt=0x7f060075;
-        public static final int detailedEmergencyContactNumberPrompt=0x7f060076;
-        public static final int detailedEmergencyContactPageMessage=0x7f060074;
-        public static final int detailedEmergencyContactRelationshipPrompt=0x7f060077;
-        public static final int detailed_contact_contact_name=0x7f060054;
-        public static final int detailed_contact_contact_name_prompt=0x7f060050;
-        public static final int detailed_contact_contact_number=0x7f060055;
-        public static final int detailed_contact_contact_number_prompt=0x7f060051;
-        public static final int detailed_contact_group_leader=0x7f060056;
-        public static final int detailed_contact_group_leader_prompt=0x7f060052;
-        public static final int detailed_contact_group_member=0x7f060057;
-        public static final int detailed_contact_group_member_prompt=0x7f060053;
-        public static final int detailed_radius_prompt=0x7f06005c;
-        public static final int displayNameExample=0x7f060045;
-        public static final int displayNameHint=0x7f06002a;
-        public static final int displayNamePrompt=0x7f060042;
-        public static final int editOrganization=0x7f060069;
+        public static final int detailedContactPageMessage=0x7f060050;
+        public static final int detailedEmergencyContactNamePrompt=0x7f060076;
+        public static final int detailedEmergencyContactNumberPrompt=0x7f060077;
+        public static final int detailedEmergencyContactPageMessage=0x7f060075;
+        public static final int detailedEmergencyContactRelationshipPrompt=0x7f060078;
+        public static final int detailed_contact_contact_name=0x7f060055;
+        public static final int detailed_contact_contact_name_prompt=0x7f060051;
+        public static final int detailed_contact_contact_number=0x7f060056;
+        public static final int detailed_contact_contact_number_prompt=0x7f060052;
+        public static final int detailed_contact_group_leader=0x7f060057;
+        public static final int detailed_contact_group_leader_prompt=0x7f060053;
+        public static final int detailed_contact_group_member=0x7f060058;
+        public static final int detailed_contact_group_member_prompt=0x7f060054;
+        public static final int detailed_radius_prompt=0x7f06005d;
+        public static final int displayNameExample=0x7f060046;
+        public static final int displayNameHint=0x7f06002b;
+        public static final int displayNamePrompt=0x7f060043;
+        public static final int editOrganization=0x7f06006a;
         /**  Strings for EDIT ORGANIZATION page 
          */
-        public static final int editOrganizationPageMessage=0x7f06007b;
-        public static final int emailExample=0x7f060046;
-        public static final int emailHint=0x7f06002b;
-        public static final int emailPrompt=0x7f060043;
-        public static final int emergencyContactNameHint=0x7f060070;
-        public static final int emergencyContactNamePrompt=0x7f06006d;
-        public static final int emergencyContactNumberHint=0x7f060071;
-        public static final int emergencyContactNumberPrompt=0x7f06006e;
+        public static final int editOrganizationPageMessage=0x7f06007c;
+        public static final int emailExample=0x7f060047;
+        public static final int emailHint=0x7f06002c;
+        public static final int emailPrompt=0x7f060044;
+        public static final int emergencyContactNameHint=0x7f060071;
+        public static final int emergencyContactNamePrompt=0x7f06006e;
+        public static final int emergencyContactNumberHint=0x7f060072;
+        public static final int emergencyContactNumberPrompt=0x7f06006f;
         public static final int error_invalidEmailAddress=0x7f06001e;
         public static final int error_invalidPassword=0x7f06001d;
         public static final int error_invalidUsername=0x7f06001c;
@@ -618,13 +622,13 @@ containing a value of this type.
         /**  ERROR Strings 
          */
         public static final int error_requiredField=0x7f06001a;
-        public static final int groupNameHint=0x7f06005f;
-        public static final int group_name_prompt=0x7f06005e;
-        public static final int group_organization_prompt=0x7f060060;
-        public static final int hello_world=0x7f060063;
-        public static final int invite=0x7f060038;
-        public static final int logoDescription=0x7f06003b;
-        public static final int map_view_text=0x7f060059;
+        public static final int groupNameHint=0x7f060060;
+        public static final int group_name_prompt=0x7f06005f;
+        public static final int group_organization_prompt=0x7f060061;
+        public static final int hello_world=0x7f060064;
+        public static final int invite=0x7f060039;
+        public static final int logoDescription=0x7f06003c;
+        public static final int map_view_text=0x7f06005a;
         public static final int menuOption_addContact=0x7f060021;
         public static final int menuOption_createGroup=0x7f060026;
         public static final int menuOption_home=0x7f060024;
@@ -634,66 +638,68 @@ containing a value of this type.
         public static final int menuOption_logout=0x7f060020;
         public static final int menuOption_notifications=0x7f060023;
         public static final int menuOption_settings=0x7f060022;
+        public static final int menuOption_terminateGroup=0x7f060028;
         public static final int menuOption_viewMap=0x7f060027;
-        public static final int next=0x7f060036;
-        public static final int notRegisteredText=0x7f06003f;
-        public static final int notification_message=0x7f06007f;
+        public static final int next=0x7f060037;
+        public static final int notRegisteredText=0x7f060040;
+        public static final int notification_message=0x7f060080;
         /**  Strings for ACCEPT/DECLINE NOTIFICATION page 
          */
-        public static final int notification_title=0x7f06007e;
-        public static final int organisation_prompt=0x7f060061;
-        public static final int organizationIdHint=0x7f06007c;
-        public static final int organizationIdInfo=0x7f06007d;
-        public static final int organizationPrompt=0x7f060068;
-        public static final int passwordExample=0x7f06003d;
-        public static final int passwordExampleRegister=0x7f060044;
-        public static final int passwordHint=0x7f060029;
-        public static final int passwordPrompt=0x7f060030;
-        public static final int prev=0x7f060037;
-        public static final int radius_prompt=0x7f06005d;
-        public static final int register=0x7f060031;
+        public static final int notification_title=0x7f06007f;
+        public static final int organisation_prompt=0x7f060062;
+        public static final int organizationIdHint=0x7f06007d;
+        public static final int organizationIdInfo=0x7f06007e;
+        public static final int organizationPrompt=0x7f060069;
+        public static final int passwordExample=0x7f06003e;
+        public static final int passwordExampleRegister=0x7f060045;
+        public static final int passwordHint=0x7f06002a;
+        public static final int passwordPrompt=0x7f060031;
+        public static final int prev=0x7f060038;
+        public static final int radius_prompt=0x7f06005e;
+        public static final int register=0x7f060032;
         /**  Strings for REGISTER page 
          */
-        public static final int registerPageMessage=0x7f060040;
-        public static final int retypePasswordPrompt=0x7f060041;
-        public static final int save=0x7f060032;
-        public static final int signin=0x7f06003e;
-        public static final int splashMessage=0x7f06003c;
-        public static final int title_activity_accept_decline_invitation=0x7f060079;
-        public static final int title_activity_add_contact=0x7f06004c;
+        public static final int registerPageMessage=0x7f060041;
+        public static final int retypePasswordPrompt=0x7f060042;
+        public static final int save=0x7f060033;
+        public static final int signin=0x7f06003f;
+        public static final int splashMessage=0x7f06003d;
+        public static final int title_activity_accept_decline_invitation=0x7f06007a;
+        public static final int title_activity_add_contact=0x7f06004d;
         /**  Strings for ADD EMERGENCY CONTACT page 
          */
-        public static final int title_activity_add_emergency_contact=0x7f06006b;
-        public static final int title_activity_contact_details=0x7f06004e;
-        public static final int title_activity_edit_organization=0x7f06007a;
+        public static final int title_activity_add_emergency_contact=0x7f06006c;
+        public static final int title_activity_contact_details=0x7f06004f;
+        public static final int title_activity_edit_organization=0x7f06007b;
         /**  Strings for EMERGENCY CONTACT DETAILS page 
          */
-        public static final int title_activity_emergency_contact_details=0x7f060073;
-        public static final int title_activity_group_termination_notification=0x7f060082;
-        public static final int title_activity_home=0x7f060048;
-        public static final int title_activity_invite_group_participants=0x7f060062;
+        public static final int title_activity_emergency_contact_details=0x7f060074;
+        public static final int title_activity_group_geo_fence_map=0x7f060084;
+        public static final int title_activity_group_termination_notification=0x7f060083;
+        public static final int title_activity_home=0x7f060049;
+        public static final int title_activity_invite_group_participants=0x7f060063;
         /**  Strings for MAP VIEW page 
          */
-        public static final int title_activity_maps_view=0x7f060058;
-        public static final int title_activity_notification=0x7f060078;
-        public static final int title_activity_register=0x7f060047;
+        public static final int title_activity_maps_view=0x7f060059;
+        public static final int title_activity_notification=0x7f060079;
+        public static final int title_activity_register=0x7f060048;
         /**  String for STEP1: SELECT GROUP PARTICIPANTS page 
          */
-        public static final int title_activity_select_group_participants=0x7f06005a;
+        public static final int title_activity_select_group_participants=0x7f06005b;
         /**  Strings for STEP2: GEO-FENCE RADIUS page 
          */
-        public static final int title_activity_set_group_geo_fence=0x7f06005b;
+        public static final int title_activity_set_group_geo_fence=0x7f06005c;
         /**  Strings for SETTINGS page 
          */
-        public static final int title_activity_settings=0x7f060064;
-        public static final int userEmailPrompt=0x7f060067;
-        public static final int usernameExample=0x7f06002f;
+        public static final int title_activity_settings=0x7f060065;
+        public static final int userEmailPrompt=0x7f060068;
+        public static final int usernameExample=0x7f060030;
         /**  HINT String 
          */
-        public static final int usernameHint=0x7f060028;
+        public static final int usernameHint=0x7f060029;
         /**  GENERIC Strings 
          */
-        public static final int usernamePrompt=0x7f06002e;
+        public static final int usernamePrompt=0x7f06002f;
     }
     public static final class style {
         /** 

@@ -98,6 +98,23 @@
             android:name="com.kainos.groupsafe.NotificationActivity"
             android:label="@string/title_activity_notification" >
         </activity>
+                <activity
+            android:name="com.kainos.groupsafe.AcceptDeclineInvitationActivity"
+            android:label="@string/title_activity_accept_decline_invitation" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.EditOrganizationActivity"
+            android:label="@string/title_activity_edit_organization" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.GroupTerminationNotificationActivity"
+            android:label="@string/title_activity_group_termination_notification" >
+        </activity>
+        <activity
+            android:name="com.kainos.groupsafe.GroupGeoFenceMapActivity"
+            android:label="@string/title_activity_group_geo_fence_map" >
+        </activity>
+        
 
         <!-- THIS IS TO INTEGRATE GOOGLE PLAY (FOR MAPS) -->
         <meta-data
@@ -128,6 +145,7 @@
             <intent-filter>
                 <action android:name="com.kainos.groupsafe.AcceptDeclineInvitationActivity" />
                 <action android:name="com.kainos.groupsafe.GroupTerminationNotificationActivity" />
+                <action android:name="com.kainos.groupsafe.GroupGeoFenceMapActivity" />
             </intent-filter>
         </receiver>
         <receiver
@@ -142,18 +160,6 @@
             </intent-filter>
         </receiver>
         <!-- END -->
-        <activity
-            android:name="com.kainos.groupsafe.AcceptDeclineInvitationActivity"
-            android:label="@string/title_activity_accept_decline_invitation" >
-        </activity>
-        <activity
-            android:name="com.kainos.groupsafe.EditOrganizationActivity"
-            android:label="@string/title_activity_edit_organization" >
-        </activity>
-        <activity
-            android:name="com.kainos.groupsafe.GroupTerminationNotificationActivity"
-            android:label="@string/title_activity_group_termination_notification" >
-        </activity>
     </application>
 
 </manifest>

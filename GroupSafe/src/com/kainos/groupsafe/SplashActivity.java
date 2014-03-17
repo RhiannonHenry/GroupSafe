@@ -24,6 +24,14 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.ParseException;
 
+/**
+ * Initial Activity that will be displayed to the user. The user can Sign-in or
+ * Register from this Android Activity
+ * 
+ * Layout: @see activity_splash.xml Menu: @see splash.xml
+ * 
+ * @author Rhiannon
+ */
 public class SplashActivity extends Activity {
 
 	private final static Logger LOGGER = Logger.getLogger(SplashActivity.class
@@ -52,8 +60,8 @@ public class SplashActivity extends Activity {
 
 		_instance = this;
 
-//		createTestOrganization();
-		
+		// createTestOrganization();
+
 		// Enable all buttons
 		enableAllButtons();
 	}
@@ -61,7 +69,7 @@ public class SplashActivity extends Activity {
 	@SuppressWarnings("unused")
 	private void createTestOrganization() {
 		ArrayList<String> organizationMembers = new ArrayList<String>();
-		
+
 		ParseObject organization = new ParseObject("Organization");
 		organization.put("organizationName", "Test Organization");
 		organization.put("organizationMembers", organizationMembers);
@@ -73,6 +81,15 @@ public class SplashActivity extends Activity {
 		}
 	}
 
+	/**
+	 * When the user selected the 'Sign-in' button on the Splash Activity
+	 * screen, this method will be triggered. The method checks for an internet
+	 * connection before proceeding @see ConnectionDetector.
+	 * 
+	 * @param view	the base class for widgets, which are used to create
+	 *            	interactive UI components (buttons, text fields, etc.).
+	 * @return void this class does not return anything
+	 */
 	public void signin(View view) {
 		// Disable buttons
 		disableAllButtons();
@@ -109,7 +126,7 @@ public class SplashActivity extends Activity {
 		LOGGER.info("Attempting to send to parse");
 		ParseUser.logInInBackground(username, password, new LogInCallback() {
 			@Override
-			public void done(ParseUser user, ParseException e) {			
+			public void done(ParseUser user, ParseException e) {
 				if (e == null && user != null) {
 					Toast.makeText(getApplicationContext(),
 							"Successfully Logged In!", Toast.LENGTH_LONG)
@@ -213,5 +230,3 @@ public class SplashActivity extends Activity {
 	}
 
 }
-
-

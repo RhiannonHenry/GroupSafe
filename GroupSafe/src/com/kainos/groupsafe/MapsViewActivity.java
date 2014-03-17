@@ -91,6 +91,9 @@ public class MapsViewActivity extends Activity {
 						LOGGER.info("THIS IS A NEW LOCATION ENTRY");
 						createNewLocationInTable();
 					}
+				}else{
+					LOGGER.info("ERROR::");
+					e.printStackTrace();
 				}
 			}
 		});

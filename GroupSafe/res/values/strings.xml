@@ -18,6 +18,7 @@
     <string name="menuOption_invitations">Invitations</string>
     <string name="menuOption_createGroup">Create Group</string>
     <string name="menuOption_viewMap">Map</string>
+    <string name="menuOption_terminateGroup">Terminate Group</string>
 
     <!-- HINT String -->
     <string name="usernameHint">Enter your mobile number</string>
@@ -150,5 +151,6 @@
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
     <string name="title_activity_group_termination_notification">GroupTerminationNotificationActivity</string>
+    <string name="title_activity_group_geo_fence_map">GroupGeoFenceMapActivity</string>
 
 </resources>

@@ -463,6 +463,9 @@ public class InviteGroupParticipantsActivity extends Activity {
 																	+ "\"groupId\": \""
 																	+ groupId
 																	+ "\", "
+																	+ "\"radius\": \""
+																	+ Integer.toString(radius)
+																	+ "\", "
 																	+ "\"action\": \"com.kainos.groupsafe.GroupGeoFenceMapActivity\"}");
 													sendNotification(
 															user.getObjectId()

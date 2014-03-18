@@ -15,7 +15,7 @@ public class NotificationResponseReceiver extends BroadcastReceiver {
 	private static final Logger LOGGER = Logger
 			.getLogger(NotificationResponseReceiver.class.getName());
 
-	String action, channel, key, title, alert, groupLeaderId, groupId, participantId;
+	String action, channel, key, title, alert, groupLeaderId, groupId, participantId, radius;
 	JSONObject json;
 	
 	@Override
@@ -47,6 +47,8 @@ public class NotificationResponseReceiver extends BroadcastReceiver {
 						groupId = json.getString(key);
 					} else if (key.equals("participantId")) {
 						participantId = json.getString(key);
+					} else if (key.equals("radius")){
+						radius = json.getString(key);
 					}
 				}
 			}
@@ -73,6 +75,7 @@ public class NotificationResponseReceiver extends BroadcastReceiver {
 				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				i.putExtra("groupId", groupId);
 				i.putExtra("groupLeaderId", groupLeaderId);
+				i.putExtra("radius", Integer.parseInt(radius));
 				context.startActivity(i);
 			}
 

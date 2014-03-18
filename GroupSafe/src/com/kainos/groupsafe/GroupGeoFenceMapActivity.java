@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -19,6 +23,7 @@ import com.parse.Parse;
 import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -33,11 +38,13 @@ import android.widget.Toast;
 
 public class GroupGeoFenceMapActivity extends FragmentActivity {
 
+	static GroupGeoFenceMapActivity _instance = null;
 	private final static Logger LOGGER = Logger
 			.getLogger(GroupGeoFenceMapActivity.class.getName());
 
 	private GoogleMap googleMap;
 	private MarkerOptions groupLeaderMarker;
+	private MarkerOptions ownMarker;
 	private Map<String, MarkerOptions> participantLocationMarkers;
 	private ArrayList<String> groupParticipants;
 	private ArrayList<String> participantNumbers;
@@ -49,14 +56,19 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 	private double lat;
 	private double lng;
 	private int radius;
+	
+	private MenuItem terminateMenuItem;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
 		ParseAnalytics.trackAppOpened(getIntent());
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_group_geo_fence_map);
+		_instance = this;
+
 		currentUser = ParseUser.getCurrentUser();
 		userId = currentUser.getObjectId().toString();
 		locationServices = new GPSTracker(GroupGeoFenceMapActivity.this);
@@ -73,48 +85,142 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 
 		LOGGER.info("GOT GROUP_ID: " + groupId);
 		LOGGER.info("GOT GROUP_LEADER_ID: " + groupLeaderId);
+		LOGGER.info("GOT RADIUS: " + radius);
 
 		LOGGER.info("Entering START ACTIVITY LOGIC...");
 		startActivityLogic();
-
 	}
 
 	private void startActivityLogic() {
 		LOGGER.info("ENTERED START ACTIVITY LOGIC!");
 		try {
-			// Get User Location : Lat, Lng
+			LOGGER.info("Initialising Map...");
+			initialiseMap();
 			getCurrentLocation();
-			// Check if User has a pre-existing location in the database...
-			// & Load Map
 			checkForExisitingLocationEntryForUser();
 
 			if (currentUser.get("groupLeader").equals(true)) {
 				LOGGER.info("GROUP LEADER FLOW");
-				LOGGER.info("Initialising Map...");
-				initialiseMap();
 				createGroupLeaderCurrentLocationMarker();
-				// Set own marker
-				setMarker(lat, lng);
-				// create geofence
-				createGeoFence();
-
-				// Position Markers for Participants
-				LOGGER.info("Entering FIND PARTICIPANTS...");
+				setMarker(lat, lng, "My Location");
+				createGeoFence(lat, lng);
 				findParticipants();
-
 			} else {
-				// TODO: functionality if User is a groupMember NOT leader
 				LOGGER.info("GROUP MEMBER FLOW");
+				createGroupLeaderCurrentLocationMarker();
+				getLeaderLocationAndSetMarker();
+				createOwnCurrentLocationMarker();
+				setOwnMarker(lat, lng);
+				findParticipants();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	private void setOwnMarker(double latitude, double longitude) {
+		LOGGER.info("Entering Set Own Marker...");
+		LOGGER.info("Placing marker at: " + lat + "," + lng);
+
+		// TODO: Remove hard coding...
+		// 54.5822043,-5.9380233 --> lat, lng
+		LatLng currentPosition = new LatLng(54.5822043, -5.9380233);
+		googleMap.addMarker(ownMarker
+				.position(currentPosition)
+				.title("My Location")
+				.draggable(false)
+				.icon(BitmapDescriptorFactory
+						.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+
+		CameraPosition cameraPosition = new CameraPosition.Builder()
+				.target(currentPosition).zoom(14.5F).bearing(300F) // orientation
+				.tilt(50F) // viewing angle
+				.build();
+		googleMap.animateCamera(CameraUpdateFactory
+				.newCameraPosition(cameraPosition));
+	}
+
+	private void getLeaderLocationAndSetMarker() {
+		// Get Group Leader current Location
+		ParseQuery<ParseUser> getLeaderLocationId = ParseUser.getQuery();
+		getLeaderLocationId.whereEqualTo("objectId", groupLeaderId);
+		getLeaderLocationId.findInBackground(new FindCallback<ParseUser>() {
+			@Override
+			public void done(List<ParseUser> foundUserList, ParseException e) {
+				if (e == null) {
+					if (foundUserList.size() > 0) {
+						LOGGER.info("SUCCESS:: Found the Group Leader User!");
+						ParseUser groupLeaderUser = foundUserList.get(0);
+						String groupLeaderLocationId = null;
+						try {
+							groupLeaderLocationId = groupLeaderUser.get(
+									"currentLocation").toString();
+						} catch (NullPointerException e1) {
+							LOGGER.info("ERROR:: ");
+							e1.printStackTrace();
+						}
+						if (groupLeaderLocationId == null) {
+							LOGGER.info("Group Leader doesn't have a location ID");
+						} else {
+							getLocationOfGroupLeader(groupLeaderUser.get(
+									"currentLocation").toString());
+						}
+					} else {
+						LOGGER.info("FAILURE:: Failed to retrieve the group leader user ("
+								+ groupLeaderId + ")");
+					}
+				} else {
+					LOGGER.info("Error:: ");
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	protected void getLocationOfGroupLeader(String locationId) {
+		// Get lat and lng of Group Leader Location
+		ParseQuery<ParseObject> getGroupLeaderLocation = ParseQuery
+				.getQuery("Location");
+		getGroupLeaderLocation.whereEqualTo("objectId", locationId);
+		getGroupLeaderLocation.whereEqualTo("userId", groupLeaderId);
+		getGroupLeaderLocation
+				.findInBackground(new FindCallback<ParseObject>() {
+					@Override
+					public void done(List<ParseObject> foundLocationList,
+							ParseException e) {
+						if (e == null) {
+							if (foundLocationList.size() > 0) {
+								LOGGER.info("SUCCESS:: Found the Location for Group Leader!");
+								ParseObject groupLeaderLocation = foundLocationList
+										.get(0);
+								double groupLeaderLat = Double
+										.parseDouble(groupLeaderLocation.get(
+												"currentLat").toString());
+								double groupLeaderLng = Double
+										.parseDouble(groupLeaderLocation.get(
+												"currentLng").toString());
+								LOGGER.info("Got Location: " + groupLeaderLat
+										+ "," + groupLeaderLng);
+								// Set Marker For Group Leader
+								setMarker(groupLeaderLat, groupLeaderLng,
+										"Group Leader");
+							} else {
+								LOGGER.info("FAILURE:: Failed to retrieve the location for user ("
+										+ groupLeaderId + ")");
+							}
+						} else {
+							LOGGER.info("Error:: ");
+							e.printStackTrace();
+						}
+					}
+				});
+	}
+
 	private void positionParticipants() {
 		LOGGER.info("Entered GET PARTICIPANTS NUMBER: ");
 		for (int i = 0; i < groupParticipants.size(); i++) {
-			LOGGER.info("Getting number for participant: "+groupParticipants.get(i));
+			LOGGER.info("Getting number for participant: "
+					+ groupParticipants.get(i));
 			ParseQuery<ParseObject> getParticipantNumber = ParseQuery
 					.getQuery("Participant");
 			getParticipantNumber.whereEqualTo("objectId",
@@ -136,9 +242,14 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 											.toString();
 									LOGGER.info("Got Participant Number: "
 											+ currentParticipantNumber);
-									participantNumbers
-											.add(currentParticipantNumber);
-									getParticipantLocation(currentParticipantNumber);
+									if (currentParticipantNumber
+											.equals(currentUser.getUsername())) {
+										LOGGER.info("This participant is the same as the logged in user, they have already retreived and diaplayed their location. Continuing...");
+									} else {
+										participantNumbers
+												.add(currentParticipantNumber);
+										getParticipantLocation(currentParticipantNumber);
+									}
 
 								} else {
 									LOGGER.info("FAILURE:: Unable to find Participant");
@@ -207,23 +318,51 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 					if (foundLocationList.size() > 0) {
 						LOGGER.info("SUCCESS:: Found Location");
 						ParseObject currentLocation = foundLocationList.get(0);
-						
-						// TODO:: Create Marker for Participant using lat and lng values...
-						double latitude = Double.parseDouble(currentLocation.get("currentLat").toString());
-						double longitude = Double.parseDouble(currentLocation.get("currentLng").toString());
-						String userId = currentLocation.get("userId").toString();
-						
-						if(latitude == 0 && longitude == 0){
+
+						// Create Marker for Participant using lat and lng
+						// values...
+						double latitude = Double.parseDouble(currentLocation
+								.get("currentLat").toString());
+						double longitude = Double.parseDouble(currentLocation
+								.get("currentLng").toString());
+						String userId = currentLocation.get("userId")
+								.toString();
+
+						// TODO:: remove hard coding. Delete these 4 lines.
+						if (latitude == 0 && longitude == 0) {
 							latitude = 54.5871171;
 							longitude = -5.9338856;
 						}
-						LOGGER.info("Creating Marker Options with Location: "+latitude+","+longitude);
-						LOGGER.info("For Participant with userID: "+userId);
-						MarkerOptions participantMarker = new MarkerOptions();
+						LOGGER.info("Creating Marker Options with Location: "
+								+ latitude + "," + longitude);
+						LOGGER.info("For Participant with userID: " + userId);
 						LatLng currentPosition = new LatLng(latitude, longitude);
-						googleMap.addMarker(participantMarker.position(currentPosition)
-								.title("Participant "+userId).draggable(false));
-						participantLocationMarkers.put(userId, participantMarker);
+						if (participantLocationMarkers.containsKey(userId)) {
+							// Fetch old participant marker and update position
+							MarkerOptions currentMarker = participantLocationMarkers
+									.get(userId);
+							if (currentMarker == null) {
+								currentMarker = new MarkerOptions();
+								googleMap.addMarker(currentMarker
+										.position(currentPosition)
+										.title("Participant " + userId)
+										.draggable(false)
+										.icon(BitmapDescriptorFactory
+												.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
+							} else {
+								currentMarker.position(currentPosition);
+							}
+						} else {
+							MarkerOptions participantMarker = new MarkerOptions();
+							googleMap.addMarker(participantMarker
+									.position(currentPosition)
+									.title("Participant " + userId)
+									.draggable(false)
+									.icon(BitmapDescriptorFactory
+											.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
+							participantLocationMarkers.put(userId,
+									participantMarker);
+						}
 					} else {
 						LOGGER.info("FAILURE:: Unable to find a location");
 					}
@@ -270,31 +409,44 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 		});
 	}
 
-	private void createGeoFence() {
+	private void createGeoFence(double latitude, double longitude) {
 		// TODO: Remove hard coding...
-		// 54.5821639,-5.9368431 --> lat, lng
+		// 54.5821639,-5.9368431 --> latitude, longitude
+		LOGGER.info("Creating Geo-Fence with Radius: " + radius
+				+ " around Location: [" + latitude + "," + longitude + "]");
 		googleMap.addCircle(new CircleOptions()
 				.center(new LatLng(54.5821639, -5.9368431)).radius(radius)
 				.fillColor(Color.parseColor("#f6a9f3")));
 	}
 
-	private void setMarker(double latitide, double longitude) {
+	private void setMarker(double latitude, double longitude, String title) {
 		LOGGER.info("Entering Set Marker...");
-
-		LOGGER.info("Placing Group Leader at: " + lat + "," + lng);
+		LOGGER.info("Placing Group Leader at: " + latitude + "," + longitude);
+		LOGGER.info("Google Map = " + googleMap.toString());
+		LOGGER.info("Group Leader Marker = "
+				+ groupLeaderMarker.describeContents());
 
 		// TODO: Remove hard coding...
 		// 54.5821639,-5.9368431 --> lat, lng
 		LatLng currentPosition = new LatLng(54.5821639, -5.9368431);
-		googleMap.addMarker(groupLeaderMarker.position(currentPosition)
-				.title("Current Location").draggable(false));
+		googleMap.addMarker(groupLeaderMarker
+				.position(currentPosition)
+				.title(title)
+				.draggable(false)
+				.icon(BitmapDescriptorFactory
+						.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 
-		CameraPosition cameraPosition = new CameraPosition.Builder()
-				.target(currentPosition).zoom(10.5F).bearing(300F) // orientation
-				.tilt(50F) // viewing angle
-				.build();
-		googleMap.animateCamera(CameraUpdateFactory
-				.newCameraPosition(cameraPosition));
+		if (currentUser.get("groupLeader").equals(true)) {
+			CameraPosition cameraPosition = new CameraPosition.Builder()
+					.target(currentPosition).zoom(10.5F).bearing(300F) // orientation
+					.tilt(50F) // viewing angle
+					.build();
+			googleMap.animateCamera(CameraUpdateFactory
+					.newCameraPosition(cameraPosition));
+		} else {
+			LOGGER.info("You are not the Group Leader...");
+			createGeoFence(latitude, longitude);
+		}
 
 	}
 
@@ -451,6 +603,13 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 		}
 	}
 
+	protected void createOwnCurrentLocationMarker() {
+		LOGGER.info("Entering Create Location Marker...");
+		if (ownMarker == null) {
+			ownMarker = new MarkerOptions();
+		}
+	}
+
 	protected void createGroupLeaderCurrentLocationMarker() {
 		LOGGER.info("Entering Create Location Marker...");
 		if (groupLeaderMarker == null) {
@@ -458,11 +617,21 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 		}
 	}
 
+//	@Override
+//	public boolean onCreateOptionsMenu(Menu menu) {
+//		// Inflate the menu; this adds items to the action bar if it is present.
+//		getMenuInflater().inflate(R.menu.group_geo_fence_map, menu);
+//		return true;
+//	}
+
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		menu.clear();
 		getMenuInflater().inflate(R.menu.group_geo_fence_map, menu);
-		return true;
+		terminateMenuItem = menu.findItem(R.id.action_terminateGroup);
+		LOGGER.info("TERMINATE MENU ITEM = "+terminateMenuItem);
+		terminateMenuItem.setVisible(currentUser.get("groupLeader").equals(true));
+		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
@@ -493,8 +662,61 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 	}
 
 	private void notifyGroupMembers() {
-		// TODO: Notify Group Members
+		for (int i = 0; i < participantNumbers.size(); i++) {
+			ParseQuery<ParseUser> getParticipantUserId = ParseUser.getQuery();
+			getParticipantUserId.whereEqualTo("username",
+					participantNumbers.get(i));
+			getParticipantUserId
+					.findInBackground(new FindCallback<ParseUser>() {
+						@Override
+						public void done(List<ParseUser> foundUserList,
+								ParseException e) {
+							if (e == null) {
+								if (foundUserList.size() > 0) {
+									LOGGER.info("SUCCESS:: Found user for number");
+									ParseUser user = foundUserList.get(0);
+									String groupLeaderDisplayName = currentUser
+											.get("displayName").toString();
+									JSONObject terminationData = null;
+									try {
+										terminationData = new JSONObject(
+												"{"
+														+ "\"alert\":\""
+														+ groupLeaderDisplayName
+														+ " has Terminated the group.\", "
+														+ "\"action\":\"com.kainos.groupsafe.GroupTerminationNotificationActivity\", "
+														+ "\"title\": \"Group Termination!\"}");
+										sendNotification(user.getObjectId()
+												.toString(), terminationData);
+									} catch (JSONException e1) {
+										LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
+										e1.printStackTrace();
+									}
+								} else {
+									LOGGER.info("FAILURE:: Failed to find a user for number");
+								}
+							} else {
+								LOGGER.info("ERROR:: ");
+								e.printStackTrace();
+							}
+						}
+					});
+
+		}
 		deleteGroup();
+	}
+
+	protected void sendNotification(String userId, JSONObject terminationData) {
+		String notificationChannel = "user_" + userId;
+		LOGGER.info("#004: Channel = " + notificationChannel);
+		ParsePush push = new ParsePush();
+		push.setData(terminationData);
+		push.setChannel(notificationChannel);
+		push.sendInBackground();
+
+		Intent intent = new Intent(_instance, HomeActivity.class);
+		startActivity(intent);
+		finish();
 	}
 
 	private void deleteGroup() {

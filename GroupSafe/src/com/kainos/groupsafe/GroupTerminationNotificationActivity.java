@@ -57,6 +57,8 @@ public class GroupTerminationNotificationActivity extends Activity {
 						if (e == null) {
 							LOGGER.info("SUCCESS: 'groupMember' has been set --> FALSE");
 							enableAllButtons();
+							Intent intent = new Intent(_instance, HomeActivity.class);
+							startActivity(intent);
 							finish();
 						} else {
 							LOGGER.info("ERROR:: Unable to change 'groupMember' --> FALSE");

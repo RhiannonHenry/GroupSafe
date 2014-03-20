@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+    
+    <Spinner
+        android:id="@+id/customRadiusSpinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/custom_radius_options"
+        android:prompt="@string/radius_prompt" />
+ 
+     <Button
+        android:id="@+id/dialogButtonUpdate"
+        android:layout_width="@dimen/small_button_width"
+        android:layout_height="wrap_content"
+        android:text="@string/update"
+        android:layout_marginTop="@dimen/very_small_margin"
+        android:layout_marginRight="@dimen/very_small_margin"
+        android:layout_below="@+id/customRadiusSpinner"
+        />
+
+</RelativeLayout>

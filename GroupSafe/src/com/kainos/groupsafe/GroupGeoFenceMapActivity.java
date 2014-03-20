@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import org.json.JSONException;
@@ -11,9 +13,11 @@ import org.json.JSONObject;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -29,42 +33,57 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import android.os.Bundle;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemSelectedListener;
 
-public class GroupGeoFenceMapActivity extends FragmentActivity {
+public class GroupGeoFenceMapActivity extends FragmentActivity implements
+		OnMapLongClickListener {
 
 	static GroupGeoFenceMapActivity _instance = null;
+	final Context context = this;
 	private final static Logger LOGGER = Logger
 			.getLogger(GroupGeoFenceMapActivity.class.getName());
 
 	private GoogleMap googleMap;
+	private Circle circle;
+	private CircleOptions geoFence;
 	private MarkerOptions groupLeaderMarker;
 	private MarkerOptions ownMarker;
 	private Map<String, MarkerOptions> participantLocationMarkers;
 	private ArrayList<String> groupParticipants;
 	private ArrayList<String> participantNumbers;
-	private ArrayList<String> participantUserIds;
-	private ArrayList<String> participantLocations;
 	private GPSTracker locationServices;
 	private ParseUser currentUser;
 	private String userId, userLocationObjectId, groupId, groupLeaderId;
 	private double lat;
 	private double lng;
 	private int radius;
-	
+
 	private MenuItem terminateMenuItem;
+	private Spinner customRadiusSpinner;
+	private Button updateButton;
+	private Timer autoUpdate;
+	private boolean mapInitialized = false;
+	private boolean initialGeoFenceDrawn = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
 		ParseAnalytics.trackAppOpened(getIntent());
-		
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_group_geo_fence_map);
 		_instance = this;
@@ -73,10 +92,8 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 		userId = currentUser.getObjectId().toString();
 		locationServices = new GPSTracker(GroupGeoFenceMapActivity.this);
 		participantLocationMarkers = new HashMap<String, MarkerOptions>();
-		participantLocations = new ArrayList<String>();
 		groupParticipants = new ArrayList<String>();
 		participantNumbers = new ArrayList<String>();
-		participantUserIds = new ArrayList<String>();
 
 		Intent intent = getIntent();
 		groupId = intent.getStringExtra("groupId");
@@ -89,6 +106,54 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 
 		LOGGER.info("Entering START ACTIVITY LOGIC...");
 		startActivityLogic();
+	}
+
+	@Override
+	public void onResume() {
+		LOGGER.info("UPDATING...");
+		super.onResume();
+		autoUpdate = new Timer();
+		autoUpdate.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					public void run() {
+						if (mapInitialized) {
+							if (currentUser.get("groupLeader").equals(true)) {
+								LOGGER.info("Refreshing View for GROUP LEADER");
+								// refresh view for group leader
+								createGroupLeaderCurrentLocationMarker();
+								setMarker(lat, lng, "My Location");
+								createGeoFence(lat, lng);
+								for (int i = 0; i < participantNumbers.size(); i++) {
+									getParticipantLocation(participantNumbers
+											.get(i));
+								}
+							} else {
+								LOGGER.info("Refreshing View for GROUP MEMBER");
+								// refresh view for group member
+								createGroupLeaderCurrentLocationMarker();
+								getLeaderLocationAndSetMarker();
+								createOwnCurrentLocationMarker();
+								setOwnMarker(lat, lng);
+								for (int i = 0; i < participantNumbers.size(); i++) {
+									getParticipantLocation(participantNumbers
+											.get(i));
+								}
+							}
+						} else {
+							LOGGER.info("Map has not been initialized!");
+						}
+					}
+				});
+			}
+		}, 0, 30000); // updates every 30 seconds
+	}
+
+	@Override
+	public void onPause() {
+		autoUpdate.cancel();
+		super.onPause();
 	}
 
 	private void startActivityLogic() {
@@ -132,12 +197,14 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 				.icon(BitmapDescriptorFactory
 						.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
 
-		CameraPosition cameraPosition = new CameraPosition.Builder()
-				.target(currentPosition).zoom(14.5F).bearing(300F) // orientation
-				.tilt(50F) // viewing angle
-				.build();
-		googleMap.animateCamera(CameraUpdateFactory
-				.newCameraPosition(cameraPosition));
+		if (!mapInitialized) {
+			CameraPosition cameraPosition = new CameraPosition.Builder()
+					.target(currentPosition).zoom(14.5F).bearing(300F) // orientation
+					.tilt(50F) // viewing angle
+					.build();
+			googleMap.animateCamera(CameraUpdateFactory
+					.newCameraPosition(cameraPosition));
+		}
 	}
 
 	private void getLeaderLocationAndSetMarker() {
@@ -261,6 +328,8 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 						}
 					});
 		}
+		LOGGER.info("MAP HAS BEEN INITIALIZED!!");
+		mapInitialized = true;
 	}
 
 	protected void getParticipantLocation(String participantNumber) {
@@ -276,8 +345,6 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 					if (foundUserList.size() > 0) {
 						LOGGER.info("SUCCESS:: Found User for Participant");
 						ParseUser current = foundUserList.get(0);
-						participantUserIds
-								.add(current.getObjectId().toString());
 						String userLocation = null;
 						try {
 							userLocation = current.get("currentLocation")
@@ -292,7 +359,6 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 						} else {
 							LOGGER.info("Got location ID: " + userLocation);
 							LOGGER.info("Adding Location ID to participantLocations array...");
-							participantLocations.add(userLocation);
 							getParticipantLatLng(userLocation);
 						}
 					} else {
@@ -360,6 +426,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 									.draggable(false)
 									.icon(BitmapDescriptorFactory
 											.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
+
 							participantLocationMarkers.put(userId,
 									participantMarker);
 						}
@@ -410,13 +477,38 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 	}
 
 	private void createGeoFence(double latitude, double longitude) {
-		// TODO: Remove hard coding...
-		// 54.5821639,-5.9368431 --> latitude, longitude
-		LOGGER.info("Creating Geo-Fence with Radius: " + radius
-				+ " around Location: [" + latitude + "," + longitude + "]");
-		googleMap.addCircle(new CircleOptions()
-				.center(new LatLng(54.5821639, -5.9368431)).radius(radius)
-				.fillColor(Color.parseColor("#f6a9f3")));
+		ParseQuery<ParseObject> getRadius = ParseQuery.getQuery("Group");
+		getRadius.whereEqualTo("objectId", groupId);
+		try {
+			List<ParseObject> currentGroupList = getRadius.find();
+			ParseObject currentGroup = currentGroupList.get(0);
+			int currentRadius = Integer.parseInt(currentGroup.get(
+					"groupGeoFenceRadius").toString());
+			LOGGER.info("Creating Geo-Fence with Radius: " + currentRadius
+					+ " around Location: [" + latitude + "," + longitude + "]");
+			if (geoFence == null) {
+				geoFence = new CircleOptions();
+			} else {
+				// TODO: Remove hard coding...
+				// 54.5821639,-5.9368431 --> latitude, longitude
+				if (!initialGeoFenceDrawn) {
+					geoFence.center(new LatLng(54.5821639, -5.9368431))
+							.radius(currentRadius)
+							.fillColor(Color.parseColor("#f6a9f3"));
+					circle = googleMap.addCircle(geoFence);
+					initialGeoFenceDrawn = true;
+				} else {
+					// TODO: Remove hard coding...
+					// 54.5821639,-5.9368431 --> latitude, longitude
+					circle.setCenter(new LatLng(54.5821639, -5.9368431));
+					circle.setRadius(currentRadius);
+				}
+
+			}
+		} catch (ParseException e) {
+			LOGGER.info("ERROR:: Unable to fetch Group Radius");
+			e.printStackTrace();
+		}
 	}
 
 	private void setMarker(double latitude, double longitude, String title) {
@@ -435,19 +527,21 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 				.draggable(false)
 				.icon(BitmapDescriptorFactory
 						.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+		groupLeaderMarker.position(currentPosition);
 
 		if (currentUser.get("groupLeader").equals(true)) {
-			CameraPosition cameraPosition = new CameraPosition.Builder()
-					.target(currentPosition).zoom(10.5F).bearing(300F) // orientation
-					.tilt(50F) // viewing angle
-					.build();
-			googleMap.animateCamera(CameraUpdateFactory
-					.newCameraPosition(cameraPosition));
+			if (!mapInitialized) {
+				CameraPosition cameraPosition = new CameraPosition.Builder()
+						.target(currentPosition).zoom(10.5F).bearing(300F) // orientation
+						.tilt(50F) // viewing angle
+						.build();
+				googleMap.animateCamera(CameraUpdateFactory
+						.newCameraPosition(cameraPosition));
+			}
 		} else {
 			LOGGER.info("You are not the Group Leader...");
 			createGeoFence(latitude, longitude);
 		}
-
 	}
 
 	private void getCurrentLocation() {
@@ -596,6 +690,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 		if (googleMap == null) {
 			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
 					R.id.groupMap)).getMap();
+			googleMap.setOnMapLongClickListener(this);
 			if (googleMap == null) {
 				Toast.makeText(getApplicationContext(),
 						"Unable to create map..", Toast.LENGTH_SHORT).show();
@@ -617,20 +712,14 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 		}
 	}
 
-//	@Override
-//	public boolean onCreateOptionsMenu(Menu menu) {
-//		// Inflate the menu; this adds items to the action bar if it is present.
-//		getMenuInflater().inflate(R.menu.group_geo_fence_map, menu);
-//		return true;
-//	}
-
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		menu.clear();
 		getMenuInflater().inflate(R.menu.group_geo_fence_map, menu);
 		terminateMenuItem = menu.findItem(R.id.action_terminateGroup);
-		LOGGER.info("TERMINATE MENU ITEM = "+terminateMenuItem);
-		terminateMenuItem.setVisible(currentUser.get("groupLeader").equals(true));
+		LOGGER.info("TERMINATE MENU ITEM = " + terminateMenuItem);
+		terminateMenuItem.setVisible(currentUser.get("groupLeader")
+				.equals(true));
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -749,5 +838,88 @@ public class GroupGeoFenceMapActivity extends FragmentActivity {
 				}
 			}
 		});
+	}
+
+	@Override
+	public void onMapLongClick(LatLng point) {
+		if (currentUser.get("groupLeader").equals(true)) {
+			final Dialog dialog = new Dialog(context);
+			dialog.setContentView(R.layout.custom_geofence_dialog);
+			dialog.setTitle("Edit Geo-Fence Radius");
+			updateButton = (Button) dialog
+					.findViewById(R.id.dialogButtonUpdate);
+			updateButton.setEnabled(true);
+			updateButton.setClickable(true);
+			customRadiusSpinner = (Spinner) dialog
+					.findViewById(R.id.customRadiusSpinner);
+			dialog.show();
+			addListenerToSpinner();
+
+			updateButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					updateButton.setEnabled(false);
+					updateButton.setClickable(false);
+					radius = Integer.parseInt(String
+							.valueOf(customRadiusSpinner.getSelectedItem()));
+					ParseQuery<ParseObject> getGroup = ParseQuery
+							.getQuery("Group");
+					getGroup.whereEqualTo("objectId", groupId);
+					getGroup.findInBackground(new FindCallback<ParseObject>() {
+						@Override
+						public void done(List<ParseObject> foundGroupList,
+								ParseException e) {
+							if (e == null) {
+								if (foundGroupList.size() > 0) {
+									LOGGER.info("SUCCESS:: Found group!");
+									ParseObject currentGroup = foundGroupList
+											.get(0);
+									currentGroup.put("groupGeoFenceRadius",
+											radius);
+									currentGroup
+											.saveInBackground(new SaveCallback() {
+
+												@Override
+												public void done(
+														ParseException e) {
+													if (e == null) {
+														LOGGER.info("Successfully Updated GeoFence for Group.");
+														dialog.dismiss();
+													} else {
+														LOGGER.info("ERROR::");
+														e.printStackTrace();
+													}
+												}
+											});
+								} else {
+									LOGGER.info("FAILURE: unable to find group");
+								}
+							} else {
+								LOGGER.info("ERROR:: ");
+								e.printStackTrace();
+							}
+						}
+					});
+				}
+			});
+		}
+	}
+
+	private void addListenerToSpinner() {
+		customRadiusSpinner
+				.setOnItemSelectedListener(new OnItemSelectedListener() {
+					@Override
+					public void onItemSelected(AdapterView<?> parentView,
+							View selectedItemView, int position, long id) {
+						String tempRadius = parentView.getItemAtPosition(
+								position).toString();
+						LOGGER.info("You have selected: " + tempRadius);
+					}
+
+					@Override
+					public void onNothingSelected(AdapterView<?> parentView) {
+						LOGGER.info("You have not selected a Radius. Resorting to Default Setting [10]");
+					}
+				});
 	}
 }

@@ -153,4 +153,26 @@
     <string name="title_activity_group_termination_notification">GroupTerminationNotificationActivity</string>
     <string name="title_activity_group_geo_fence_map">GroupGeoFenceMapActivity</string>
 
+    <!--  Strings for CUSTOM EDIT GEO-FENCE RADIUS dialog -->
+    <string name="set_radius">Radius(m)</string>
+    <string name="update">Update</string>
+    <string-array name="custom_radius_options">
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+        <item>60</item>
+        <item>70</item>
+        <item>80</item>
+        <item>90</item>
+        <item>100</item>
+        <item>110</item>
+        <item>120</item>
+        <item>130</item>
+        <item>140</item>
+    </string-array>
 </resources>

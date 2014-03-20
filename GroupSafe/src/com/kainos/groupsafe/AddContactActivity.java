@@ -231,8 +231,6 @@ public class AddContactActivity extends Activity {
 
 		if (id == R.id.action_logout) {
 			logCurrentUserOut();
-		} else if (id == R.id.action_addContact) {
-			addNewContact();
 		} else if (id == R.id.action_viewMap) {
 			viewMap();
 		} else if (id == R.id.action_createGroup) {
@@ -263,19 +261,6 @@ public class AddContactActivity extends Activity {
 				Toast.makeText(getApplicationContext(), "Please Try Again!",
 						Toast.LENGTH_LONG).show();
 			}
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	private void addNewContact() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			LOGGER.info("Starting Add Contact Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					AddContactActivity.class);
-			startActivity(intent);
-			finish();
 		} else {
 			showNoInternetConnectionDialog();
 		}

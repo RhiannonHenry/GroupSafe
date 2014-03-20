@@ -287,15 +287,15 @@ containing a value of this type.
     public static final class id {
         public static final int OKButton=0x7f050034;
         public static final int acceptButton=0x7f050007;
-        public static final int action_addContact=0x7f050080;
-        public static final int action_createGroup=0x7f050082;
+        public static final int action_addContact=0x7f050083;
+        public static final int action_createGroup=0x7f05007f;
         public static final int action_home=0x7f05007d;
-        public static final int action_invitations=0x7f05007f;
-        public static final int action_logout=0x7f050081;
-        public static final int action_notifications=0x7f05007e;
+        public static final int action_invitations=0x7f050082;
+        public static final int action_logout=0x7f05007e;
+        public static final int action_notifications=0x7f050081;
         public static final int action_settings=0x7f05007c;
         public static final int action_terminateGroup=0x7f050084;
-        public static final int action_viewMap=0x7f050083;
+        public static final int action_viewMap=0x7f050080;
         public static final int addContactCancelButton=0x7f05000f;
         public static final int addContactNameInput=0x7f05000b;
         public static final int addContactNamePrompt=0x7f05000a;

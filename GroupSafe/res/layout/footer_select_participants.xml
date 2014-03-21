@@ -4,6 +4,14 @@
     android:layout_height="wrap_content" >
     
     <Button
+        android:id="@+id/selectGroupParticipantsCancelButton"
+        android:layout_width="@dimen/button_width"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_top"
+        android:layout_alignParentLeft="true"
+        android:text="@string/cancel" />
+    
+    <Button
         android:id="@+id/selectGroupParticipantsNextButton"
         android:layout_width="@dimen/button_width"
         android:layout_height="wrap_content"

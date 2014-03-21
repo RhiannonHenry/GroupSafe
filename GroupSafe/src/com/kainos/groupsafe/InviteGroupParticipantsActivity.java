@@ -24,12 +24,10 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 public class InviteGroupParticipantsActivity extends Activity {
 
@@ -106,7 +104,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 		previousButtonClicked();
 		cancelButtonClicked();
 	}
-	
+
 	@Override
 	public void onResume() {
 		LOGGER.info("UPDATING...");
@@ -376,8 +374,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 	}
 
 	protected void sendStartPushNotificationToParticipants() {
-		ParseQuery<ParseObject> getGroupQuery = ParseQuery
-				.getQuery("Group");
+		ParseQuery<ParseObject> getGroupQuery = ParseQuery.getQuery("Group");
 		getGroupQuery.whereEqualTo("objectId", groupId);
 		try {
 			List<ParseObject> foundGroups = getGroupQuery.find();
@@ -397,31 +394,75 @@ public class InviteGroupParticipantsActivity extends Activity {
 		} catch (ParseException e) {
 			LOGGER.info("ERROR:: Unable to Find Group...");
 			e.printStackTrace();
-		}		
+		}
 	}
 
 	private void findParticipantInParticipantTable(String participant) {
 		ParseQuery<ParseObject> getParticipant = ParseQuery
 				.getQuery("Participant");
 		getParticipant.whereEqualTo("objectId", participant);
-		getParticipant
-				.findInBackground(new FindCallback<ParseObject>() {
+		getParticipant.findInBackground(new FindCallback<ParseObject>() {
+			@Override
+			public void done(List<ParseObject> foundParticipants,
+					ParseException e) {
+				if (e == null) {
+					if (foundParticipants.size() > 0) {
+						LOGGER.info("SUCCESS:: Found Participant");
+						ParseObject current = foundParticipants.get(0);
+						String number = current.get("participantNumber")
+								.toString();
+						LOGGER.info("Got username: " + number
+								+ " for participant");
+						findUserInDb(number);
+					} else {
+						LOGGER.info("FAILURE:: Failed to get Participant");
+					}
+				} else {
+					LOGGER.info("ERROR::");
+					e.printStackTrace();
+				}
+			}
+
+			private void findUserInDb(String number) {
+				ParseQuery<ParseUser> userQuery = ParseUser.getQuery();
+				userQuery.whereEqualTo("username", number);
+				userQuery.findInBackground(new FindCallback<ParseUser>() {
 					@Override
-					public void done(
-							List<ParseObject> foundParticipants,
-							ParseException e) {
+					public void done(List<ParseUser> userList, ParseException e) {
 						if (e == null) {
-							if (foundParticipants.size() > 0) {
-								LOGGER.info("SUCCESS:: Found Participant");
-								ParseObject current = foundParticipants
-										.get(0);
-								String number = current.get(
-										"participantNumber").toString();
-								LOGGER.info("Got username: " + number
-										+ " for participant");
-								findUserInDb(number);
+							if (userList.size() > 0) {
+								ParseUser user = userList.get(0);
+								LOGGER.info("SUCCESS:: Found User "
+										+ user.get("displayName"));
+								String groupLeaderDisplayName = ParseUser
+										.getCurrentUser().get("displayName")
+										.toString();
+								JSONObject startData = null;
+								try {
+									startData = new JSONObject(
+											"{"
+													+ "\"alert\":\""
+													+ groupLeaderDisplayName
+													+ " has started the Group!\", "
+													+ "\"title\": \"Group Started!\", "
+													+ "\"groupLeaderId\": \""
+													+ groupLeaderId
+													+ "\", "
+													+ "\"groupId\": \""
+													+ groupId
+													+ "\", "
+													+ "\"radius\": \""
+													+ Integer.toString(radius)
+													+ "\", "
+													+ "\"action\": \"com.kainos.groupsafe.GroupGeoFenceMapActivity\"}");
+									sendNotification(user.getObjectId()
+											.toString(), startData);
+								} catch (JSONException e1) {
+									LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
+									e1.printStackTrace();
+								}
 							} else {
-								LOGGER.info("FAILURE:: Failed to get Participant");
+								LOGGER.info("FAILURE:: Unable to find User");
 							}
 						} else {
 							LOGGER.info("ERROR::");
@@ -429,83 +470,25 @@ public class InviteGroupParticipantsActivity extends Activity {
 						}
 					}
 
-					private void findUserInDb(String number) {
-						ParseQuery<ParseUser> userQuery = ParseUser
-								.getQuery();
-						userQuery.whereEqualTo("username", number);
-						userQuery
-								.findInBackground(new FindCallback<ParseUser>() {
-									@Override
-									public void done(
-											List<ParseUser> userList,
-											ParseException e) {
-										if (e == null) {
-											if (userList.size() > 0) {
-												ParseUser user = userList
-														.get(0);
-												LOGGER.info("SUCCESS:: Found User "
-														+ user.get("displayName"));
-												String groupLeaderDisplayName = ParseUser
-														.getCurrentUser()
-														.get("displayName")
-														.toString();
-												JSONObject startData = null;
-												try {
-													startData = new JSONObject(
-															"{"
-																	+ "\"alert\":\""
-																	+ groupLeaderDisplayName
-																	+ " has started the Group!\", "
-																	+ "\"title\": \"Group Started!\", "
-																	+ "\"groupLeaderId\": \""
-																	+ groupLeaderId
-																	+ "\", "
-																	+ "\"groupId\": \""
-																	+ groupId
-																	+ "\", "
-																	+ "\"radius\": \""
-																	+ Integer.toString(radius)
-																	+ "\", "
-																	+ "\"action\": \"com.kainos.groupsafe.GroupGeoFenceMapActivity\"}");
-													sendNotification(
-															user.getObjectId()
-																	.toString(),
-															startData);
-												} catch (JSONException e1) {
-													LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
-													e1.printStackTrace();
-												}
-											} else {
-												LOGGER.info("FAILURE:: Unable to find User");
-											}
-										} else {
-											LOGGER.info("ERROR::");
-											e.printStackTrace();
-										}
-									}
+					private void sendNotification(String userObjectId,
+							JSONObject terminationData) {
+						String notificationChannel = "user_" + userObjectId;
+						LOGGER.info("#004: Channel = " + notificationChannel);
+						ParsePush push = new ParsePush();
+						push.setData(terminationData);
+						push.setChannel(notificationChannel);
+						push.sendInBackground();
 
-									private void sendNotification(
-											String userObjectId,
-											JSONObject terminationData) {
-										String notificationChannel = "user_"
-												+ userObjectId;
-										LOGGER.info("#004: Channel = "
-												+ notificationChannel);
-										ParsePush push = new ParsePush();
-										push.setData(terminationData);
-										push.setChannel(notificationChannel);
-										push.sendInBackground();
-										
-										Intent intent = new Intent(_instance,
-												GroupGeoFenceMapActivity.class);
-										intent.putExtra("groupId", groupId);
-										intent.putExtra("groupLeaderId", groupLeaderId);
-										intent.putExtra("radius", radius);
-										startActivity(intent);
-									}
-								});
+						Intent intent = new Intent(_instance,
+								GroupGeoFenceMapActivity.class);
+						intent.putExtra("groupId", groupId);
+						intent.putExtra("groupLeaderId", groupLeaderId);
+						intent.putExtra("radius", radius);
+						startActivity(intent);
 					}
-				});		
+				});
+			}
+		});
 	}
 
 	private void inviteButtonClicked() {
@@ -791,8 +774,8 @@ public class InviteGroupParticipantsActivity extends Activity {
 	}
 
 	protected JSONObject generateJSON(int position) {
-		groupLeaderDisplayName = ParseUser.getCurrentUser()
-				.get("displayName").toString();
+		groupLeaderDisplayName = ParseUser.getCurrentUser().get("displayName")
+				.toString();
 		JSONObject data = null;
 		try {
 			data = new JSONObject(
@@ -860,86 +843,6 @@ public class InviteGroupParticipantsActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.invite_group_participants, menu);
 		return true;
-	}
-
-	/**
-	 * This is a Javadoc example. It explains the working of Javadoc comments.
-	 * 
-	 * @param String
-	 *            text The above line is used to document what the parameters
-	 *            that are passed to the method do. Each parameter gets its own @param
-	 *            block.
-	 * 
-	 * @return void This explains what the output / result of the method is. In
-	 *         this case, it's void.
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		int id = item.getItemId();
-
-		if (id == R.id.action_logout) {
-			logCurrentUserOut();
-		} else if (id == R.id.action_addContact) {
-			LOGGER.info("Starting Add Contact Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					AddContactActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_viewMap) {
-			LOGGER.info("Starting Map View Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					MapsViewActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_createGroup) {
-			LOGGER.info("Starting Create Group Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					SelectGroupParticipantsActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_home) {
-			LOGGER.info("Starting Home Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					HomeActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_settings) {
-			LOGGER.info("Going to Settings page... ");
-			Intent intent = new Intent(getApplicationContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			finish();
-		}
-		return true;
-	}
-
-	/**
-	 * This is a Javadoc example. It explains the working of Javadoc comments.
-	 * 
-	 * @param String
-	 *            text The above line is used to document what the parameters
-	 *            that are passed to the method do. Each parameter gets its own @param
-	 *            block.
-	 * 
-	 * @return void This explains what the output / result of the method is. In
-	 *         this case, it's void.
-	 */
-	private void logCurrentUserOut() {
-		LOGGER.info("Logging out user: " + ParseUser.getCurrentUser() + "...");
-		ParseUser.logOut();
-		if (ParseUser.getCurrentUser() == null) {
-			LOGGER.info("User successfully logged out!");
-			Toast.makeText(getApplicationContext(), "Successfully Logged Out!",
-					Toast.LENGTH_LONG).show();
-			Intent intent = new Intent(getApplicationContext(),
-					SplashActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			Toast.makeText(getApplicationContext(), "Please Try Again!",
-					Toast.LENGTH_LONG).show();
-		}
-
 	}
 
 	private void enableAllButtons() {

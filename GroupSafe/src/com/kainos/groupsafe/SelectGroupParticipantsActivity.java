@@ -16,11 +16,10 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 public class SelectGroupParticipantsActivity extends Activity {
 
@@ -31,6 +30,7 @@ public class SelectGroupParticipantsActivity extends Activity {
 	ParticipantContactRowAdapter adapter = null;
 	private ArrayList<ParticipantContact> retrievedContacts = new ArrayList<ParticipantContact>();
 	private ArrayList<String> chosenParticipants = new ArrayList<String>();
+	private Button next, cancel;
 	ListView listView = null;
 
 	@Override
@@ -55,15 +55,37 @@ public class SelectGroupParticipantsActivity extends Activity {
 		// assign adapter to ListView
 		listView.setAdapter(adapter);
 
-		Button button = (Button) footer
+		next = (Button) footer
 				.findViewById(R.id.selectGroupParticipantsNextButton);
-		button.setOnClickListener(new View.OnClickListener() {
+		cancel = (Button) footer
+				.findViewById(R.id.selectGroupParticipantsCancelButton);
+
+		enableAllButtons();
+
+		nextButtonOnClick();
+		cancelButtonOnClick();
+	}
+
+	private void cancelButtonOnClick() {
+		cancel.setOnClickListener(new OnClickListener() {
+
 			@Override
 			public void onClick(View v) {
-				// Disable Button
-				Button selectParticipantsNextButton = (Button) findViewById(R.id.selectGroupParticipantsNextButton);
-				selectParticipantsNextButton.setClickable(false);
-				selectParticipantsNextButton.setEnabled(false);
+				disableAllButtons();
+
+				LOGGER.info("Exiting the Create Group process...");
+				Intent intent = new Intent(_instance, HomeActivity.class);
+				startActivity(intent);
+			}
+		});
+	}
+
+	private void nextButtonOnClick() {
+		next.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// Disable all Buttons
+				disableAllButtons();
 
 				ArrayList<ParticipantContact> possibleParticipants = adapter.participantContactList;
 
@@ -88,7 +110,20 @@ public class SelectGroupParticipantsActivity extends Activity {
 				startActivity(intent);
 			}
 		});
+	}
 
+	private void disableAllButtons() {
+		next.setClickable(false);
+		next.setEnabled(false);
+		cancel.setClickable(false);
+		cancel.setEnabled(false);
+	}
+
+	private void enableAllButtons() {
+		next.setClickable(true);
+		next.setEnabled(true);
+		cancel.setClickable(true);
+		cancel.setEnabled(true);
 	}
 
 	/**
@@ -107,86 +142,6 @@ public class SelectGroupParticipantsActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.select_group_participants, menu);
 		return true;
-	}
-
-	/**
-	 * This is a Javadoc example. It explains the working of Javadoc comments.
-	 * 
-	 * @param String
-	 *            text The above line is used to document what the parameters
-	 *            that are passed to the method do. Each parameter gets its own @param
-	 *            block.
-	 * 
-	 * @return void This explains what the output / result of the method is. In
-	 *         this case, it's void.
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		int id = item.getItemId();
-
-		if (id == R.id.action_logout) {
-			logCurrentUserOut();
-		} else if (id == R.id.action_addContact) {
-			LOGGER.info("Starting Add Contact Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					AddContactActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_viewMap) {
-			LOGGER.info("Starting Map View Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					MapsViewActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_createGroup) {
-			LOGGER.info("Starting Create Group Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					SelectGroupParticipantsActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_home) {
-			LOGGER.info("Starting Home Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					HomeActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_settings) {
-			LOGGER.info("Going to Settings page... ");
-			Intent intent = new Intent(getApplicationContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			finish();
-		}
-		return true;
-	}
-
-	/**
-	 * This is a Javadoc example. It explains the working of Javadoc comments.
-	 * 
-	 * @param String
-	 *            text The above line is used to document what the parameters
-	 *            that are passed to the method do. Each parameter gets its own @param
-	 *            block.
-	 * 
-	 * @return void This explains what the output / result of the method is. In
-	 *         this case, it's void.
-	 */
-	private void logCurrentUserOut() {
-		LOGGER.info("Logging out user: " + ParseUser.getCurrentUser() + "...");
-		ParseUser.logOut();
-		if (ParseUser.getCurrentUser() == null) {
-			LOGGER.info("User successfully logged out!");
-			Toast.makeText(getApplicationContext(), "Successfully Logged Out!",
-					Toast.LENGTH_LONG).show();
-			Intent intent = new Intent(getApplicationContext(),
-					SplashActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			Toast.makeText(getApplicationContext(), "Please Try Again!",
-					Toast.LENGTH_LONG).show();
-		}
-
 	}
 
 	/**

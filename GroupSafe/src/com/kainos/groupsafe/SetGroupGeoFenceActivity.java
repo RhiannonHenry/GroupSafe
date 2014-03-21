@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -25,7 +24,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 public class SetGroupGeoFenceActivity extends Activity {
 
@@ -36,14 +34,11 @@ public class SetGroupGeoFenceActivity extends Activity {
 	static final String SAVED_GROUP_ORGANIZATION = "groupOrganization";
 	static final String SAVED_GROUP_NAME = "groupName";
 	static final String SAVED_GEO_FENCE_RADIUS = "radius";
-	
+
 	private Spinner radiusSpinner, organizationSpinner;
-	private Button nextButton;
-	private Button previousButton;
+	private Button nextButton, previousButton, cancelButton;
 	private String organizationName;
 	private List<String> list;
-	
-	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,11 +50,52 @@ public class SetGroupGeoFenceActivity extends Activity {
 		setContentView(R.layout.activity_set_group_geo_fence);
 		_instance = this;
 
+		radiusSpinner = (Spinner) findViewById(R.id.radiusSpinner);
+		organizationSpinner = (Spinner) findViewById(R.id.organizationSpinner);
+		nextButton = (Button) findViewById(R.id.setGeoFenceRadiusNextButton);
+		previousButton = (Button) findViewById(R.id.setGeoFenceRadiusPrevButton);
+		cancelButton = (Button) findViewById(R.id.setGeoFenceRadiusCancelButton);
+
+		enableAllButtons();
+		disableAllButtons();
+
 		addItemsToOrganizationSpinner();
 		addListenerOnNextButton();
 		addListenerOnPrevButton();
+		addListenerOnCancelButton();
 		addListenerOnRadiusSpinnerItemSelect();
 		addListenerOnOrganizationSpinnerItemSelect();
+	}
+
+	private void disableAllButtons() {
+		previousButton.setClickable(false);
+		previousButton.setEnabled(false);
+		nextButton.setClickable(false);
+		nextButton.setEnabled(false);
+		cancelButton.setClickable(false);
+		cancelButton.setEnabled(false);
+	}
+
+	private void enableAllButtons() {
+		previousButton.setClickable(true);
+		previousButton.setEnabled(true);
+		nextButton.setClickable(true);
+		nextButton.setEnabled(true);
+		cancelButton.setClickable(true);
+		cancelButton.setEnabled(true);
+	}
+
+	private void addListenerOnCancelButton() {
+		cancelButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				disableAllButtons();
+				LOGGER.info("Exiting the Create Group process...");
+				Intent intent = new Intent(_instance, HomeActivity.class);
+				startActivity(intent);
+				finish();
+			}
+		});
 	}
 
 	@SuppressWarnings("null")
@@ -72,7 +108,6 @@ public class SetGroupGeoFenceActivity extends Activity {
 			e.printStackTrace();
 		}
 
-		organizationSpinner = (Spinner) findViewById(R.id.organizationSpinner);
 		list = new ArrayList<String>();
 		list.add("None");
 
@@ -80,14 +115,16 @@ public class SetGroupGeoFenceActivity extends Activity {
 			ParseQuery<ParseObject> query = ParseQuery.getQuery("Organization");
 			query.whereEqualTo("objectId", userOrganization);
 			query.findInBackground(new FindCallback<ParseObject>() {
-				
+
 				@Override
-				public void done(List<ParseObject> organizations, ParseException e) {
-					if(e == null){
-						if(organizations.size() > 0){
+				public void done(List<ParseObject> organizations,
+						ParseException e) {
+					if (e == null) {
+						if (organizations.size() > 0) {
 							LOGGER.info("FOUND ORGANIZATION: ");
 							ParseObject current = organizations.get(0);
-							organizationName = current.get("organizationName").toString();
+							organizationName = current.get("organizationName")
+									.toString();
 							LOGGER.info(organizationName);
 							list.add(organizationName);
 						} else {
@@ -108,16 +145,11 @@ public class SetGroupGeoFenceActivity extends Activity {
 	}
 
 	private void addListenerOnNextButton() {
-
-		radiusSpinner = (Spinner) findViewById(R.id.radiusSpinner);
-		organizationSpinner = (Spinner) findViewById(R.id.organizationSpinner);
-
-		nextButton = (Button) findViewById(R.id.setGeoFenceRadiusNextButton);
-
 		nextButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+				disableAllButtons();
 				ArrayList<String> selectedParticipants = getSelectedParticipants();
 				String selectedRadius = String.valueOf(radiusSpinner
 						.getSelectedItem());
@@ -125,7 +157,7 @@ public class SetGroupGeoFenceActivity extends Activity {
 						.getSelectedItem());
 				EditText groupNameInput = (EditText) findViewById(R.id.groupNameInput);
 				String groupName = groupNameInput.getText().toString();
-				
+
 				LOGGER.info("GOING TO STEP 3 WITH:");
 				LOGGER.info("Radius: " + selectedRadius + " meters");
 				LOGGER.info("Organization: " + selectedOrgaization);
@@ -148,11 +180,11 @@ public class SetGroupGeoFenceActivity extends Activity {
 
 	private void addListenerOnPrevButton() {
 		// Go to previous screen
-		previousButton = (Button) findViewById(R.id.setGeoFenceRadiusPrevButton);
 		previousButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				LOGGER.info("GOING BACK TO STEP 1...");
+				disableAllButtons();
 				Intent intent = new Intent(_instance,
 						SelectGroupParticipantsActivity.class);
 				startActivity(intent);
@@ -171,7 +203,6 @@ public class SetGroupGeoFenceActivity extends Activity {
 	}
 
 	private void addListenerOnRadiusSpinnerItemSelect() {
-		radiusSpinner = (Spinner) findViewById(R.id.radiusSpinner);
 		radiusSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parentView,
@@ -190,7 +221,6 @@ public class SetGroupGeoFenceActivity extends Activity {
 	}
 
 	private void addListenerOnOrganizationSpinnerItemSelect() {
-		organizationSpinner = (Spinner) findViewById(R.id.organizationSpinner);
 		organizationSpinner
 				.setOnItemSelectedListener(new OnItemSelectedListener() {
 					@Override
@@ -214,56 +244,4 @@ public class SetGroupGeoFenceActivity extends Activity {
 		getMenuInflater().inflate(R.menu.set_group_geo_fence, menu);
 		return true;
 	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		int id = item.getItemId();
-
-		if (id == R.id.action_logout) {
-			logCurrentUserOut();
-		} else if (id == R.id.action_addContact) {
-			LOGGER.info("Starting Add Contact Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					AddContactActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_viewMap) {
-			LOGGER.info("Starting Map View Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					MapsViewActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_createGroup) {
-			LOGGER.info("Starting Create Group Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					SelectGroupParticipantsActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_home) {
-			LOGGER.info("Starting Home Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					HomeActivity.class);
-			startActivity(intent);
-			finish();
-		}
-		return true;
-	}
-
-	private void logCurrentUserOut() {
-		LOGGER.info("Logging out user: " + ParseUser.getCurrentUser() + "...");
-		ParseUser.logOut();
-		if (ParseUser.getCurrentUser() == null) {
-			LOGGER.info("User successfully logged out!");
-			Toast.makeText(getApplicationContext(), "Successfully Logged Out!",
-					Toast.LENGTH_LONG).show();
-			Intent intent = new Intent(getApplicationContext(),
-					SplashActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			Toast.makeText(getApplicationContext(), "Please Try Again!",
-					Toast.LENGTH_LONG).show();
-		}
-	}
-
 }

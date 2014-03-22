@@ -4,15 +4,12 @@ import java.util.logging.Logger;
 
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
-import com.parse.ParseUser;
-
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.TextView;
 
 public class ExitGeoFenceNotificationActivity extends Activity {
 

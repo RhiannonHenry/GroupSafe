@@ -145,6 +145,7 @@
                 <action android:name="com.kainos.groupsafe.AcceptDeclineInvitationActivity" />
                 <action android:name="com.kainos.groupsafe.GroupTerminationNotificationActivity" />
                 <action android:name="com.kainos.groupsafe.GroupGeoFenceMapActivity" />
+                <action android:name="com.kainos.groupsafe.ExitGeoFenceNotificationActivity" />
             </intent-filter>
         </receiver>
         <receiver

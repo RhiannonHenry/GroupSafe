@@ -77,6 +77,13 @@ public class NotificationResponseReceiver extends BroadcastReceiver {
 				i.putExtra("groupLeaderId", groupLeaderId);
 				i.putExtra("radius", Integer.parseInt(radius));
 				context.startActivity(i);
+			}else if(action.equalsIgnoreCase("com.kainos.groupsafe.ExitGeoFenceNotificationActivity")){
+				Intent i = new Intent(context, ExitGeoFenceNotificationActivity.class);
+				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(i);
+				
+				//TODO: Try opening just a Dialog....
+				
 			}
 
 		} catch (JSONException e) {

@@ -57,7 +57,6 @@ public class SetGroupGeoFenceActivity extends Activity {
 		cancelButton = (Button) findViewById(R.id.setGeoFenceRadiusCancelButton);
 
 		enableAllButtons();
-		disableAllButtons();
 
 		addItemsToOrganizationSpinner();
 		addListenerOnNextButton();

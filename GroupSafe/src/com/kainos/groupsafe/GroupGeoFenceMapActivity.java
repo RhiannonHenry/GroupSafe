@@ -1,5 +1,6 @@
 package com.kainos.groupsafe;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +46,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
@@ -55,6 +57,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 	final Context context = this;
 	private final static Logger LOGGER = Logger
 			.getLogger(GroupGeoFenceMapActivity.class.getName());
+	private static final int EARTH_RADIUS_KM = 6371;
 
 	private GoogleMap googleMap;
 	private Circle circle;
@@ -73,7 +76,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 
 	private MenuItem terminateMenuItem;
 	private Spinner customRadiusSpinner;
-	private Button updateButton;
+	private Button updateButton, okButton;
 	private Timer autoUpdate;
 	private boolean mapInitialized = false;
 	private boolean initialGeoFenceDrawn = false;
@@ -128,6 +131,24 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								for (int i = 0; i < participantNumbers.size(); i++) {
 									getParticipantLocation(participantNumbers
 											.get(i));
+									ParseQuery<ParseUser> getParticipantUserId = ParseUser
+											.getQuery();
+									getParticipantUserId.whereEqualTo(
+											"username",
+											participantNumbers.get(i));
+									try {
+										List<ParseUser> participantUser = getParticipantUserId
+												.find();
+										String userObjectId = participantUser
+												.get(0).getObjectId()
+												.toString();
+										if (userObjectId != null) {
+											checkIfParticipantInGeoFence(userObjectId);
+										}
+									} catch (ParseException e) {
+										LOGGER.info("ERROR:: ");
+										e.printStackTrace();
+									}
 								}
 							} else {
 								LOGGER.info("Refreshing View for GROUP MEMBER");
@@ -144,6 +165,104 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 						} else {
 							LOGGER.info("Map has not been initialized!");
 						}
+					}
+
+					private void checkIfParticipantInGeoFence(
+							String userObjectId) {
+						MarkerOptions participant = participantLocationMarkers
+								.get(userObjectId);
+						LatLng participantLocation = participant.getPosition();
+						LatLng geoFenceCenter = circle.getCenter();
+
+						// TODO: Get distance from Participant to Group Leader
+						int meters = getDistanceDifference(participantLocation,
+								geoFenceCenter);
+						if (meters > radius) {
+							// TODO: Send Notification
+							JSONObject participantNotificationData = null;
+							try {
+								participantNotificationData = new JSONObject(
+										"{"
+												+ "\"alert\":\""
+												+ "You have left the Geo-Fence\", "
+												+ "\"action\":\"com.kainos.groupsafe.ExitGeoFenceNotificationActivity\", "
+												+ "\"title\": \"Exit!\"}");
+								sendNotification(userObjectId,
+										participantNotificationData);
+								notifyGroupLeader(userObjectId);
+							} catch (JSONException e1) {
+								LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
+								e1.printStackTrace();
+							}
+						} else {
+							LOGGER.info("PARTICIPANT IS WITHIN THE GEO-FENCE");
+						}
+					}
+
+					private void notifyGroupLeader(String userObjectId) {
+						final Dialog dialog = new Dialog(context);
+						dialog.setContentView(R.layout.custom_notification_dialog);
+						dialog.setTitle("Exit Geo-Fence");
+						okButton = (Button) dialog
+								.findViewById(R.id.dialogNotificationOK);
+						TextView message = (TextView) dialog
+								.findViewById(R.id.dialogNotificationMessage);
+						message.setText("Participant " + userObjectId
+								+ " has left the geo-fence!");
+						okButton.setEnabled(true);
+						okButton.setClickable(true);
+						dialog.show();
+
+						okButton.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								okButton.setEnabled(false);
+								okButton.setClickable(false);
+								dialog.dismiss();
+							}
+						});
+					}
+
+					private int getDistanceDifference(
+							LatLng participantLocation, LatLng geoFenceCenter) {
+						// Lat and Lng for PARTICIPANT
+						double participantLatitude = participantLocation.latitude;
+						double participantLongitude = participantLocation.longitude;
+
+						// Lat and Lng for LEADER/CENTER OF GEOFENCE
+						double geoFenceCenterLatitude = geoFenceCenter.latitude;
+						double geoFenceCenterLongitude = geoFenceCenter.longitude;
+
+						// Difference between Lat and Lng
+						double deltaLatitude = Math
+								.toRadians(participantLatitude
+										- geoFenceCenterLatitude);
+						double deltaLongitude = Math
+								.toRadians(participantLongitude
+										- geoFenceCenterLongitude);
+
+						// Part 1:
+						// sin^2(lat1-lat2/2)+cos(lat1)*cos(lat2)*sin^2(long1-long2/2)
+						double part1 = Math.sin(deltaLatitude / 2)
+								* Math.sin(deltaLatitude / 2)
+								+ Math.cos(Math.toRadians(participantLatitude)
+										* Math.toRadians(participantLongitude))
+								* Math.sin(deltaLongitude / 2)
+								* Math.sin(deltaLongitude / 2);
+						// Part 2:
+						// 2*sin^-1(sqrt(part1))
+						double part2 = 2.0 * Math.asin(Math.sqrt(part1));
+
+						// Part 3: Difference
+						// radius*part2
+						double difference = EARTH_RADIUS_KM * part2;
+						DecimalFormat newFormat = new DecimalFormat("####");
+						double meter = difference % 1000;
+						int meterInDec = Integer.valueOf(newFormat
+								.format(meter));
+						LOGGER.info("Distance from Center of Geo-fence = "
+								+ meterInDec);
+						return meterInDec;
 					}
 				});
 			}

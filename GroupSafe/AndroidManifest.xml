@@ -98,7 +98,7 @@
             android:name="com.kainos.groupsafe.NotificationActivity"
             android:label="@string/title_activity_notification" >
         </activity>
-                <activity
+        <activity
             android:name="com.kainos.groupsafe.AcceptDeclineInvitationActivity"
             android:label="@string/title_activity_accept_decline_invitation" >
         </activity>
@@ -114,7 +114,6 @@
             android:name="com.kainos.groupsafe.GroupGeoFenceMapActivity"
             android:label="@string/title_activity_group_geo_fence_map" >
         </activity>
-        
 
         <!-- THIS IS TO INTEGRATE GOOGLE PLAY (FOR MAPS) -->
         <meta-data
@@ -160,6 +159,10 @@
             </intent-filter>
         </receiver>
         <!-- END -->
+        <activity
+            android:name="com.kainos.groupsafe.ExitGeoFenceNotificationActivity"
+            android:label="@string/title_activity_exit_geo_fence_notification" >
+        </activity>
     </application>
 
 </manifest>

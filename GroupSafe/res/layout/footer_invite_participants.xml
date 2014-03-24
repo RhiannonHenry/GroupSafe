@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_marginTop="@dimen/margin_top"
-        android:text="@string/next" />
+        android:text="@string/start" />
 
     <Button
         android:id="@+id/inviteParticipantsPrevButton"

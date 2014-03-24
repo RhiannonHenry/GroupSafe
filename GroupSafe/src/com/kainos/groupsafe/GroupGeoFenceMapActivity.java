@@ -171,8 +171,12 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 							String userObjectId) {
 						MarkerOptions participant = participantLocationMarkers
 								.get(userObjectId);
+						LOGGER.info("Getting location for user: "+userObjectId);
+						
 						LatLng participantLocation = participant.getPosition();
+						LOGGER.info("User is at location: "+participantLocation.latitude+","+participantLocation.longitude);
 						LatLng geoFenceCenter = circle.getCenter();
+						LOGGER.info("Center of Geo-Fence is at: "+geoFenceCenter.latitude+","+geoFenceCenter.longitude);
 
 						// TODO: Get distance from Participant to Group Leader
 						int meters = getDistanceDifference(participantLocation,
@@ -187,16 +191,26 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 												+ "You have left the Geo-Fence\", "
 												+ "\"action\":\"com.kainos.groupsafe.ExitGeoFenceNotificationActivity\", "
 												+ "\"title\": \"Exit!\"}");
-								sendNotification(userObjectId,
+								sendAlertNotification(userObjectId,
 										participantNotificationData);
-								notifyGroupLeader(userObjectId);
 							} catch (JSONException e1) {
 								LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
 								e1.printStackTrace();
 							}
+							notifyGroupLeader(userObjectId);
 						} else {
 							LOGGER.info("PARTICIPANT IS WITHIN THE GEO-FENCE");
 						}
+					}
+
+					private void sendAlertNotification(String userObjectId,
+							JSONObject participantNotificationData) {
+						String notificationChannel = "user_" + userId;
+						LOGGER.info("#004: Channel = " + notificationChannel);
+						ParsePush push = new ParsePush();
+						push.setData(participantNotificationData);
+						push.setChannel(notificationChannel);
+						push.sendInBackground();						
 					}
 
 					private void notifyGroupLeader(String userObjectId) {
@@ -256,8 +270,9 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 						// Part 3: Difference
 						// radius*part2
 						double difference = EARTH_RADIUS_KM * part2;
+						LOGGER.info("Difference in KM: "+difference);
 						DecimalFormat newFormat = new DecimalFormat("####");
-						double meter = difference % 1000;
+						double meter = difference*1000;
 						int meterInDec = Integer.valueOf(newFormat
 								.format(meter));
 						LOGGER.info("Distance from Center of Geo-fence = "

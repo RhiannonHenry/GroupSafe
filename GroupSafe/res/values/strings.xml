@@ -40,6 +40,7 @@
     <string name="next">Next</string>
     <string name="prev">Prev</string>
     <string name="invite">Invite Participants</string>
+    <string name="start">Start</string>
 
     <!-- Strings for LOGIN page -->
     <string name="app_name">GroupSafe</string>

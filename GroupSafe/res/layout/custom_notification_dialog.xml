@@ -11,7 +11,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="@dimen/small_margin_top"
         android:text="@string/hello_world" 
-        android:textColor="#FFF"/>
+        android:textColor="#000"/>
 
     <Button
         android:id="@+id/dialogNotificationOK"

@@ -205,7 +205,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 
 					private void sendAlertNotification(String userObjectId,
 							JSONObject participantNotificationData) {
-						String notificationChannel = "user_" + userId;
+						String notificationChannel = "user_" + userObjectId;
 						LOGGER.info("#004: Channel = " + notificationChannel);
 						ParsePush push = new ParsePush();
 						push.setData(participantNotificationData);

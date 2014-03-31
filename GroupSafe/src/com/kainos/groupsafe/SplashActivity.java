@@ -1,7 +1,6 @@
 package com.kainos.groupsafe;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 import android.os.Bundle;
 import android.provider.Settings;
@@ -9,6 +8,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,54 +30,60 @@ import com.parse.ParseException;
  * 
  * Layout: @see activity_splash.xml Menu: @see splash.xml
  * 
- * @author Rhiannon
+ * @author Rhiannon Henry
  */
 public class SplashActivity extends Activity {
 
-	private final static Logger LOGGER = Logger.getLogger(SplashActivity.class
-			.getName());
-
+	private final static String TAG = "Splash_Activity";
+	private static SplashActivity _instance = null;
 	private boolean internetPresent = false;
-	ConnectionDetector connectionDetector;
-	static SplashActivity _instance = null;
+	private ConnectionDetector connectionDetector;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
-		// Used to track statistics around application opens.
 		ParseAnalytics.trackAppOpened(getIntent());
 		connectionDetector = new ConnectionDetector(getApplicationContext());
-
 		ParseUser currentUser = ParseUser.getCurrentUser();
-		LOGGER.info("User: " + currentUser);
+		Log.i(TAG, "User: " + currentUser);
 		if (currentUser != null) {
 			currentUser = null;
 		}
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
-
 		_instance = this;
-
 		// createTestOrganization();
-
-		// Enable all buttons
 		enableAllButtons();
 	}
 
-	@SuppressWarnings("unused")
-	private void createTestOrganization() {
-		ArrayList<String> organizationMembers = new ArrayList<String>();
-
-		ParseObject organization = new ParseObject("Organization");
-		organization.put("organizationName", "Test Organization");
-		organization.put("organizationMembers", organizationMembers);
-		try {
-			organization.save();
-		} catch (ParseException e2) {
-			LOGGER.info("UNABLE TO CREATE NEW ORGANIZATION...");
-			e2.printStackTrace();
+	/**
+	 * When the user selects the 'Register/SignUp' button on the Splash
+	 * Activity, this method will be triggered. The method checks for internet
+	 * connection before proceeding opening the 'Registration Form' @see
+	 * RegisterActivity.java
+	 * 
+	 * @param view
+	 *            the base class for widgets, which are used to create
+	 *            interactive UI components (buttons, text fields, etc.). 
+	 * @return void this class does not return anything
+	 */
+	public void registerNow(View view) {
+		disableAllButtons();
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			Log.i(TAG,
+					"The user has clicked 'Register'. Now entering RegisterActivity.class");
+			Intent intent = new Intent(_instance, RegisterActivity.class);
+			startActivity(intent);
+		} else {
+			showNoInternetConnectionDialog();
+			enableAllButtons();
 		}
 	}
 
@@ -86,8 +92,9 @@ public class SplashActivity extends Activity {
 	 * screen, this method will be triggered. The method checks for an internet
 	 * connection before proceeding @see ConnectionDetector.
 	 * 
-	 * @param view	the base class for widgets, which are used to create
-	 *            	interactive UI components (buttons, text fields, etc.).
+	 * @param view
+	 *            the base class for widgets, which are used to create
+	 *            interactive UI components (buttons, text fields, etc.).
 	 * @return void this class does not return anything
 	 */
 	public void signin(View view) {
@@ -102,28 +109,24 @@ public class SplashActivity extends Activity {
 		}
 	}
 
-	public void registerNow(View view) {
-		disableAllButtons();
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			LOGGER.info("The user has clicked 'Register'. Now entering RegisterActivity.class");
-			Intent intent = new Intent(_instance, RegisterActivity.class);
-			startActivity(intent);
-		} else {
-			showNoInternetConnectionDialog();
-			enableAllButtons();
-		}
-	}
-
+	/**
+	 * This method gets the users input from the Username and Password text
+	 * fields. It will then attempt to log the user in using
+	 * ParseUser.LogInInBackground()
+	 * 
+	 * The user will either be logged in successfully and the Home Android
+	 * Activity will be displayed @see HomeActivity.java, or the will receive
+	 * notification that the username/password they entered was invalid.
+	 */
 	private void proceedToLogin() {
 		EditText usernameInput = (EditText) findViewById(R.id.usernameInput);
 		EditText passwordInput = (EditText) findViewById(R.id.passwordInput);
 		String username = usernameInput.getText().toString();
 		String password = passwordInput.getText().toString();
-		LOGGER.info("Username: " + username);
-		LOGGER.info("Password: " + password);
+		Log.i(TAG, "Username: " + username);
+		Log.i(TAG, "Password: " + password);
+		Log.i(TAG, "Attempting to send to parse");
 
-		LOGGER.info("Attempting to send to parse");
 		ParseUser.logInInBackground(username, password, new LogInCallback() {
 			@Override
 			public void done(ParseUser user, ParseException e) {
@@ -141,6 +144,10 @@ public class SplashActivity extends Activity {
 				}
 			}
 
+			/**
+			 * Displays an error indicating that the supplied user credentials
+			 * were not found in the database
+			 */
 			private void usernameOrPasswordIsInvalid() {
 				@SuppressWarnings("unused")
 				View focusView = null;
@@ -151,6 +158,11 @@ public class SplashActivity extends Activity {
 				enableAllButtons();
 			}
 
+			/**
+			 * Displays a short message indicating that there was an error
+			 * sending the LogIn request to Parse and prompting the user to 'Try
+			 * Again'
+			 */
 			private void somethingWentWrong() {
 				Toast.makeText(getApplicationContext(), "Try Again",
 						Toast.LENGTH_LONG).show();
@@ -159,7 +171,9 @@ public class SplashActivity extends Activity {
 	}
 
 	/*
-	 * MENU...
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -168,6 +182,11 @@ public class SplashActivity extends Activity {
 		return true;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
@@ -177,13 +196,18 @@ public class SplashActivity extends Activity {
 		return true;
 	}
 
+	/**
+	 * Displays the phones 'Settings' page to the user.
+	 */
 	private void goToSettings() {
 		Intent intent = new Intent(Settings.ACTION_SETTINGS);
 		startActivity(intent);
 	}
 
-	/*
-	 * UTILITIES
+	/**
+	 * Enables all buttons that are on the SplashActivity.java view.
+	 * 
+	 * @see activity_splash.xml
 	 */
 	private void enableAllButtons() {
 		Button signinButton = (Button) findViewById(R.id.signinButton);
@@ -195,6 +219,11 @@ public class SplashActivity extends Activity {
 		rigisterNowButton.setEnabled(true);
 	}
 
+	/**
+	 * Disables all buttons that are on the SplashActivity.java view.
+	 * 
+	 * @see activity_splash.xml
+	 */
 	private void disableAllButtons() {
 		Button signinButton = (Button) findViewById(R.id.signinButton);
 		signinButton.setClickable(false);
@@ -204,6 +233,11 @@ public class SplashActivity extends Activity {
 		registerNowButton.setEnabled(false);
 	}
 
+	/**
+	 * Method that displays an alert dialog to the user prompting them to alter
+	 * their Internet settings. The user can cancel the dialog or they can be
+	 * directed to the 'Settings' screen for their phone.
+	 */
 	private void showNoInternetConnectionDialog() {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setTitle("Internet Settings");
@@ -214,8 +248,7 @@ public class SplashActivity extends Activity {
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						Intent intent = new Intent(Settings.ACTION_SETTINGS);
-						startActivity(intent);
+						goToSettings();
 					}
 				});
 
@@ -227,6 +260,21 @@ public class SplashActivity extends Activity {
 					}
 				});
 		alertDialog.show();
+	}
+
+	@SuppressWarnings("unused")
+	private void createTestOrganization() {
+		ArrayList<String> organizationMembers = new ArrayList<String>();
+
+		ParseObject organization = new ParseObject("Organization");
+		organization.put("organizationName", "Test Organization");
+		organization.put("organizationMembers", organizationMembers);
+		try {
+			organization.save();
+		} catch (ParseException e2) {
+			Log.i(TAG, "UNABLE TO CREATE NEW ORGANIZATION...");
+			e2.printStackTrace();
+		}
 	}
 
 }

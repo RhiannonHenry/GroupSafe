@@ -2,11 +2,8 @@ package com.kainos.groupsafe;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
-
 import com.parse.FindCallback;
 import com.parse.Parse;
-import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
@@ -21,6 +18,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,26 +27,54 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 /**
- * Home Activity
+ * This is the activity screen that will be displayed to the user once they have
+ * logged into the application @see activity_home.xml
+ * 
+ * From this screen the user can view their contact list, and also access other
+ * features of the application from the drop-down menu
+ * 
+ * @author Rhiannon Henry
  */
 public class HomeActivity extends Activity {
 
-	private final static Logger LOGGER = Logger.getLogger(HomeActivity.class
-			.getName());
+	private final static String TAG = "Home_Activity";
 	public static final String SELECTED_CONTACT = "com.kainos.groupsafe.activities.HomeActivity.SELECTEDCONTACT";
+	private static HomeActivity _instance = null;
+
+	/**
+	 * An Array of Contacts for the user @see Contact.java
+	 */
 	private static ArrayList<Contact> retrievedContacts = new ArrayList<Contact>();
-	static HomeActivity _instance = null;
-	static ContactRowAdapter contactRowAdapter = null;
-	static ListView contactListView = null;
-	View activityRoot;
+
+	/**
+	 * This ListView is within the Home activity and each row in the list is
+	 * populated using an adapter
+	 * 
+	 * @see contact_row.xml
+	 * @see home.xml
+	 */
+	private static ListView contactListView = null;
+	/**
+	 * This Adapter is used to place the contactName and contactNumber in the
+	 * appropriate place for each contact. Each contact gets a new row in the
+	 * list view
+	 * 
+	 * @see ContactRowAdapter.java
+	 */
+	private static ContactRowAdapter contactRowAdapter = null;
 
 	private String currentUserId;
 	private ParseUser currentUser;
 	private ParseInstallation installation;
 
 	private boolean internetPresent = false;
-	ConnectionDetector connectionDetector;
+	private ConnectionDetector connectionDetector;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
@@ -68,17 +94,19 @@ public class HomeActivity extends Activity {
 							if (e == null) {
 								installation = ParseInstallation
 										.getCurrentInstallation();
-								LOGGER.info("Got Installation: "
+								Log.d(TAG, "Got Installation: "
 										+ installation.getObjectId().toString());
 								installation.put("owner", currentUserId);
 								installation.saveInBackground();
+							} else {
+								Log.e(TAG,
+										"Unable to save the current installation");
+								e.printStackTrace();
 							}
 						}
 					});
 		} else {
 			installation = ParseInstallation.getCurrentInstallation();
-//			LOGGER.info("Got Installation: "
-//					+ installation.getObjectId().toString());
 			installation.put("owner", currentUserId);
 			installation.saveInBackground();
 		}
@@ -89,7 +117,6 @@ public class HomeActivity extends Activity {
 		currentUser.saveInBackground();
 
 		connectionDetector = new ConnectionDetector(getApplicationContext());
-		ParseAnalytics.trackAppOpened(getIntent());
 
 		super.onCreate(savedInstanceState);
 		_instance = this;
@@ -104,6 +131,14 @@ public class HomeActivity extends Activity {
 		contactListView
 				.setOnItemClickListener(new ListView.OnItemClickListener() {
 
+					/*
+					 * (non-Javadoc)
+					 * 
+					 * @see
+					 * android.widget.AdapterView.OnItemClickListener#onItemClick
+					 * (android.widget.AdapterView, android.view.View, int,
+					 * long)
+					 */
 					@Override
 					public void onItemClick(AdapterView<?> parent, View view,
 							int position, long id) {
@@ -117,35 +152,55 @@ public class HomeActivity extends Activity {
 				});
 	}
 
+	/**
+	 * This method is used to retrieve a list of contacts associated with the
+	 * user who is currently logged-in. It makes a call to
+	 * createRetrievedContact() which will add the contact to the ListView
+	 */
 	private void refreshContacts() {
 		retrievedContacts.clear();
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		@SuppressWarnings("unchecked")
 		ArrayList<Object> userContacts = (ArrayList<Object>) currentUser
 				.get("contacts");
-		LOGGER.info("Got Contacts:");
+		Log.i(TAG, "Got Contacts:");
 		for (int i = 0; i < userContacts.size(); i++) {
 			Object currentContact = userContacts.get(i);
 			createRetrievedContact(currentContact);
-			LOGGER.info(i + ". " + currentContact);
+			Log.i(TAG, i + ". " + currentContact);
 		}
 	}
 
+	/**
+	 * This method is used to create a local Contact @see Contact.java populated
+	 * with the contacts name and number. This information will then be used to
+	 * populate each row in the list of contacts.
+	 * 
+	 * @param currentContact
+	 *            This is the unique objectId of a contact within the Contact
+	 *            entity in the database.
+	 */
 	private void createRetrievedContact(Object currentContact) {
 		String contactObjectId = currentContact.toString();
 		ParseQuery<ParseObject> contact = ParseQuery.getQuery("Contact");
 		contact.whereEqualTo("objectId", contactObjectId);
 		contact.findInBackground(new FindCallback<ParseObject>() {
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see com.parse.FindCallback#done(java.util.List,
+			 * com.parse.ParseException)
+			 */
 			@Override
 			public void done(List<ParseObject> contactList, ParseException e) {
 				if (e == null) {
 					for (int i = 0; i < contactList.size(); i++) {
 						Contact contact = new Contact();
 						ParseObject current = contactList.get(i);
-						LOGGER.info("Contact Name: "
+						Log.d(TAG, "Contact Name: "
 								+ current.get("name").toString());
 						contact.setContactName(current.get("name").toString());
-						LOGGER.info("Contact Number: "
+						Log.d(TAG, "Contact Number: "
 								+ current.get("number").toString());
 						contact.setContactNumber(current.get("number")
 								.toString());
@@ -154,14 +209,18 @@ public class HomeActivity extends Activity {
 						contactRowAdapter.notifyDataSetChanged();
 					}
 				} else {
-					LOGGER.info("SOMETHING WENT WRONG RETRIEVING CONTACT");
+					Log.e(TAG,
+							"ERROR:: Unable to retrieve contact from database");
+					e.printStackTrace();
 				}
 			}
 		});
 	}
 
 	/*
-	 * MENU ...
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -170,6 +229,11 @@ public class HomeActivity extends Activity {
 		return true;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
@@ -187,14 +251,18 @@ public class HomeActivity extends Activity {
 		return true;
 	}
 
+	/**
+	 * This method is used to log the current user out of the application. The
+	 * user can only log out if they have internet connection.
+	 */
 	private void logCurrentUserOut() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Logging out user: " + ParseUser.getCurrentUser()
+			Log.d(TAG, "Logging out user: " + ParseUser.getCurrentUser()
 					+ "...");
 			ParseUser.logOut();
 			if (ParseUser.getCurrentUser() == null) {
-				LOGGER.info("User successfully logged out!");
+				Log.i(TAG, "User successfully logged out!");
 				Toast.makeText(getApplicationContext(),
 						"Successfully Logged Out!", Toast.LENGTH_LONG).show();
 				Intent intent = new Intent(getApplicationContext(),
@@ -210,10 +278,15 @@ public class HomeActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'Add Contact' menu option. This will display
+	 * the activity that will allow a user to add a new contact to their contact
+	 * list @see AddContactActivity.java and @see activity_add_contact.xml
+	 */
 	private void addNewContact() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Starting Add Contact Activity...");
+			Log.d(TAG, "Starting Add Contact Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					AddContactActivity.class);
 			startActivity(intent);
@@ -223,10 +296,15 @@ public class HomeActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'View Map' menu option. This will display the
+	 * activity that will allow a user to view their current location on a map @see
+	 * MapsViewActivity.java and @see activity_maps_view.xml
+	 */
 	private void viewMap() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Starting Map View Activity...");
+			Log.d(TAG, "Starting Map View Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					MapsViewActivity.class);
 			startActivity(intent);
@@ -236,10 +314,17 @@ public class HomeActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'Create Group' menu option. This will display
+	 * the activity that will allow a user to select participants from their
+	 * contact list who they wish to participate in the group they are creating @see
+	 * SelectGroupParticipantsActivity.java and @see
+	 * activity_select_group_participants.xml
+	 */
 	private void createGroup() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Starting Create Group Activity...");
+			Log.d(TAG, "Starting Create Group Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					SelectGroupParticipantsActivity.class);
 			startActivity(intent);
@@ -249,10 +334,16 @@ public class HomeActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'Settings' menu option. This will display the
+	 * activity that will allow a user to view and change their current settings
+	 * for the application @see SettingsActivity.java and @see
+	 * activity_settings.xml
+	 */
 	private void settings() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Going to Settings page... ");
+			Log.d(TAG, "Going to Settings page... ");
 			Intent intent = new Intent(getApplicationContext(),
 					SettingsActivity.class);
 			startActivity(intent);
@@ -262,6 +353,11 @@ public class HomeActivity extends Activity {
 		}
 	}
 
+	/**
+	 * Method that displays an alert dialog to the user prompting them to alter
+	 * their Internet settings. The user can cancel the dialog or they can be
+	 * directed to the 'Settings' screen for their phone.
+	 */
 	private void showNoInternetConnectionDialog() {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setTitle("Internet Settings");
@@ -286,5 +382,4 @@ public class HomeActivity extends Activity {
 				});
 		alertDialog.show();
 	}
-
 }

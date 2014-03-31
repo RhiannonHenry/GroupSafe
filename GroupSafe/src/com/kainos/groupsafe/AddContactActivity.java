@@ -1,11 +1,8 @@
 package com.kainos.groupsafe;
 
 import java.util.List;
-import java.util.logging.Logger;
-
 import com.parse.FindCallback;
 import com.parse.Parse;
-import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -18,6 +15,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,19 +23,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+/**
+ * Activity that will be displayed to the user if they select 'Add Contact' from
+ * the menu at any point. This activity allows a user to add a new contact to
+ * their address book.
+ * 
+ * Layout: @see activity_add_contact.xml Menu: @see add_contact.xml
+ * 
+ * @author Rhiannon Henry
+ * 
+ */
 public class AddContactActivity extends Activity {
 
-	private final static Logger LOGGER = Logger
-			.getLogger(AddContactActivity.class.getName());
+	private static final String TAG = "ADD_CONTACT_ACTIVITY";
 	private static String contactName = null;
 	private static String contactNumber = null;
-
 	private static String newContactObjectID = null;
-	static AddContactActivity _instance = null;
-
+	private static AddContactActivity _instance = null;
 	private boolean internetPresent = false;
-	ConnectionDetector connectionDetector;
-
+	private ConnectionDetector connectionDetector;
 	private EditText addContactName;
 	private EditText addContactNumber;
 
@@ -45,19 +49,22 @@ public class AddContactActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
-
 		connectionDetector = new ConnectionDetector(getApplicationContext());
-
-		ParseAnalytics.trackAppOpened(getIntent());
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_contact);
-
 		_instance = this;
-
 		enableAllButtons();
 	}
 
+	/**
+	 * This method is called when the user clicks 'Cancel' from the AddContact
+	 * view @see activity_add_contact.xml. The user will be returned to the Home
+	 * screen.
+	 * 
+	 * @param view
+	 *            the base class for widgets, which are used to create
+	 *            interactive UI components (buttons, text fields, etc.).
+	 */
 	public void cancelNewContact(View view) {
 		disableAllButtons();
 		internetPresent = connectionDetector.isConnectedToInternet();
@@ -71,6 +78,15 @@ public class AddContactActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is called when the user clicks 'Save' from the AddContact
+	 * view @see activity_add_contact.xml. The contact that the user specified
+	 * will be validated and saved.
+	 * 
+	 * @param view
+	 *            the base class for widgets, which are used to create
+	 *            interactive UI components (buttons, text fields, etc.).
+	 */
 	public void saveNewContact(View view) {
 		disableAllButtons();
 		internetPresent = connectionDetector.isConnectedToInternet();
@@ -82,6 +98,10 @@ public class AddContactActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used to save the information that the user input into the
+	 * form to local variables: Contact name and Contact number
+	 */
 	private void addContactToDatabase() {
 		addContactName = (EditText) findViewById(R.id.addContactNameInput);
 		addContactNumber = (EditText) findViewById(R.id.addContactNumberInput);
@@ -91,6 +111,11 @@ public class AddContactActivity extends Activity {
 		checkThatUserExistsInDatabase();
 	}
 
+	/**
+	 * This method checks if a user with that number specified by the user is
+	 * currently in the database. If there is, then this is a valid contact,
+	 * otherwise it isn't.
+	 */
 	private void checkThatUserExistsInDatabase() {
 		ParseQuery<ParseUser> query = ParseUser.getQuery();
 		query.whereEqualTo("username", contactNumber);
@@ -98,19 +123,20 @@ public class AddContactActivity extends Activity {
 			@Override
 			public void done(List<ParseUser> userList, ParseException e) {
 				if (e == null) {
-					if(userList.size()>0){
-					LOGGER.info("Successfully retrieved user: "
-							+ userList.get(0).getUsername());
-					addToContactsTable();
-					}else{
+					if (userList.size() > 0) {
+						Log.i(TAG, "Successfully retrieved user: "
+								+ userList.get(0).getUsername());
+						checkIfContactIsPresentInTable();
+					} else {
 						enableAllButtons();
+						Log.e(TAG, "User doesn't exist in database");
 						Toast.makeText(getApplicationContext(),
 								"User does not exist. Try Again!",
 								Toast.LENGTH_LONG).show();
 					}
 				} else {
 					enableAllButtons();
-					LOGGER.info("An error occurred retrieving the user!");
+					Log.e(TAG, "An error occurred retrieving the user!");
 					Toast.makeText(getApplicationContext(),
 							"User does not exist. Try Again!",
 							Toast.LENGTH_LONG).show();
@@ -119,10 +145,11 @@ public class AddContactActivity extends Activity {
 		});
 	}
 
-	private void addToContactsTable() {
-		checkIfContactIsPresentInTable();
-	}
-
+	/**
+	 * This method checks if there is a contact with an identical name and
+	 * number currently in the database. If there is, we will use that contact
+	 * and reference it, otherwise, we will create a new contact
+	 */
 	private void checkIfContactIsPresentInTable() {
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Contact");
 		query.whereEndsWith("name", contactName);
@@ -132,11 +159,10 @@ public class AddContactActivity extends Activity {
 			public void done(List<ParseObject> foundContacts, ParseException e) {
 				if (e == null) {
 					if (foundContacts.size() != 0) {
-						LOGGER.info("A CONTACT ALREADY EXISTS");
-						foundContacts.get(0);
+						Log.i(TAG, "A CONTACT ALREADY EXISTS");
 						retrieveObjectID();
 					} else {
-						LOGGER.info("THIS IS A NEW CONATCT");
+						Log.i(TAG, "THIS IS A NEW CONATCT");
 						createNewContactInTable();
 					}
 				}
@@ -144,6 +170,10 @@ public class AddContactActivity extends Activity {
 		});
 	}
 
+	/**
+	 * This method creates a new contact with the user specified name and number
+	 * and saves it to the database in the Contact table.
+	 */
 	protected void createNewContactInTable() {
 		ParseObject contact = new ParseObject("Contact");
 		contact.put("name", contactName);
@@ -151,12 +181,17 @@ public class AddContactActivity extends Activity {
 		try {
 			contact.save();
 		} catch (ParseException e2) {
-			LOGGER.info("UNABLE TO SAVE NEW CONTACT AT THIS TIME...");
+			Log.e(TAG, "UNABLE TO SAVE NEW CONTACT AT THIS TIME...");
 			e2.printStackTrace();
 		}
 		retrieveObjectID();
 	}
 
+	/**
+	 * This method is used to get the unique identifier of the contact that the
+	 * user wishes to be added to their contact list. This unique identifier
+	 * will be used to associate the contact with the user.
+	 */
 	private void retrieveObjectID() {
 		ParseQuery<ParseObject> contactID = ParseQuery.getQuery("Contact");
 		contactID.whereEqualTo("number", contactNumber);
@@ -164,37 +199,46 @@ public class AddContactActivity extends Activity {
 			@Override
 			public void done(List<ParseObject> contactList, ParseException e) {
 				if (e == null) {
-					LOGGER.info("Retrieved: " + contactList.size()
-							+ " contacts");
+					Log.i(TAG, "Retrieved: " + contactList.size() + " contacts");
 					for (int i = 0; i < contactList.size(); i++) {
 						ParseObject current = contactList.get(i);
-						LOGGER.info("Contact " + i + ": Name: "
-								+ current.get("name") + " Number: "
-								+ current.get("number") + " ObjectID: "
-								+ current.getObjectId());
+						Log.i(TAG,
+								"Contact " + i + ": Name: "
+										+ current.get("name") + " Number: "
+										+ current.get("number") + " ObjectID: "
+										+ current.getObjectId());
 						if (current.get("name").equals(contactName)
 								&& current.get("number").equals(contactNumber)) {
 							newContactObjectID = current.getObjectId();
 							addContactToUserContactList(newContactObjectID);
 						} else {
-							LOGGER.info("NO MATCH FOR CONTACT");
+							Log.e(TAG, "NO MATCH FOR CONTACT");
 						}
 					}
 				} else {
-					LOGGER.info("UNABLE TO RETRIEVE CONTACT FROM CONTACT TABLE");
+					Log.e(TAG, "UNABLE TO RETRIEVE CONTACT FROM CONTACT TABLE");
+					e.printStackTrace();
 				}
 			}
 
+			/**
+			 * This method is used to place the unique identifier for the
+			 * contact into the list of contacts for the user. Once this has
+			 * been updated, the user will be returned to the Home screen.
+			 * 
+			 * @param newContactObjectID
+			 *            the string value of the unique identifier for the new
+			 *            contact
+			 */
 			private void addContactToUserContactList(String newContactObjectID) {
-				LOGGER.info("New Contact ObjectID: " + newContactObjectID);
-				LOGGER.info("Starting query on user contact list...");
+				Log.i(TAG, "New Contact ObjectID: " + newContactObjectID);
 				ParseUser currentUser = ParseUser.getCurrentUser();
 				currentUser.addUnique("contacts", newContactObjectID);
 				currentUser.saveInBackground(new SaveCallback() {
 					@Override
 					public void done(ParseException e) {
 						if (e == null) {
-							LOGGER.info("SAVED CONTACT SUCCESSFULLY");
+							Log.i(TAG, "SAVED CONTACT SUCCESSFULLY");
 							Toast.makeText(getApplicationContext(),
 									"Saved Contact Successfully!",
 									Toast.LENGTH_LONG).show();
@@ -206,8 +250,8 @@ public class AddContactActivity extends Activity {
 							Toast.makeText(getApplicationContext(),
 									"Unable to Save Contact...",
 									Toast.LENGTH_LONG).show();
-							LOGGER.info("ENCOUNTERED ERROR SAVING CONTACT");
-							LOGGER.info(e.getMessage());
+							Log.e(TAG, "ENCOUNTERED ERROR SAVING CONTACT");
+							Log.e(TAG, e.getMessage());
 						}
 					}
 				});
@@ -216,7 +260,9 @@ public class AddContactActivity extends Activity {
 	}
 
 	/*
-	 * MENU ...
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -225,6 +271,11 @@ public class AddContactActivity extends Activity {
 		return true;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
@@ -237,20 +288,24 @@ public class AddContactActivity extends Activity {
 			createGroup();
 		} else if (id == R.id.action_home) {
 			home();
-		} else if (id == R.id.action_settings){
+		} else if (id == R.id.action_settings) {
 			settings();
 		}
 		return true;
 	}
 
+	/**
+	 * This method is used to log the current user out of the application. The
+	 * user can only log out if they have internet connection.
+	 */
 	private void logCurrentUserOut() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Logging out user: " + ParseUser.getCurrentUser()
+			Log.i(TAG, "Logging out user: " + ParseUser.getCurrentUser()
 					+ "...");
 			ParseUser.logOut();
 			if (ParseUser.getCurrentUser() == null) {
-				LOGGER.info("User successfully logged out!");
+				Log.i(TAG, "User successfully logged out!");
 				Toast.makeText(getApplicationContext(),
 						"Successfully Logged Out!", Toast.LENGTH_LONG).show();
 				Intent intent = new Intent(getApplicationContext(),
@@ -266,10 +321,15 @@ public class AddContactActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'View Map' menu option. This will display the
+	 * activity that will allow a user to view their current location on a map @see
+	 * MapsViewActivity.java and @see activity_maps_view.xml
+	 */
 	private void viewMap() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Starting Map View Activity...");
+			Log.d(TAG, "Starting Map View Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					MapsViewActivity.class);
 			startActivity(intent);
@@ -279,10 +339,17 @@ public class AddContactActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'Create Group' menu option. This will display
+	 * the activity that will allow a user to select participants from their
+	 * contact list who they wish to participate in the group they are creating @see
+	 * SelectGroupParticipantsActivity.java and @see
+	 * activity_select_group_participants.xml
+	 */
 	private void createGroup() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Starting Create Group Activity...");
+			Log.d(TAG, "Starting Create Group Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					SelectGroupParticipantsActivity.class);
 			startActivity(intent);
@@ -292,10 +359,15 @@ public class AddContactActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'Home' menu option. This will display the
+	 * home activity screen to the user. @see HomeActivity.java and @see
+	 * activity_home.xml
+	 */
 	private void home() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Starting Home Activity...");
+			Log.d(TAG, "Starting Home Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					HomeActivity.class);
 			startActivity(intent);
@@ -305,22 +377,30 @@ public class AddContactActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'Settings' menu option. This will display the
+	 * activity that will allow a user to view and change their current settings
+	 * for the application @see SettingsActivity.java and @see
+	 * activity_settings.xml
+	 */
 	private void settings() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Going to Settings page... ");
-			Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+			Log.d(TAG, "Going to Settings page... ");
+			Intent intent = new Intent(getApplicationContext(),
+					SettingsActivity.class);
 			startActivity(intent);
 			finish();
 		} else {
 			showNoInternetConnectionDialog();
 		}
 	}
-	
-	/*
-	 * UTILITY METHODS ...
-	 */
 
+	/**
+	 * Method that displays an alert dialog to the user prompting them to alter
+	 * their Internet settings. The user can cancel the dialog or they can be
+	 * directed to the 'Settings' screen for their phone.
+	 */
 	private void showNoInternetConnectionDialog() {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setTitle("Internet Settings");
@@ -346,21 +426,29 @@ public class AddContactActivity extends Activity {
 		alertDialog.show();
 	}
 
+	/**
+	 * Enables all buttons that are on the AddContactActivity.java view.
+	 * 
+	 * @see activity_add_contact.xml
+	 */
 	private void enableAllButtons() {
 		Button saveButton = (Button) findViewById(R.id.addContactSaveButton);
 		saveButton.setClickable(true);
 		saveButton.setEnabled(true);
-
 		Button cancelButton = (Button) findViewById(R.id.addContactCancelButton);
 		cancelButton.setClickable(true);
 		cancelButton.setEnabled(true);
 	}
 
+	/**
+	 * Enables all buttons that are on the AddContactActivity.java view.
+	 * 
+	 * @see activity_add_contact.xml
+	 */
 	public void disableAllButtons() {
 		Button saveButton = (Button) findViewById(R.id.addContactSaveButton);
 		saveButton.setClickable(false);
 		saveButton.setEnabled(false);
-
 		Button cancelButton = (Button) findViewById(R.id.addContactCancelButton);
 		cancelButton.setClickable(false);
 		cancelButton.setEnabled(false);

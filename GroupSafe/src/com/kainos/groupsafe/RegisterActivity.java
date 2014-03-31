@@ -1,10 +1,7 @@
 package com.kainos.groupsafe;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
-
 import com.parse.Parse;
-import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseUser;
@@ -17,6 +14,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,11 +22,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+/**
+ * This is the activity screen that will be displayed to the user when they
+ * first wish to register with the application. @see activity_register.xml and @see
+ * register.xml
+ * 
+ * @author Rhiannon Henry
+ */
 public class RegisterActivity extends Activity {
-	private final static Logger LOGGER = Logger
-			.getLogger(RegisterActivity.class.getName());
-	static RegisterActivity _instance = null;
+	private static final String TAG = "Register_Activity";
+	private static RegisterActivity _instance = null;
 
+	/**
+	 * Below are the Editable Text Areas on the register form
+	 */
 	private EditText registerUsernameInput;
 	private EditText registerPasswordInput;
 	private EditText registerRetypePasswordInput;
@@ -42,37 +49,50 @@ public class RegisterActivity extends Activity {
 	private static String emailAddress = null;
 
 	private boolean errorsPresent = false;
-
 	private boolean internetPresent = false;
-	ConnectionDetector connectionDetector;
+	private ConnectionDetector connectionDetector;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		connectionDetector = new ConnectionDetector(getApplicationContext());
-
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
-
-		// Used to track statistics around application opens.
-		ParseAnalytics.trackAppOpened(getIntent());
-
+		connectionDetector = new ConnectionDetector(getApplicationContext());
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_register);
-
 		_instance = this;
-
 		enableAllButtons();
 	}
 
+	/**
+	 * This method is called when the user opts to cancel registration and
+	 * navigate back to the Splash screen
+	 * 
+	 * @param view
+	 *            the base class for widgets, which are used to create
+	 *            interactive UI components (buttons, text fields, etc.).
+	 */
 	public void registerCancel(View view) {
 		disableAllButtons();
 
-		Intent intent = new Intent(getApplicationContext(),
+		Intent intent = new Intent(_instance,
 				SplashActivity.class);
 		startActivity(intent);
 		finish();
 	}
 
+	/**
+	 * This method is called when the user clicks on the 'Register' button. This
+	 * method begins the registration process (validation, registration, login).
+	 * 
+	 * @param view
+	 *            the base class for widgets, which are used to create
+	 *            interactive UI components (buttons, text fields, etc.).
+	 */
 	public void register(View view) {
 		disableAllButtons();
 		internetPresent = connectionDetector.isConnectedToInternet();
@@ -84,6 +104,10 @@ public class RegisterActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used to populate local variables with the input that the
+	 * user input to the fields on the registration form.
+	 */
 	private void proceedToRegistration() {
 		if (errorsPresent) {
 			clearExistingErrors();
@@ -106,6 +130,12 @@ public class RegisterActivity extends Activity {
 		validateForm();
 	}
 
+	/**
+	 * This method is used to validate each field of the registration form with
+	 * the users input. If the validation fails at any point, the errorsPresent
+	 * boolean variable will be set to true indicating that an validation
+	 * failed.
+	 */
 	private void validateForm() {
 		View focusView = null;
 		String usernameRegex = "^[0-9]{11}$";
@@ -180,6 +210,10 @@ public class RegisterActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method creates a ParseUser with the details the user input and
+	 * initialises some other attributes of user to their starting state.
+	 */
 	private void signUp() {
 		ArrayList<String> contacts = new ArrayList<String>();
 		ArrayList<String> emergencyContacts = new ArrayList<String>();
@@ -196,22 +230,27 @@ public class RegisterActivity extends Activity {
 		user.put("currentLocation", currentLocation);
 
 		user.signUpInBackground(new SignUpCallback() {
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see com.parse.SignUpCallback#done(com.parse.ParseException)
+			 */
 			@Override
 			public void done(ParseException e) {
 				if (e == null) {
-					LOGGER.info("Account Created Successfully");
+					Log.i(TAG, "Account Created Successfully");
 					// Show a simple Toast message upon successful registration
 					registerParseDevice();
 					Toast.makeText(getApplicationContext(),
 							"Successfully Registered!", Toast.LENGTH_LONG)
 							.show();
-					Intent intent = new Intent(getApplicationContext(),
+					Intent intent = new Intent(_instance,
 							HomeActivity.class);
 					startActivity(intent);
 					finish();
 				} else {
 					enableAllButtons();
-					LOGGER.info("A user with username: {" + username
+					Log.e(TAG, "A user with username: {" + username
 							+ "} already exists");
 					Toast.makeText(getApplicationContext(),
 							"Username already exists!", Toast.LENGTH_LONG)
@@ -220,12 +259,19 @@ public class RegisterActivity extends Activity {
 				}
 			}
 
+			/**
+			 * Creates an installation associated with this device
+			 */
 			private void registerParseDevice() {
 				ParseInstallation.getCurrentInstallation().saveInBackground();
 			}
 		});
 	}
 
+	/**
+	 * This method clears any existing prior errors that may remain from a prior
+	 * registration attempt.
+	 */
 	private void clearExistingErrors() {
 		registerUsernameInput.setError(null);
 		registerPasswordInput.setError(null);
@@ -234,7 +280,9 @@ public class RegisterActivity extends Activity {
 	}
 
 	/*
-	 * MENU...
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -243,6 +291,11 @@ public class RegisterActivity extends Activity {
 		return true;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
@@ -252,13 +305,18 @@ public class RegisterActivity extends Activity {
 		return true;
 	}
 
+	/**
+	 * This method is used to direct the current user to the 'Settings' page for
+	 * their phone
+	 */
 	private void goToSettings() {
 		Intent intent = new Intent(Settings.ACTION_SETTINGS);
 		startActivity(intent);
+		finish();
 	}
 
-	/*
-	 * UTILITIES...
+	/**
+	 * This method is used to enable all buttons on the current screen
 	 */
 	private void enableAllButtons() {
 		Button registerCancelButton = (Button) findViewById(R.id.registerCancelButton);
@@ -270,6 +328,9 @@ public class RegisterActivity extends Activity {
 		registerButton.setEnabled(true);
 	}
 
+	/**
+	 * This method is used to disable all buttons on the current screen
+	 */
 	private void disableAllButtons() {
 		Button registerCancelButton = (Button) findViewById(R.id.registerCancelButton);
 		registerCancelButton.setClickable(false);
@@ -280,6 +341,11 @@ public class RegisterActivity extends Activity {
 		registerButton.setEnabled(false);
 	}
 
+	/**
+	 * Method that displays an alert dialog to the user prompting them to alter
+	 * their Internet settings. The user can cancel the dialog or they can be
+	 * directed to the 'Settings' screen for their phone.
+	 */
 	private void showNoInternetConnectionDialog() {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setTitle("Internet Settings");

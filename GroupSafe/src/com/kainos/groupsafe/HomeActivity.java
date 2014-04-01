@@ -13,10 +13,7 @@ import com.parse.PushService;
 import com.parse.SaveCallback;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
@@ -24,7 +21,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 /**
  * This is the activity screen that will be displayed to the user once they have
@@ -237,149 +233,7 @@ public class HomeActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		if (id == R.id.action_logout) {
-			logCurrentUserOut();
-		} else if (id == R.id.action_addContact) {
-			addNewContact();
-		} else if (id == R.id.action_viewMap) {
-			viewMap();
-		} else if (id == R.id.action_createGroup) {
-			createGroup();
-		} else if (id == R.id.action_settings) {
-			settings();
-		}
-		return true;
-	}
-
-	/**
-	 * This method is used to log the current user out of the application. The
-	 * user can only log out if they have internet connection.
-	 */
-	private void logCurrentUserOut() {
 		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			Log.d(TAG, "Logging out user: " + ParseUser.getCurrentUser()
-					+ "...");
-			ParseUser.logOut();
-			if (ParseUser.getCurrentUser() == null) {
-				Log.i(TAG, "User successfully logged out!");
-				Toast.makeText(getApplicationContext(),
-						"Successfully Logged Out!", Toast.LENGTH_LONG).show();
-				Intent intent = new Intent(getApplicationContext(),
-						SplashActivity.class);
-				startActivity(intent);
-				finish();
-			} else {
-				Toast.makeText(getApplicationContext(), "Please Try Again!",
-						Toast.LENGTH_LONG).show();
-			}
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	/**
-	 * This method is used for the 'Add Contact' menu option. This will display
-	 * the activity that will allow a user to add a new contact to their contact
-	 * list @see AddContactActivity.java and @see activity_add_contact.xml
-	 */
-	private void addNewContact() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			Log.d(TAG, "Starting Add Contact Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					AddContactActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	/**
-	 * This method is used for the 'View Map' menu option. This will display the
-	 * activity that will allow a user to view their current location on a map @see
-	 * MapsViewActivity.java and @see activity_maps_view.xml
-	 */
-	private void viewMap() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			Log.d(TAG, "Starting Map View Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					MapsViewActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	/**
-	 * This method is used for the 'Create Group' menu option. This will display
-	 * the activity that will allow a user to select participants from their
-	 * contact list who they wish to participate in the group they are creating @see
-	 * SelectGroupParticipantsActivity.java and @see
-	 * activity_select_group_participants.xml
-	 */
-	private void createGroup() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			Log.d(TAG, "Starting Create Group Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					SelectGroupParticipantsActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	/**
-	 * This method is used for the 'Settings' menu option. This will display the
-	 * activity that will allow a user to view and change their current settings
-	 * for the application @see SettingsActivity.java and @see
-	 * activity_settings.xml
-	 */
-	private void settings() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			Log.d(TAG, "Going to Settings page... ");
-			Intent intent = new Intent(getApplicationContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	/**
-	 * Method that displays an alert dialog to the user prompting them to alter
-	 * their Internet settings. The user can cancel the dialog or they can be
-	 * directed to the 'Settings' screen for their phone.
-	 */
-	private void showNoInternetConnectionDialog() {
-		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-		alertDialog.setTitle("Internet Settings");
-		alertDialog
-				.setMessage("Cannot connect to internet. Enable Internet Services in Settings.");
-
-		alertDialog.setPositiveButton("Settings",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Intent intent = new Intent(Settings.ACTION_SETTINGS);
-						startActivity(intent);
-					}
-				});
-
-		alertDialog.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-		alertDialog.show();
+		return MenuUtils.menuOptions(id, this, internetPresent, TAG);
 	}
 }

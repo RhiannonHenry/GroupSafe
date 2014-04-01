@@ -73,7 +73,7 @@ public class AcceptDeclineInvitationActivity extends Activity {
 			Log.d(TAG, "Populating Page...");
 			populatePage();
 		} else {
-			showNoInternetConnectionDialog();
+			Utilities.showNoInternetConnectionDialog(this);
 		}
 		enableAllButtons();
 		acceptButtonClicked();
@@ -268,7 +268,7 @@ public class AcceptDeclineInvitationActivity extends Activity {
 			Log.e(TAG,
 					"Unable to click 'Decline' as there is no internet connection detected.");
 			enableAllButtons();
-			showNoInternetConnectionDialog();
+			Utilities.showNoInternetConnectionDialog(this);
 		}
 	}
 
@@ -345,7 +345,7 @@ public class AcceptDeclineInvitationActivity extends Activity {
 			Log.e(TAG,
 					"Unable to click 'Accept' as no internet connection has been found");
 			enableAllButtons();
-			showNoInternetConnectionDialog();
+			Utilities.showNoInternetConnectionDialog(this);
 		}
 	}
 
@@ -416,35 +416,4 @@ public class AcceptDeclineInvitationActivity extends Activity {
 		getMenuInflater().inflate(R.menu.accept_decline_invitation, menu);
 		return true;
 	}
-
-	/**
-	 * Method that displays an alert dialog to the user prompting them to alter
-	 * their Internet settings. The user can cancel the dialog or they can be
-	 * directed to the 'Settings' screen for their phone.
-	 */
-	private void showNoInternetConnectionDialog() {
-		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-		alertDialog.setTitle("Internet Settings");
-		alertDialog
-				.setMessage("Cannot connect to internet. Enable Internet Services in Settings.");
-
-		alertDialog.setPositiveButton("Settings",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Intent intent = new Intent(Settings.ACTION_SETTINGS);
-						startActivity(intent);
-					}
-				});
-
-		alertDialog.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-		alertDialog.show();
-	}
-
 }

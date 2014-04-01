@@ -82,7 +82,7 @@ public class SplashActivity extends Activity {
 			Intent intent = new Intent(_instance, RegisterActivity.class);
 			startActivity(intent);
 		} else {
-			showNoInternetConnectionDialog();
+			Utilities.showNoInternetConnectionDialog(this);
 			enableAllButtons();
 		}
 	}
@@ -104,7 +104,7 @@ public class SplashActivity extends Activity {
 		if (internetPresent) {
 			proceedToLogin();
 		} else {
-			showNoInternetConnectionDialog();
+			Utilities.showNoInternetConnectionDialog(this);
 			enableAllButtons();
 		}
 	}
@@ -231,35 +231,6 @@ public class SplashActivity extends Activity {
 		Button registerNowButton = (Button) findViewById(R.id.registerNowButton);
 		registerNowButton.setClickable(false);
 		registerNowButton.setEnabled(false);
-	}
-
-	/**
-	 * Method that displays an alert dialog to the user prompting them to alter
-	 * their Internet settings. The user can cancel the dialog or they can be
-	 * directed to the 'Settings' screen for their phone.
-	 */
-	private void showNoInternetConnectionDialog() {
-		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-		alertDialog.setTitle("Internet Settings");
-		alertDialog
-				.setMessage("Cannot connect to internet. Enable Internet Services in Settings.");
-
-		alertDialog.setPositiveButton("Settings",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						goToSettings();
-					}
-				});
-
-		alertDialog.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-		alertDialog.show();
 	}
 
 	@SuppressWarnings("unused")

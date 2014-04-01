@@ -15,10 +15,7 @@ import com.parse.RequestPasswordResetCallback;
 import com.parse.SaveCallback;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +29,7 @@ import android.widget.Toast;
 
 public class SettingsActivity extends Activity {
 
+	private static final String TAG = "SETTINGS";
 	private final static Logger LOGGER = Logger
 			.getLogger(SettingsActivity.class.getName());
 
@@ -74,7 +72,7 @@ public class SettingsActivity extends Activity {
 			LOGGER.info("Populating page...");
 			populatePage();
 		} else {
-			showNoInternetConnectionDialog();
+			Utilities.showNoInternetConnectionDialog(this);
 		}
 
 		userClicksOnEmergencyContact();
@@ -187,7 +185,7 @@ public class SettingsActivity extends Activity {
 					startActivity(intent);
 					finish();
 				} else {
-					showNoInternetConnectionDialog();
+					Utilities.showNoInternetConnectionDialog(_instance);
 				}
 			}
 		});
@@ -204,7 +202,7 @@ public class SettingsActivity extends Activity {
 					LOGGER.info("Starting Reset Password Functionality...");
 					sendResetEmail();
 				} else {
-					showNoInternetConnectionDialog();
+					Utilities.showNoInternetConnectionDialog(_instance);
 				}
 			}
 		});
@@ -297,7 +295,7 @@ public class SettingsActivity extends Activity {
 					startActivity(intent);
 					finish();
 				} else {
-					showNoInternetConnectionDialog();
+					Utilities.showNoInternetConnectionDialog(_instance);
 				}
 			}
 		});
@@ -394,119 +392,7 @@ public class SettingsActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-
-		if (id == R.id.action_logout) {
-			logCurrentUserOut();
-		} else if (id == R.id.action_addContact) {
-			addNewContact();
-		} else if (id == R.id.action_viewMap) {
-			viewMap();
-		} else if (id == R.id.action_createGroup) {
-			createGroup();
-		} else if (id == R.id.action_home) {
-			home();
-		} 
-		return true;
-	}
-
-	private void logCurrentUserOut() {
 		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			LOGGER.info("Logging out user: " + ParseUser.getCurrentUser()
-					+ "...");
-			ParseUser.logOut();
-			if (ParseUser.getCurrentUser() == null) {
-				LOGGER.info("User successfully logged out!");
-				Toast.makeText(getApplicationContext(),
-						"Successfully Logged Out!", Toast.LENGTH_LONG).show();
-				Intent intent = new Intent(getApplicationContext(),
-						SplashActivity.class);
-				startActivity(intent);
-				finish();
-			} else {
-				Toast.makeText(getApplicationContext(), "Please Try Again!",
-						Toast.LENGTH_LONG).show();
-			}
-		} else {
-			showNoInternetConnectionDialog();
-		}
+		return MenuUtils.menuOptions(id, this, internetPresent, TAG);
 	}
-
-	private void addNewContact() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			LOGGER.info("Starting Add Contact Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					AddContactActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	private void viewMap() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			LOGGER.info("Starting Map View Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					MapsViewActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	private void createGroup() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			LOGGER.info("Starting Create Group Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					SelectGroupParticipantsActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	private void home() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			LOGGER.info("Starting Home Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					HomeActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	private void showNoInternetConnectionDialog() {
-		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-		alertDialog.setTitle("Internet Settings");
-		alertDialog
-				.setMessage("Cannot connect to internet. Enable Internet Services in Settings.");
-
-		alertDialog.setPositiveButton("Settings",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Intent intent = new Intent(Settings.ACTION_SETTINGS);
-						startActivity(intent);
-					}
-				});
-
-		alertDialog.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-		alertDialog.show();
-	}
-
 }

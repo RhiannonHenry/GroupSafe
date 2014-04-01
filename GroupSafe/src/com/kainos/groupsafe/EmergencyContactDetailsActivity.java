@@ -2,6 +2,7 @@ package com.kainos.groupsafe;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.Parse;
@@ -73,7 +74,7 @@ public class EmergencyContactDetailsActivity extends Activity {
 			Log.i(TAG, "Populating page...");
 			updatePageFields();
 		} else {
-			showNoInternetConnectionDialog();
+			Utilities.showNoInternetConnectionDialog(this);
 		}
 	}
 
@@ -113,7 +114,7 @@ public class EmergencyContactDetailsActivity extends Activity {
 			startActivity(intent);
 			finish();
 		} else {
-			showNoInternetConnectionDialog();
+			Utilities.showNoInternetConnectionDialog(this);
 			enableAllButtons();
 		}
 	}
@@ -233,7 +234,7 @@ public class EmergencyContactDetailsActivity extends Activity {
 						}
 					});
 		} else {
-			showNoInternetConnectionDialog();
+			Utilities.showNoInternetConnectionDialog(this);
 			enableAllButtons();
 		}
 	}
@@ -281,35 +282,4 @@ public class EmergencyContactDetailsActivity extends Activity {
 		getMenuInflater().inflate(R.menu.emergency_contact_details, menu);
 		return true;
 	}
-
-	/**
-	 * Method that displays an alert dialog to the user prompting them to alter
-	 * their Internet settings. The user can cancel the dialog or they can be
-	 * directed to the 'Settings' screen for their phone.
-	 */
-	private void showNoInternetConnectionDialog() {
-		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-		alertDialog.setTitle("Internet Settings");
-		alertDialog
-				.setMessage("Cannot connect to internet. Enable Internet Services in Settings.");
-
-		alertDialog.setPositiveButton("Settings",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Intent intent = new Intent(Settings.ACTION_SETTINGS);
-						startActivity(intent);
-					}
-				});
-
-		alertDialog.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-		alertDialog.show();
-	}
-
 }

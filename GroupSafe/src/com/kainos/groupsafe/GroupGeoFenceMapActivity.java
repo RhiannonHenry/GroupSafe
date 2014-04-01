@@ -500,7 +500,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 							e.printStackTrace();
 						}
 					}
-				});
+				});	
 	}
 
 	/**

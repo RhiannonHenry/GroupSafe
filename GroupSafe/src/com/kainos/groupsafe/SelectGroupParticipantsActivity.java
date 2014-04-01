@@ -190,12 +190,37 @@ public class SelectGroupParticipantsActivity extends Activity {
 						String objectId = current.getObjectId();
 						LOGGER.info("Contact Name: " + contactName);
 						LOGGER.info("Contact Number: " + contactNumber);
-						ParticipantContact contact = new ParticipantContact(
-								contactName, contactNumber, objectId, false);
-						retrievedContacts.add(contact);
-						adapter.participantContactList.add(contact);
-						adapter.notifyDataSetChanged();
-						listView.refreshDrawableState();
+						ParseQuery<ParseUser> getUserForContact = ParseUser
+								.getQuery();
+						getUserForContact.whereEqualTo("username",
+								contactNumber);
+						try {
+							List<ParseUser> contactUserList = getUserForContact
+									.find();
+							if (contactUserList.size() > 0) {
+								ParseUser contactUser = contactUserList.get(0);
+								if (contactUser.getBoolean("groupLeader")) {
+									LOGGER.info("User is currently a GROUP LEADER");
+								} else if (contactUser
+										.getBoolean("groupMember")) {
+									LOGGER.info("User is currently a GROUP MEMBER");
+								} else {
+									ParticipantContact contact = new ParticipantContact(
+											contactName, contactNumber,
+											objectId, false);
+									retrievedContacts.add(contact);
+									adapter.participantContactList.add(contact);
+									adapter.notifyDataSetChanged();
+									listView.refreshDrawableState();
+								}
+							} else {
+								LOGGER.info("ERROR:: Unable to find user for contact");
+							}
+						} catch (ParseException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+
 					}
 				} else {
 					LOGGER.info("SOMETHING WENT WRONG RETRIEVING CONTACT");

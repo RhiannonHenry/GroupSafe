@@ -1,6 +1,7 @@
 package com.kainos.groupsafe;
 
 import java.util.ArrayList;
+
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
@@ -99,7 +100,7 @@ public class RegisterActivity extends Activity {
 		if (internetPresent) {
 			proceedToRegistration();
 		} else {
-			showNoInternetConnectionDialog();
+			Utilities.showNoInternetConnectionDialog(this);
 			enableAllButtons();
 		}
 	}
@@ -346,7 +347,7 @@ public class RegisterActivity extends Activity {
 	 * their Internet settings. The user can cancel the dialog or they can be
 	 * directed to the 'Settings' screen for their phone.
 	 */
-	private void showNoInternetConnectionDialog() {
+	 {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setTitle("Internet Settings");
 		alertDialog

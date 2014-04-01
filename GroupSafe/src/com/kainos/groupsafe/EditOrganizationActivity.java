@@ -1,6 +1,7 @@
 package com.kainos.groupsafe;
 
 import java.util.List;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -73,7 +74,7 @@ public class EditOrganizationActivity extends Activity {
 				if (internetPresent) {
 					checkIfGroupExists();
 				} else {
-					showNoInternetConnectionDialog();
+					Utilities.showNoInternetConnectionDialog(_instance);
 					enableAllButtons();
 				}
 
@@ -219,7 +220,7 @@ public class EditOrganizationActivity extends Activity {
 					startActivity(intent);
 					finish();
 				} else {
-					showNoInternetConnectionDialog();
+					Utilities.showNoInternetConnectionDialog(_instance);
 					enableAllButtons();
 				}
 			}
@@ -243,7 +244,7 @@ public class EditOrganizationActivity extends Activity {
 	 * their Internet settings. The user can cancel the dialog or they can be
 	 * directed to the 'Settings' screen for their phone.
 	 */
-	private void showNoInternetConnectionDialog() {
+	 {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setTitle("Internet Settings");
 		alertDialog

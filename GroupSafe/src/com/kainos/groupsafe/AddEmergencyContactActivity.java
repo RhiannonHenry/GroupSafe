@@ -1,6 +1,7 @@
 package com.kainos.groupsafe;
 
 import java.util.List;
+
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -82,7 +83,7 @@ public class AddEmergencyContactActivity extends Activity {
 				if (internetPresent) {
 					addEmergencyContactToDatabase();
 				} else {
-					showNoInternetConnectionDialog();
+					Utilities.showNoInternetConnectionDialog(_instance);
 					enableAllButtons();
 				}
 
@@ -263,7 +264,7 @@ public class AddEmergencyContactActivity extends Activity {
 					startActivity(intent);
 					finish();
 				} else {
-					showNoInternetConnectionDialog();
+					Utilities.showNoInternetConnectionDialog(_instance);
 					enableAllButtons();
 				}
 			}
@@ -275,7 +276,7 @@ public class AddEmergencyContactActivity extends Activity {
 	 * their Internet settings. The user can cancel the dialog or they can be
 	 * directed to the 'Settings' screen for their phone.
 	 */
-	private void showNoInternetConnectionDialog() {
+	 {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setTitle("Internet Settings");
 		alertDialog
@@ -352,140 +353,8 @@ public class AddEmergencyContactActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-
-		if (id == R.id.action_logout) {
-			logCurrentUserOut();
-		} else if (id == R.id.action_addContact) {
-			addNewContact();
-		} else if (id == R.id.action_viewMap) {
-			viewMap();
-		} else if (id == R.id.action_createGroup) {
-			createGroup();
-		} else if (id == R.id.action_home) {
-			home();
-		} else if (id == R.id.action_settings) {
-			settings();
-		}
-		return true;
-	}
-
-	/**
-	 * This method is used to log the current user out of the application. The
-	 * user can only log out if they have internet connection.
-	 */
-	private void logCurrentUserOut() {
 		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			Log.i(TAG, "Logging out user: " + ParseUser.getCurrentUser()
-					+ "...");
-			ParseUser.logOut();
-			if (ParseUser.getCurrentUser() == null) {
-				Log.i(TAG, "User successfully logged out!");
-				Toast.makeText(getApplicationContext(),
-						"Successfully Logged Out!", Toast.LENGTH_LONG).show();
-				Intent intent = new Intent(getApplicationContext(),
-						SplashActivity.class);
-				startActivity(intent);
-				finish();
-			} else {
-				Toast.makeText(getApplicationContext(), "Please Try Again!",
-						Toast.LENGTH_LONG).show();
-			}
-		} else {
-			showNoInternetConnectionDialog();
-		}
+		return MenuUtils.menuOptions(id, this, internetPresent, TAG);
 	}
 
-	/**
-	 * This method is used for the 'Add Contact' menu option. This will display
-	 * the activity that will allow a user to add a new contact to their contact
-	 * list @see AddContactActivity.java and @see activity_add_contact.xml
-	 */
-	private void addNewContact() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			Log.i(TAG, "Starting Add Contact Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					AddContactActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	/**
-	 * This method is used for the 'View Map' menu option. This will display the
-	 * activity that will allow a user to view their current location on a map @see
-	 * MapsViewActivity.java and @see activity_maps_view.xml
-	 */
-	private void viewMap() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			Log.i(TAG, "Starting Map View Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					MapsViewActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	/**
-	 * This method is used for the 'Create Group' menu option. This will display
-	 * the activity that will allow a user to select participants from their
-	 * contact list who they wish to participate in the group they are creating @see
-	 * SelectGroupParticipantsActivity.java and @see
-	 * activity_select_group_participants.xml
-	 */
-	private void createGroup() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			Log.i(TAG, "Starting Create Group Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					SelectGroupParticipantsActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	/**
-	 * This method is used for the 'Home' menu option. This will display the
-	 * home activity screen to the user. @see HomeActivity.java and @see
-	 * activity_home.xml
-	 */
-	private void home() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			Log.i(TAG, "Starting Home Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					HomeActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
-
-	/**
-	 * This method is used for the 'Settings' menu option. This will display the
-	 * activity that will allow a user to view and change their current settings
-	 * for the application @see SettingsActivity.java and @see
-	 * activity_settings.xml
-	 */
-	private void settings() {
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			Log.i(TAG, "Going to Settings page... ");
-			Intent intent = new Intent(getApplicationContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			showNoInternetConnectionDialog();
-		}
-	}
 }

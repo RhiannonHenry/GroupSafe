@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Logger;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,7 +23,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.Parse;
-import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParsePush;
@@ -39,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,13 +48,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
+/**
+ * This activity is used to display the group map screen to both group leaders
+ * and group members. This screen displays the map, the current participants and
+ * the geo-fence.
+ * 
+ * @see activity_group_geo_fence_map.xml
+ * 
+ * @author Rhiannon Henry
+ * 
+ */
 public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		OnMapLongClickListener {
 
-	static GroupGeoFenceMapActivity _instance = null;
+	private static GroupGeoFenceMapActivity _instance = null;
 	final Context context = this;
-	private final static Logger LOGGER = Logger
-			.getLogger(GroupGeoFenceMapActivity.class.getName());
+	private static final String TAG = "GROUP_MAP";
 	private static final int EARTH_RADIUS_KM = 6371;
 
 	private GoogleMap googleMap;
@@ -81,12 +88,15 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 	private boolean mapInitialized = false;
 	private boolean initialGeoFenceDrawn = false;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
-		ParseAnalytics.trackAppOpened(getIntent());
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_group_geo_fence_map);
 		_instance = this;
@@ -103,17 +113,21 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		groupLeaderId = intent.getStringExtra("groupLeaderId");
 		radius = intent.getIntExtra("radius", 2);
 
-		LOGGER.info("GOT GROUP_ID: " + groupId);
-		LOGGER.info("GOT GROUP_LEADER_ID: " + groupLeaderId);
-		LOGGER.info("GOT RADIUS: " + radius);
-
-		LOGGER.info("Entering START ACTIVITY LOGIC...");
+		Log.i(TAG, "GOT GROUP_ID: " + groupId);
+		Log.i(TAG, "GOT GROUP_LEADER_ID: " + groupLeaderId);
+		Log.i(TAG, "GOT RADIUS: " + radius);
+		Log.d(TAG, "Entering START ACTIVITY LOGIC...");
 		startActivityLogic();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.support.v4.app.FragmentActivity#onResume()
+	 */
 	@Override
 	public void onResume() {
-		LOGGER.info("UPDATING...");
+		Log.i(TAG, "UPDATING...");
 		super.onResume();
 		autoUpdate = new Timer();
 		autoUpdate.schedule(new TimerTask() {
@@ -123,8 +137,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 					public void run() {
 						if (mapInitialized) {
 							if (currentUser.get("groupLeader").equals(true)) {
-								LOGGER.info("Refreshing View for GROUP LEADER");
-								// refresh view for group leader
+								Log.i(TAG, "Refreshing View for GROUP LEADER");
 								createGroupLeaderCurrentLocationMarker();
 								setMarker(lat, lng, "My Location");
 								createGeoFence(lat, lng);
@@ -146,13 +159,12 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 											checkIfParticipantInGeoFence(userObjectId);
 										}
 									} catch (ParseException e) {
-										LOGGER.info("ERROR:: ");
+										Log.e(TAG, "ERROR:: ");
 										e.printStackTrace();
 									}
 								}
 							} else {
-								LOGGER.info("Refreshing View for GROUP MEMBER");
-								// refresh view for group member
+								Log.i(TAG, "Refreshing View for GROUP MEMBER");
 								createGroupLeaderCurrentLocationMarker();
 								getLeaderLocationAndSetMarker();
 								createOwnCurrentLocationMarker();
@@ -163,26 +175,37 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								}
 							}
 						} else {
-							LOGGER.info("Map has not been initialized!");
+							Log.e(TAG, "Map has not been initialized!");
 						}
 					}
 
+					/**
+					 * This method is used to check if the user is currently
+					 * inside the group geo-fence, or if they are outside it.
+					 * This is calculated using the Haversine Formula.
+					 * 
+					 * @param userObjectId
+					 *            the unique identifier for the user we are
+					 *            checking.
+					 */
 					private void checkIfParticipantInGeoFence(
 							String userObjectId) {
 						MarkerOptions participant = participantLocationMarkers
 								.get(userObjectId);
-						LOGGER.info("Getting location for user: "+userObjectId);
-						
-						LatLng participantLocation = participant.getPosition();
-						LOGGER.info("User is at location: "+participantLocation.latitude+","+participantLocation.longitude);
-						LatLng geoFenceCenter = circle.getCenter();
-						LOGGER.info("Center of Geo-Fence is at: "+geoFenceCenter.latitude+","+geoFenceCenter.longitude);
+						Log.i(TAG, "Getting location for user: " + userObjectId);
 
-						// TODO: Get distance from Participant to Group Leader
+						LatLng participantLocation = participant.getPosition();
+						Log.i(TAG, "User is at location: "
+								+ participantLocation.latitude + ","
+								+ participantLocation.longitude);
+						LatLng geoFenceCenter = circle.getCenter();
+						Log.i(TAG, "Center of Geo-Fence is at: "
+								+ geoFenceCenter.latitude + ","
+								+ geoFenceCenter.longitude);
+
 						int meters = getDistanceDifference(participantLocation,
 								geoFenceCenter);
 						if (meters > radius) {
-							// TODO: Send Notification
 							JSONObject participantNotificationData = null;
 							try {
 								participantNotificationData = new JSONObject(
@@ -194,25 +217,44 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								sendAlertNotification(userObjectId,
 										participantNotificationData);
 							} catch (JSONException e1) {
-								LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
+								Log.e(TAG,
+										"ERROR: Error Creating JSON for Temination Notification.");
 								e1.printStackTrace();
 							}
 							notifyGroupLeader(userObjectId);
 						} else {
-							LOGGER.info("PARTICIPANT IS WITHIN THE GEO-FENCE");
+							Log.i(TAG, "PARTICIPANT IS WITHIN THE GEO-FENCE");
 						}
 					}
 
+					/**
+					 * This method is used to send a notification to the user
+					 * who is outside the geo-fence.
+					 * 
+					 * @param userObjectId
+					 *            the user to whom the notification should be
+					 *            sent.
+					 * @param participantNotificationData
+					 *            the JSON data to be sent in the notification
+					 *            body.
+					 */
 					private void sendAlertNotification(String userObjectId,
 							JSONObject participantNotificationData) {
 						String notificationChannel = "user_" + userObjectId;
-						LOGGER.info("#004: Channel = " + notificationChannel);
+						Log.i(TAG, "#004: Channel = " + notificationChannel);
 						ParsePush push = new ParsePush();
 						push.setData(participantNotificationData);
 						push.setChannel(notificationChannel);
-						push.sendInBackground();						
+						push.sendInBackground();
 					}
 
+					/**
+					 * This method is used to notify the group leader that a
+					 * user is outside the geo-fence.
+					 * 
+					 * @param userObjectId
+					 *            the user who is outside the geo-fence
+					 */
 					private void notifyGroupLeader(String userObjectId) {
 						final Dialog dialog = new Dialog(context);
 						dialog.setContentView(R.layout.custom_notification_dialog);
@@ -237,16 +279,30 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 						});
 					}
 
+					/**
+					 * This method uses the Haversine Formula to calculate the
+					 * distance the participant is from the centre of the
+					 * geo-fence (i.e whether they are inside or outside the
+					 * geo-fence)
+					 * 
+					 * @param participantLocation
+					 *            the latitude and longitude of the participants
+					 *            current location.
+					 * @param geoFenceCenter
+					 *            the latitude and longitude of the center of
+					 *            the geo-fence
+					 * @return difference and integer value of the distance
+					 *         between the participant and the centre of the
+					 *         geo-fence in meters.
+					 */
 					private int getDistanceDifference(
 							LatLng participantLocation, LatLng geoFenceCenter) {
 						// Lat and Lng for PARTICIPANT
 						double participantLatitude = participantLocation.latitude;
 						double participantLongitude = participantLocation.longitude;
-
 						// Lat and Lng for LEADER/CENTER OF GEOFENCE
 						double geoFenceCenterLatitude = geoFenceCenter.latitude;
 						double geoFenceCenterLongitude = geoFenceCenter.longitude;
-
 						// Difference between Lat and Lng
 						double deltaLatitude = Math
 								.toRadians(participantLatitude
@@ -254,7 +310,6 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 						double deltaLongitude = Math
 								.toRadians(participantLongitude
 										- geoFenceCenterLongitude);
-
 						// Part 1:
 						// sin^2(lat1-lat2/2)+cos(lat1)*cos(lat2)*sin^2(long1-long2/2)
 						double part1 = Math.sin(deltaLatitude / 2)
@@ -266,16 +321,15 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 						// Part 2:
 						// 2*sin^-1(sqrt(part1))
 						double part2 = 2.0 * Math.asin(Math.sqrt(part1));
-
 						// Part 3: Difference
 						// radius*part2
 						double difference = EARTH_RADIUS_KM * part2;
-						LOGGER.info("Difference in KM: "+difference);
+						Log.i(TAG, "Difference in KM: " + difference);
 						DecimalFormat newFormat = new DecimalFormat("####");
-						double meter = difference*1000;
+						double meter = difference * 1000;
 						int meterInDec = Integer.valueOf(newFormat
 								.format(meter));
-						LOGGER.info("Distance from Center of Geo-fence = "
+						Log.i(TAG, "Distance from Center of Geo-fence = "
 								+ meterInDec);
 						return meterInDec;
 					}
@@ -290,22 +344,26 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		super.onPause();
 	}
 
+	/**
+	 * This method is used to initialise the Group Geo Fence Map Activity for
+	 * group leader / group member depending on the user who is viewing the map.
+	 */
 	private void startActivityLogic() {
-		LOGGER.info("ENTERED START ACTIVITY LOGIC!");
+		Log.d(TAG, "ENTERED START ACTIVITY LOGIC!");
 		try {
-			LOGGER.info("Initialising Map...");
+			Log.i(TAG, "Initialising Map...");
 			initialiseMap();
 			getCurrentLocation();
 			checkForExisitingLocationEntryForUser();
 
 			if (currentUser.get("groupLeader").equals(true)) {
-				LOGGER.info("GROUP LEADER FLOW");
+				Log.i(TAG, "GROUP LEADER FLOW");
 				createGroupLeaderCurrentLocationMarker();
 				setMarker(lat, lng, "My Location");
 				createGeoFence(lat, lng);
 				findParticipants();
 			} else {
-				LOGGER.info("GROUP MEMBER FLOW");
+				Log.i(TAG, "GROUP MEMBER FLOW");
 				createGroupLeaderCurrentLocationMarker();
 				getLeaderLocationAndSetMarker();
 				createOwnCurrentLocationMarker();
@@ -317,9 +375,19 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		}
 	}
 
+	/**
+	 * This method is used by a GROUP MEMBER. This method is used to set the
+	 * marker for the user who is a group member. The marker for the user (who
+	 * is a member) will be YELLOW.
+	 * 
+	 * @param latitude
+	 *            a double value representing the latitude location of the user
+	 * @param longitudea
+	 *            double value representing the longitude location of the user
+	 */
 	private void setOwnMarker(double latitude, double longitude) {
-		LOGGER.info("Entering Set Own Marker...");
-		LOGGER.info("Placing marker at: " + lat + "," + lng);
+		Log.i(TAG, "Entering Set Own Marker...");
+		Log.i(TAG, "Placing marker at: " + lat + "," + lng);
 
 		// TODO: Remove hard coding...
 		// 54.5822043,-5.9380233 --> lat, lng
@@ -341,6 +409,11 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		}
 	}
 
+	/**
+	 * This method is used to find the unique reference of the Location of the
+	 * group leader. This will reference an object in the Location entity in the
+	 * database.
+	 */
 	private void getLeaderLocationAndSetMarker() {
 		// Get Group Leader current Location
 		ParseQuery<ParseUser> getLeaderLocationId = ParseUser.getQuery();
@@ -350,36 +423,47 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 			public void done(List<ParseUser> foundUserList, ParseException e) {
 				if (e == null) {
 					if (foundUserList.size() > 0) {
-						LOGGER.info("SUCCESS:: Found the Group Leader User!");
+						Log.i(TAG, "SUCCESS:: Found the Group Leader User!");
 						ParseUser groupLeaderUser = foundUserList.get(0);
 						String groupLeaderLocationId = null;
 						try {
 							groupLeaderLocationId = groupLeaderUser.get(
 									"currentLocation").toString();
 						} catch (NullPointerException e1) {
-							LOGGER.info("ERROR:: ");
+							Log.e(TAG, "ERROR:: ");
 							e1.printStackTrace();
 						}
 						if (groupLeaderLocationId == null) {
-							LOGGER.info("Group Leader doesn't have a location ID");
+							Log.i(TAG,
+									"Group Leader doesn't have a location ID");
 						} else {
 							getLocationOfGroupLeader(groupLeaderUser.get(
 									"currentLocation").toString());
 						}
 					} else {
-						LOGGER.info("FAILURE:: Failed to retrieve the group leader user ("
-								+ groupLeaderId + ")");
+						Log.e(TAG,
+								"FAILURE:: Failed to retrieve the group leader user ("
+										+ groupLeaderId + ")");
 					}
 				} else {
-					LOGGER.info("Error:: ");
+					Log.e(TAG, "Error:: ");
 					e.printStackTrace();
 				}
 			}
 		});
 	}
 
+	/**
+	 * This method is used to find the latitude and longitude of the group
+	 * leaders current location. This infomation is kept in the Location entity
+	 * in the database.
+	 * 
+	 * @param locationId
+	 *            a String value that is the unique reference to an object
+	 *            within the Location entity in the database that is associated
+	 *            with the group leaders user.
+	 */
 	protected void getLocationOfGroupLeader(String locationId) {
-		// Get lat and lng of Group Leader Location
 		ParseQuery<ParseObject> getGroupLeaderLocation = ParseQuery
 				.getQuery("Location");
 		getGroupLeaderLocation.whereEqualTo("objectId", locationId);
@@ -391,7 +475,8 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 							ParseException e) {
 						if (e == null) {
 							if (foundLocationList.size() > 0) {
-								LOGGER.info("SUCCESS:: Found the Location for Group Leader!");
+								Log.i(TAG,
+										"SUCCESS:: Found the Location for Group Leader!");
 								ParseObject groupLeaderLocation = foundLocationList
 										.get(0);
 								double groupLeaderLat = Double
@@ -400,28 +485,35 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								double groupLeaderLng = Double
 										.parseDouble(groupLeaderLocation.get(
 												"currentLng").toString());
-								LOGGER.info("Got Location: " + groupLeaderLat
+								Log.i(TAG, "Got Location: " + groupLeaderLat
 										+ "," + groupLeaderLng);
 								// Set Marker For Group Leader
 								setMarker(groupLeaderLat, groupLeaderLng,
 										"Group Leader");
 							} else {
-								LOGGER.info("FAILURE:: Failed to retrieve the location for user ("
-										+ groupLeaderId + ")");
+								Log.e(TAG,
+										"FAILURE:: Failed to retrieve the location for user ("
+												+ groupLeaderId + ")");
 							}
 						} else {
-							LOGGER.info("Error:: ");
+							Log.e(TAG, "Error:: ");
 							e.printStackTrace();
 						}
 					}
 				});
 	}
 
+	/**
+	 * This method is used by GROUP LEADER and GROUP MEMBERS. This method is
+	 * used to position any group participants on the map. This method loops
+	 * through all of the participants.
+	 */
 	private void positionParticipants() {
-		LOGGER.info("Entered GET PARTICIPANTS NUMBER: ");
+		Log.d(TAG, "Entered GET PARTICIPANTS NUMBER: ");
 		for (int i = 0; i < groupParticipants.size(); i++) {
-			LOGGER.info("Getting number for participant: "
-					+ groupParticipants.get(i));
+			Log.i(TAG,
+					"Getting number for participant: "
+							+ groupParticipants.get(i));
 			ParseQuery<ParseObject> getParticipantNumber = ParseQuery
 					.getQuery("Participant");
 			getParticipantNumber.whereEqualTo("objectId",
@@ -435,17 +527,18 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								ParseException e) {
 							if (e == null) {
 								if (foundParticipantList.size() > 0) {
-									LOGGER.info("SUCCESS:: Found Participant");
+									Log.i(TAG, "SUCCESS:: Found Participant");
 									ParseObject current = foundParticipantList
 											.get(0);
 									String currentParticipantNumber = current
 											.get("participantNumber")
 											.toString();
-									LOGGER.info("Got Participant Number: "
+									Log.i(TAG, "Got Participant Number: "
 											+ currentParticipantNumber);
 									if (currentParticipantNumber
 											.equals(currentUser.getUsername())) {
-										LOGGER.info("This participant is the same as the logged in user, they have already retreived and diaplayed their location. Continuing...");
+										Log.i(TAG,
+												"This participant is the same as the logged in user, they have already retreived and diaplayed their location. Continuing...");
 									} else {
 										participantNumbers
 												.add(currentParticipantNumber);
@@ -453,59 +546,82 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 									}
 
 								} else {
-									LOGGER.info("FAILURE:: Unable to find Participant");
+									Log.e(TAG,
+											"FAILURE:: Unable to find Participant");
 								}
 							} else {
-								LOGGER.info("ERROR:: ");
+								Log.e(TAG, "ERROR:: ");
 								e.printStackTrace();
 							}
 						}
 					});
 		}
-		LOGGER.info("MAP HAS BEEN INITIALIZED!!");
+		Log.i(TAG, "MAP HAS BEEN INITIALIZED!!");
 		mapInitialized = true;
 	}
 
+	/**
+	 * This method is used to get the unique location reference associate with
+	 * each participants user. This will reference the current location of each
+	 * participant in the Location entity.
+	 * 
+	 * @param participantNumber
+	 *            a String value of the participants phone number (aka. their
+	 *            username)
+	 */
 	protected void getParticipantLocation(String participantNumber) {
-		LOGGER.info("Entered GET PARTICIPANT LOCATION...for participant with number: "
-				+ participantNumber);
+		Log.d(TAG,
+				"Entered GET PARTICIPANT LOCATION...for participant with number: "
+						+ participantNumber);
 		ParseQuery<ParseUser> userLocationQuery = ParseUser.getQuery();
 		userLocationQuery.whereEqualTo("username", participantNumber);
 		userLocationQuery.findInBackground(new FindCallback<ParseUser>() {
-
 			@Override
 			public void done(List<ParseUser> foundUserList, ParseException e) {
 				if (e == null) {
 					if (foundUserList.size() > 0) {
-						LOGGER.info("SUCCESS:: Found User for Participant");
+						Log.i(TAG, "SUCCESS:: Found User for Participant");
 						ParseUser current = foundUserList.get(0);
 						String userLocation = null;
 						try {
 							userLocation = current.get("currentLocation")
 									.toString();
 						} catch (NullPointerException e1) {
-							LOGGER.info("Participant doen't have a location");
+							Log.e(TAG, "Participant doen't have a location");
 							e1.printStackTrace();
 						}
 
 						if (userLocation == null) {
-							LOGGER.info("User Location is NULL");
+							Log.i(TAG, "User Location is NULL");
 						} else {
-							LOGGER.info("Got location ID: " + userLocation);
-							LOGGER.info("Adding Location ID to participantLocations array...");
+							Log.i(TAG, "Got location ID: " + userLocation);
+							Log.i(TAG,
+									"Adding Location ID to participantLocations array...");
 							getParticipantLatLng(userLocation);
 						}
 					} else {
-						LOGGER.info("FAILURE:: Unable to find User for Participant");
+						Log.e(TAG,
+								"FAILURE:: Unable to find User for Participant");
 					}
 				} else {
-					LOGGER.info("ERROR::");
+					Log.e(TAG, "ERROR::");
 					e.printStackTrace();
 				}
 			}
 		});
 	}
 
+	/**
+	 * This method is used to get the latitude and longitude value for each
+	 * participant. This information is fetched form the Location entity in the
+	 * database by using the unique location reference that is passed through in
+	 * the parameters. The Marker for each participant who is not the current
+	 * user/group leader is ROSE (PINK)
+	 * 
+	 * @param userLocationID
+	 *            a String value representing a unique reference to the location
+	 *            associated with the user/participant.
+	 */
 	protected void getParticipantLatLng(String userLocationID) {
 		ParseQuery<ParseObject> getLocationQuery = ParseQuery
 				.getQuery("Location");
@@ -516,9 +632,8 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 					ParseException e) {
 				if (e == null) {
 					if (foundLocationList.size() > 0) {
-						LOGGER.info("SUCCESS:: Found Location");
+						Log.i(TAG, "SUCCESS:: Found Location");
 						ParseObject currentLocation = foundLocationList.get(0);
-
 						// Create Marker for Participant using lat and lng
 						// values...
 						double latitude = Double.parseDouble(currentLocation
@@ -533,9 +648,9 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 							latitude = 54.5871171;
 							longitude = -5.9338856;
 						}
-						LOGGER.info("Creating Marker Options with Location: "
+						Log.i(TAG, "Creating Marker Options with Location: "
 								+ latitude + "," + longitude);
-						LOGGER.info("For Participant with userID: " + userId);
+						Log.i(TAG, "For Participant with userID: " + userId);
 						LatLng currentPosition = new LatLng(latitude, longitude);
 						if (participantLocationMarkers.containsKey(userId)) {
 							// Fetch old participant marker and update position
@@ -560,23 +675,27 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 									.draggable(false)
 									.icon(BitmapDescriptorFactory
 											.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
-
 							participantLocationMarkers.put(userId,
 									participantMarker);
 						}
 					} else {
-						LOGGER.info("FAILURE:: Unable to find a location");
+						Log.e(TAG, "FAILURE:: Unable to find a location");
 					}
 				} else {
-					LOGGER.info("ERROR::");
+					Log.e(TAG, "ERROR::");
 					e.printStackTrace();
 				}
 			}
 		});
 	}
 
+	/**
+	 * This method is used to fetch each participant associated with the group.
+	 * This method will then start to position the group participants by calling
+	 * the @see positionParticipants() method.
+	 */
 	private void findParticipants() {
-		LOGGER.info("ENTERED FIND PARTICIPANTS");
+		Log.d(TAG, "ENTERED FIND PARTICIPANTS");
 		ParseQuery<ParseObject> queryGroup = ParseQuery.getQuery("Group");
 		queryGroup.whereEqualTo("objectId", groupId);
 		queryGroup.whereEqualTo("groupLeaderId", groupLeaderId);
@@ -585,7 +704,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 			public void done(List<ParseObject> foundGroupList, ParseException e) {
 				if (e == null) {
 					if (foundGroupList.size() > 0) {
-						LOGGER.info("SUCCESS:: Found Group with ID: " + groupId);
+						Log.i(TAG, "SUCCESS:: Found Group with ID: " + groupId);
 						ParseObject group = foundGroupList.get(0);
 						@SuppressWarnings("unchecked")
 						ArrayList<String> participants = (ArrayList<String>) group
@@ -593,23 +712,35 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 						groupParticipants = participants;
 						// Check that participants is correct
 						for (int i = 0; i < groupParticipants.size(); i++) {
-							LOGGER.info("" + i + ". Got Participant: "
+							Log.i(TAG, "" + i + ". Got Participant: "
 									+ groupParticipants.get(i));
 						}
 						positionParticipants();
-
 					} else {
-						LOGGER.info("FAILURE:: No Group Found with ID: "
+						Log.e(TAG, "FAILURE:: No Group Found with ID: "
 								+ groupId);
 					}
 				} else {
-					LOGGER.info("ERROR:: ");
+					Log.e(TAG, "ERROR:: ");
 					e.printStackTrace();
 				}
 			}
 		});
 	}
 
+	/**
+	 * This method is used to position the geo-fence on the map. This is
+	 * achieved by passing though the latitude and longitude values for the
+	 * centre of the geo-fence (this will be the group leaders current
+	 * location.)
+	 * 
+	 * @param latitude
+	 *            a double value representing the latitude location of the
+	 *            centre of the geo-fence
+	 * @param longitude
+	 *            a double value representing the longitude location of the
+	 *            centre of the geo-fence
+	 */
 	private void createGeoFence(double latitude, double longitude) {
 		ParseQuery<ParseObject> getRadius = ParseQuery.getQuery("Group");
 		getRadius.whereEqualTo("objectId", groupId);
@@ -618,7 +749,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 			ParseObject currentGroup = currentGroupList.get(0);
 			int currentRadius = Integer.parseInt(currentGroup.get(
 					"groupGeoFenceRadius").toString());
-			LOGGER.info("Creating Geo-Fence with Radius: " + currentRadius
+			Log.i(TAG, "Creating Geo-Fence with Radius: " + currentRadius
 					+ " around Location: [" + latitude + "," + longitude + "]");
 			if (geoFence == null) {
 				geoFence = new CircleOptions();
@@ -637,21 +768,31 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 					circle.setCenter(new LatLng(54.5821639, -5.9368431));
 					circle.setRadius(currentRadius);
 				}
-
 			}
 		} catch (ParseException e) {
-			LOGGER.info("ERROR:: Unable to fetch Group Radius");
+			Log.e(TAG, "ERROR:: Unable to fetch Group Radius");
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * This method is used to set the marker for the group leader. The group
+	 * leader marker will be GREEN for both the group leader view and the group
+	 * memeber view.
+	 * 
+	 * @param latitude
+	 *            a double value representing the latitude location of the group
+	 *            leader.
+	 * @param longitude
+	 *            a double value representing the longitude location of the
+	 *            group leader.
+	 * @param title
+	 *            a String value representing the title that should be given to
+	 *            the marker (i.e. Group Leader/My Location.)
+	 */
 	private void setMarker(double latitude, double longitude, String title) {
-		LOGGER.info("Entering Set Marker...");
-		LOGGER.info("Placing Group Leader at: " + latitude + "," + longitude);
-		LOGGER.info("Google Map = " + googleMap.toString());
-		LOGGER.info("Group Leader Marker = "
-				+ groupLeaderMarker.describeContents());
-
+		Log.d(TAG, "Entering Set Marker...");
+		Log.i(TAG, "Placing Group Leader at: " + latitude + "," + longitude);
 		// TODO: Remove hard coding...
 		// 54.5821639,-5.9368431 --> lat, lng
 		LatLng currentPosition = new LatLng(54.5821639, -5.9368431);
@@ -673,33 +814,53 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 						.newCameraPosition(cameraPosition));
 			}
 		} else {
-			LOGGER.info("You are not the Group Leader...");
+			Log.i(TAG, "You are not the Group Leader...");
 			createGeoFence(latitude, longitude);
 		}
 	}
 
+	/**
+	 * This method is used to get the current location of the user.
+	 */
 	private void getCurrentLocation() {
 		if (locationServices.canGetLocation) {
-			LOGGER.info("SUCCESS:: Able to get location");
+			Log.i(TAG, "SUCCESS:: Able to get location");
 			lat = getCurrentLatitude();
 			lng = getCurrentLongitude();
-			LOGGER.info("LAT: " + lat + " LNG: " + lng);
+			Log.i(TAG, "LAT: " + lat + " LNG: " + lng);
 		} else {
-			LOGGER.info("ERROR:: Unable to get location");
+			Log.e(TAG, "ERROR:: Unable to get location");
 			locationServices.showSettingAlert();
 		}
 	}
 
+	/**
+	 * This method is used to get the latitude value of the users location.
+	 * 
+	 * @return latitude a double value representing the users current latitude
+	 *         location.
+	 */
 	private double getCurrentLatitude() {
 		double latitude = locationServices.getLat();
 		return latitude;
 	}
 
+	/**
+	 * This method is used to get the longitude value of the users location.
+	 * 
+	 * @return longitude a double value representing the users current longitude
+	 *         location.
+	 */
 	private double getCurrentLongitude() {
 		double longitude = locationServices.getLng();
 		return longitude;
 	}
 
+	/**
+	 * This method is used to check if the user currently had an exiting unique
+	 * location reference associated with them in the database. If an existing
+	 * unique location reference cannot be found, a new one will be created.
+	 */
 	private void checkForExisitingLocationEntryForUser() {
 		ParseQuery<ParseObject> existingLocationQuery = ParseQuery
 				.getQuery("Location");
@@ -710,13 +871,13 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 					ParseException e) {
 				if (e == null) {
 					if (existingLocationList.size() > 0) {
-						LOGGER.info("SUCCESS:: Found an existing location entry for user"
-								+ userId);
+						Log.i(TAG,
+								"SUCCESS:: Found an existing location entry for user"
+										+ userId);
 						ParseObject currentLocationData = existingLocationList
 								.get(0);
 						userLocationObjectId = currentLocationData
 								.getObjectId().toString();
-
 						// Update existing Data with new Location Information
 						currentLocationData.put("currentLat",
 								String.valueOf(lat));
@@ -727,30 +888,38 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 									@Override
 									public void done(ParseException e) {
 										if (e == null) {
-											LOGGER.info("SUCCESS:: Updated Location Data for User: "
-													+ userId);
+											Log.i(TAG,
+													"SUCCESS:: Updated Location Data for User: "
+															+ userId);
 											initialiseMap();
 										} else {
-											LOGGER.info("ERROR:: Unable to Update Location Data for User: "
-													+ userId);
+											Log.e(TAG,
+													"ERROR:: Unable to Update Location Data for User: "
+															+ userId);
 											e.printStackTrace();
 										}
 									}
 								});
 					} else {
-						LOGGER.info("INFO:: Unable to find an existing location entry for user: "
-								+ userId);
-						LOGGER.info("Create New Location Entry in DB");
+						Log.e(TAG,
+								"INFO:: Unable to find an existing location entry for user: "
+										+ userId);
+						Log.i(TAG, "Create New Location Entry in DB");
 						createNewLocationDataInDB();
 					}
 				} else {
-					LOGGER.info("ERROR:: ");
+					Log.e(TAG, "ERROR:: ");
 					e.printStackTrace();
 				}
 			}
 		});
 	}
 
+	/**
+	 * This method is used to create a new location in the Location entity,
+	 * which will then be associated with a user via the unique location
+	 * identifier.
+	 */
 	protected void createNewLocationDataInDB() {
 		ParseObject location = new ParseObject("Location");
 		location.put("currentLat", String.valueOf(lat));
@@ -760,18 +929,23 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 			@Override
 			public void done(ParseException e) {
 				if (e == null) {
-					LOGGER.info("SUCCESS:: Saved Location Data for User: "
+					Log.i(TAG, "SUCCESS:: Saved Location Data for User: "
 							+ userId);
 					retrieveLocationObjectId();
 				} else {
-					LOGGER.info("ERROR:: Unable to Save NEW Location Data for User: "
-							+ userId);
+					Log.e(TAG,
+							"ERROR:: Unable to Save NEW Location Data for User: "
+									+ userId);
 					e.printStackTrace();
 				}
 			}
 		});
 	}
 
+	/**
+	 * This method is used to retrieve the unique location reference for a
+	 * specific location object within the Location entity in the database.
+	 */
 	protected void retrieveLocationObjectId() {
 		ParseQuery<ParseObject> queryLocationId = ParseQuery
 				.getQuery("Location");
@@ -782,17 +956,19 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 					ParseException e) {
 				if (e == null) {
 					if (existingLocationList.size() > 0) {
-						LOGGER.info("SUCCESS:: Found Exisiting Location Data for User: "
-								+ userId);
+						Log.i(TAG,
+								"SUCCESS:: Found Exisiting Location Data for User: "
+										+ userId);
 						ParseObject current = existingLocationList.get(0);
 						userLocationObjectId = current.getObjectId().toString();
 						addLocationToUserInformationInDB();
 					} else {
-						LOGGER.info("INFO:: Unable to find Location Data for user: "
-								+ userId);
+						Log.e(TAG,
+								"INFO:: Unable to find Location Data for user: "
+										+ userId);
 					}
 				} else {
-					LOGGER.info("ERROR:: ");
+					Log.e(TAG, "ERROR:: ");
 					e.printStackTrace();
 				}
 			}
@@ -800,27 +976,36 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 
 	}
 
+	/**
+	 * This method is used to update the unique location reference associated to
+	 * the user by updation the value of 'currentLocation' in the User entity in
+	 * the database.
+	 */
 	protected void addLocationToUserInformationInDB() {
-		LOGGER.info("Updating User Entity with Location ID: "
+		Log.i(TAG, "Updating User Entity with Location ID: "
 				+ userLocationObjectId);
 		currentUser.put("currentLocation", userLocationObjectId);
 		currentUser.saveInBackground(new SaveCallback() {
 			@Override
 			public void done(ParseException e) {
 				if (e == null) {
-					LOGGER.info("SUCCESS:: Successfully updated User with Location ID "
-							+ userLocationObjectId);
+					Log.i(TAG,
+							"SUCCESS:: Successfully updated User with Location ID "
+									+ userLocationObjectId);
 					initialiseMap();
 				} else {
-					LOGGER.info("ERROR:: ");
+					Log.e(TAG, "ERROR:: ");
 					e.printStackTrace();
 				}
 			}
 		});
 	}
 
+	/**
+	 * This method is used to initialise the Google Map fragment for the screen.
+	 */
 	protected void initialiseMap() {
-		LOGGER.info("Initializing Map... ");
+		Log.i(TAG, "Initializing Map... ");
 		if (googleMap == null) {
 			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
 					R.id.groupMap)).getMap();
@@ -832,58 +1017,93 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		}
 	}
 
+	/**
+	 * This is used by a GROUP MEMBER user to create their own marker.
+	 */
 	protected void createOwnCurrentLocationMarker() {
-		LOGGER.info("Entering Create Location Marker...");
+		Log.d(TAG, "Entering Create Location Marker...");
 		if (ownMarker == null) {
 			ownMarker = new MarkerOptions();
 		}
 	}
 
+	/**
+	 * This is used by a GROUP LEADER and GROUP MEMBER to create the marker
+	 * associated with the group leader.
+	 */
 	protected void createGroupLeaderCurrentLocationMarker() {
-		LOGGER.info("Entering Create Location Marker...");
+		Log.d(TAG, "Entering Create Location Marker...");
 		if (groupLeaderMarker == null) {
 			groupLeaderMarker = new MarkerOptions();
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onPrepareOptionsMenu(android.view.Menu)
+	 */
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		menu.clear();
 		getMenuInflater().inflate(R.menu.group_geo_fence_map, menu);
 		terminateMenuItem = menu.findItem(R.id.action_terminateGroup);
-		LOGGER.info("TERMINATE MENU ITEM = " + terminateMenuItem);
+		Log.i(TAG, "TERMINATE MENU ITEM = " + terminateMenuItem);
 		terminateMenuItem.setVisible(currentUser.get("groupLeader")
 				.equals(true));
 		return super.onPrepareOptionsMenu(menu);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-
 		if (id == R.id.action_terminateGroup) {
 			terminateGroup();
 		}
 		return true;
 	}
 
+	/**
+	 * This method is used by the GROUP LEADER when they select 'Terminate
+	 * Group' from their menu. This method will set the 'groupLeader' user
+	 * attribute to FALSE and then notify participants that the group has been
+	 * terminated.
+	 */
 	private void terminateGroup() {
 		setGroupLeaderStatus(false);
 		notifyGroupMembers();
 	}
 
+	/**
+	 * This method sets the value of the 'groupLeader' User attribute to the
+	 * value of the boolean passed in.
+	 * 
+	 * @param groupLeaderStatus
+	 *            a boolean value to represent if the user is a group leader or
+	 *            not.
+	 */
 	protected void setGroupLeaderStatus(boolean groupLeaderStatus) {
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		currentUser.put("groupLeader", groupLeaderStatus);
 		try {
 			currentUser.save();
-			LOGGER.info("SUCCESS:: Updated 'groupLeader' value for user!");
+			Log.i(TAG, "SUCCESS:: Updated 'groupLeader' value for user!");
 		} catch (ParseException e) {
-			LOGGER.info("ERROR:: Updating 'groupLeader' value for user!");
+			Log.e(TAG, "ERROR:: Updating 'groupLeader' value for user!");
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * This method is used to create the notification that will be sent to all
+	 * participants to notify them that the group leader has terminated the
+	 * group.
+	 */
 	private void notifyGroupMembers() {
 		for (int i = 0; i < participantNumbers.size(); i++) {
 			ParseQuery<ParseUser> getParticipantUserId = ParseUser.getQuery();
@@ -896,7 +1116,8 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								ParseException e) {
 							if (e == null) {
 								if (foundUserList.size() > 0) {
-									LOGGER.info("SUCCESS:: Found user for number");
+									Log.i(TAG,
+											"SUCCESS:: Found user for number");
 									ParseUser user = foundUserList.get(0);
 									String groupLeaderDisplayName = currentUser
 											.get("displayName").toString();
@@ -912,26 +1133,39 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 										sendNotification(user.getObjectId()
 												.toString(), terminationData);
 									} catch (JSONException e1) {
-										LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
+										Log.e(TAG,
+												"ERROR: Error Creating JSON for Temination Notification.");
 										e1.printStackTrace();
 									}
 								} else {
-									LOGGER.info("FAILURE:: Failed to find a user for number");
+									Log.e(TAG,
+											"FAILURE:: Failed to find a user for number");
 								}
 							} else {
-								LOGGER.info("ERROR:: ");
+								Log.e(TAG, "ERROR:: ");
 								e.printStackTrace();
 							}
 						}
 					});
-
 		}
 		deleteGroup();
 	}
 
+	/**
+	 * This method is used to send the terminated group notification. Once the
+	 * notification has been sent the group leader will be returned to the Home
+	 * screen for the application.
+	 * 
+	 * @param userId
+	 *            the unique user identifer for the participant to whom the
+	 *            notification is to be sent.
+	 * @param terminationData
+	 *            this is the JSON object containing the notification message to
+	 *            be sent to the participants.
+	 */
 	protected void sendNotification(String userId, JSONObject terminationData) {
 		String notificationChannel = "user_" + userId;
-		LOGGER.info("#004: Channel = " + notificationChannel);
+		Log.i(TAG, "#005: Channel = " + notificationChannel);
 		ParsePush push = new ParsePush();
 		push.setData(terminationData);
 		push.setChannel(notificationChannel);
@@ -942,6 +1176,10 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		finish();
 	}
 
+	/**
+	 * This method is used to delete the group from the Group entity in the
+	 * database.
+	 */
 	private void deleteGroup() {
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Group");
 		query.whereEqualTo("objectId", groupId);
@@ -950,30 +1188,38 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 			public void done(List<ParseObject> foundGroups, ParseException e) {
 				if (e == null) {
 					if (foundGroups.size() > 0) {
-						LOGGER.info("SUCCESS:: Found Group!");
+						Log.i(TAG, "SUCCESS:: Found Group!");
 						ParseObject group = foundGroups.get(0);
 						group.deleteEventually(new DeleteCallback() {
 							@Override
 							public void done(ParseException e) {
 								if (e == null) {
-									LOGGER.info("SUCCESS:: Deleted Group From DB");
+									Log.i(TAG,
+											"SUCCESS:: Deleted Group From DB");
 								} else {
-									LOGGER.info("ERROR:: Failed to Delete Group");
+									Log.e(TAG, "ERROR:: Failed to Delete Group");
 									e.printStackTrace();
 								}
 							}
 						});
 					} else {
-						LOGGER.info("FAILURE:: Failed to Find Group");
+						Log.e(TAG, "FAILURE:: Failed to Find Group");
 					}
 				} else {
-					LOGGER.info("ERROR::");
+					Log.e(TAG, "ERROR::");
 					e.printStackTrace();
 				}
 			}
 		});
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.google.android.gms.maps.GoogleMap.OnMapLongClickListener#onMapLongClick
+	 * (com.google.android.gms.maps.model.LatLng)
+	 */
 	@Override
 	public void onMapLongClick(LatLng point) {
 		if (currentUser.get("groupLeader").equals(true)) {
@@ -1005,7 +1251,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								ParseException e) {
 							if (e == null) {
 								if (foundGroupList.size() > 0) {
-									LOGGER.info("SUCCESS:: Found group!");
+									Log.i(TAG, "SUCCESS:: Found group!");
 									ParseObject currentGroup = foundGroupList
 											.get(0);
 									currentGroup.put("groupGeoFenceRadius",
@@ -1017,19 +1263,20 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 												public void done(
 														ParseException e) {
 													if (e == null) {
-														LOGGER.info("Successfully Updated GeoFence for Group.");
+														Log.i(TAG,
+																"Successfully Updated GeoFence for Group.");
 														dialog.dismiss();
 													} else {
-														LOGGER.info("ERROR::");
+														Log.e(TAG, "ERROR::");
 														e.printStackTrace();
 													}
 												}
 											});
 								} else {
-									LOGGER.info("FAILURE: unable to find group");
+									Log.e(TAG, "FAILURE: unable to find group");
 								}
 							} else {
-								LOGGER.info("ERROR:: ");
+								Log.e(TAG, "ERROR:: ");
 								e.printStackTrace();
 							}
 						}
@@ -1039,6 +1286,11 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		}
 	}
 
+	/**
+	 * This method is used to listen to the spinner(drop down) list on the
+	 * Custom Radius Dialog which the group leader can access by long clicking
+	 * on the map.
+	 */
 	private void addListenerToSpinner() {
 		customRadiusSpinner
 				.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -1047,12 +1299,13 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 							View selectedItemView, int position, long id) {
 						String tempRadius = parentView.getItemAtPosition(
 								position).toString();
-						LOGGER.info("You have selected: " + tempRadius);
+						Log.i(TAG, "You have selected: " + tempRadius);
 					}
 
 					@Override
 					public void onNothingSelected(AdapterView<?> parentView) {
-						LOGGER.info("You have not selected a Radius. Resorting to Default Setting [10]");
+						Log.i(TAG,
+								"You have not selected a Radius. Resorting to Default Setting [10]");
 					}
 				});
 	}

@@ -1,8 +1,6 @@
 package com.kainos.groupsafe;
 
 import java.util.List;
-import java.util.logging.Logger;
-
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -17,6 +15,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,41 +24,53 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+/**
+ * Activity that will be displayed to the user if they select 'Add Emergency
+ * Contact' from the Settings screen. This activity allows a user to add a new
+ * emergency contact to their address book.
+ * 
+ * Layout: @see activity_add_emergency_contact.xml Menu: @see
+ * add_emergency_contact.xml
+ * 
+ * @author Rhiannon Henry
+ * 
+ */
 public class AddEmergencyContactActivity extends Activity {
 
-	private final static Logger LOGGER = Logger
-			.getLogger(AddEmergencyContactActivity.class.getName());
-	static AddEmergencyContactActivity _instance = null;
-
+	private static String TAG = "ADD_EMERGENCY_CONTACT";
+	private static AddEmergencyContactActivity _instance = null;
 	private static String emergencyContactName = null;
 	private static String emergencyContactNumber = null;
 	private static String emergencyContactRelationship = null;
 	private static String newEmergencyContactObjectID = null;
-
 	private EditText addEmergencyContactName;
 	private EditText addEmergencyContactNumber;
 	private EditText addEmergencyContactRelationship;
-
 	private boolean internetPresent = false;
-	ConnectionDetector connectionDetector;
+	private ConnectionDetector connectionDetector;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
-
 		connectionDetector = new ConnectionDetector(getApplicationContext());
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_emergency_contact);
 		_instance = this;
-
 		enableAllButtons();
-
 		cancelButtonClicked();
 		saveButtonClicked();
 	}
 
+	/**
+	 * This method is called if the user clicks on Save. This will start a flow
+	 * for adding a new Emergency contact to the database.
+	 */
 	private void saveButtonClicked() {
 		Button saveEmergencyContact = (Button) findViewById(R.id.addEmergencyContactSaveButton);
 		saveEmergencyContact.setOnClickListener(new OnClickListener() {
@@ -79,6 +90,11 @@ public class AddEmergencyContactActivity extends Activity {
 		});
 	}
 
+	/**
+	 * This method will retrieve the users input from the text fields on the
+	 * screen @see activity_add_emergency_contact.xml and will check if there is
+	 * an existing duplicate entry already in the database.
+	 */
 	protected void addEmergencyContactToDatabase() {
 		addEmergencyContactName = (EditText) findViewById(R.id.addEmergencyContactNameInput);
 		addEmergencyContactNumber = (EditText) findViewById(R.id.addEmergencyContactNumberInput);
@@ -99,34 +115,49 @@ public class AddEmergencyContactActivity extends Activity {
 					ParseException e) {
 				if (e == null) {
 					if (foundEmergencyContacts.size() != 0) {
-						LOGGER.info("A MATCHING EMERGENCY CONTACT ALREADY EXISTS");
+						Log.i(TAG,
+								"A MATCHING EMERGENCY CONTACT ALREADY EXISTS");
 						ParseObject contact = foundEmergencyContacts.get(0);
-						LOGGER.info("FOUND: "+contact.getObjectId());
+						Log.i(TAG, "FOUND: " + contact.getObjectId());
 						retrieveObjectID();
 					} else {
-						LOGGER.info("THIS IS A NEW EMERGENCY CONATCT");
+						Log.i(TAG, "THIS IS A NEW EMERGENCY CONATCT");
 						createNewContactInTable();
 					}
+				} else {
+					Log.e(TAG, "Error::");
+					e.printStackTrace();
 				}
 			}
 		});
 	}
 
+	/**
+	 * This method will be called if the emergency contact being added is not
+	 * presently in the Database. This method will add a new emergency contact
+	 * with the supplied information to the database, in the EmergencyContact
+	 * entity.
+	 */
 	protected void createNewContactInTable() {
 		ParseObject contact = new ParseObject("EmergencyContact");
 		contact.put("emergencyContactName", emergencyContactName);
 		contact.put("emergencyContactNumber", emergencyContactNumber);
-		contact.put("emergencyContactRelationship", emergencyContactRelationship);
+		contact.put("emergencyContactRelationship",
+				emergencyContactRelationship);
 		try {
 			contact.save();
+			Log.i(TAG, "New Emergency Contact Saved Successfully");
 		} catch (ParseException e2) {
-			LOGGER.info("UNABLE TO SAVE NEW EMERGENCY CONTACT AT THIS TIME...");
+			Log.e(TAG, "UNABLE TO SAVE NEW EMERGENCY CONTACT AT THIS TIME...");
 			e2.printStackTrace();
 		}
 		retrieveObjectID();
-
 	}
 
+	/**
+	 * This method is used to find the unique identifier of the newly added
+	 * emergency contact.
+	 */
 	protected void retrieveObjectID() {
 		ParseQuery<ParseObject> emergencyContactID = ParseQuery
 				.getQuery("EmergencyContact");
@@ -137,17 +168,21 @@ public class AddEmergencyContactActivity extends Activity {
 			public void done(List<ParseObject> emergencyContactList,
 					ParseException e) {
 				if (e == null) {
-					LOGGER.info("Retrieved: " + emergencyContactList.size()
+					Log.i(TAG, "Retrieved: " + emergencyContactList.size()
 							+ " emergency contacts");
 					for (int i = 0; i < emergencyContactList.size(); i++) {
 						ParseObject current = emergencyContactList.get(i);
-						LOGGER.info("Emergency Contact " + i + ": Name: "
-								+ current.get("emergencyContactName")
-								+ " Number: "
-								+ current.get("emergencyContactNumber")
-								+ " Relationship: "
-								+ current.get("emergencyContactRelationship")
-								+ " ObjectID: " + current.getObjectId());
+						Log.i(TAG,
+								"Emergency Contact "
+										+ i
+										+ ": Name: "
+										+ current.get("emergencyContactName")
+										+ " Number: "
+										+ current.get("emergencyContactNumber")
+										+ " Relationship: "
+										+ current
+												.get("emergencyContactRelationship")
+										+ " ObjectID: " + current.getObjectId());
 						if (current.get("emergencyContactName").equals(
 								emergencyContactName)
 								&& current.get("emergencyContactNumber")
@@ -157,19 +192,30 @@ public class AddEmergencyContactActivity extends Activity {
 							newEmergencyContactObjectID = current.getObjectId();
 							addContactToUserEmergencyContactList(newEmergencyContactObjectID);
 						} else {
-							LOGGER.info("NO MATCH FOR EMERGENCY CONTACT");
+							Log.e(TAG, "NO MATCH FOR EMERGENCY CONTACT");
 						}
 					}
 				} else {
-					LOGGER.info("UNABLE TO RETRIEVE CONTACT FROM CONTACT TABLE");
+					Log.e(TAG, "UNABLE TO RETRIEVE CONTACT FROM CONTACT TABLE");
 				}
 			}
 
+			/**
+			 * This method is used to add a reference to the emergency contact
+			 * to the users list of emergency contacts for the user. Once
+			 * complete, the user will be returned to the Settings screen for
+			 * the application
+			 * 
+			 * @param newEmergencyContactObjectID
+			 *            This is a String value giving the unique reference
+			 *            that can be used to reference the newly created
+			 *            Emergency Contact in the Emergency Contact entity.
+			 */
 			private void addContactToUserEmergencyContactList(
 					String newEmergencyContactObjectID) {
-				LOGGER.info("New Emergency Contact ObjectID: "
+				Log.i(TAG, "New Emergency Contact ObjectID: "
 						+ newEmergencyContactObjectID);
-				LOGGER.info("Starting query on user emergency contact list...");
+				Log.i(TAG, "Starting query on user emergency contact list...");
 				ParseUser currentUser = ParseUser.getCurrentUser();
 				currentUser.addUnique("emergencyContacts",
 						newEmergencyContactObjectID);
@@ -177,7 +223,7 @@ public class AddEmergencyContactActivity extends Activity {
 					@Override
 					public void done(ParseException e) {
 						if (e == null) {
-							LOGGER.info("SAVED EMERGENCY CONTACT SUCCESSFULLY");
+							Log.i(TAG, "SAVED EMERGENCY CONTACT SUCCESSFULLY");
 							Toast.makeText(getApplicationContext(),
 									"Saved Emergency Contact Successfully!",
 									Toast.LENGTH_LONG).show();
@@ -189,8 +235,9 @@ public class AddEmergencyContactActivity extends Activity {
 							Toast.makeText(getApplicationContext(),
 									"Unable to Save Emergency Contact...",
 									Toast.LENGTH_LONG).show();
-							LOGGER.info("ENCOUNTERED ERROR SAVING EMERGENCY CONTACT");
-							LOGGER.info(e.getMessage());
+							Log.e(TAG,
+									"ENCOUNTERED ERROR SAVING EMERGENCY CONTACT");
+							Log.e(TAG, e.getMessage());
 						}
 					}
 				});
@@ -198,10 +245,14 @@ public class AddEmergencyContactActivity extends Activity {
 		});
 	}
 
+	/**
+	 * This method will be called if the user clicks 'Cancel' on the Add
+	 * Emergency Contact page @see activity_add_emergency_contact.xml. The user
+	 * will be returned to the Settings page of the application.
+	 */
 	private void cancelButtonClicked() {
 		Button cancelEmergencyContact = (Button) findViewById(R.id.addEmergencyContactCancelButton);
 		cancelEmergencyContact.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				disableAllButtons();
@@ -219,6 +270,11 @@ public class AddEmergencyContactActivity extends Activity {
 		});
 	}
 
+	/**
+	 * Method that displays an alert dialog to the user prompting them to alter
+	 * their Internet settings. The user can cancel the dialog or they can be
+	 * directed to the 'Settings' screen for their phone.
+	 */
 	private void showNoInternetConnectionDialog() {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setTitle("Internet Settings");
@@ -244,6 +300,12 @@ public class AddEmergencyContactActivity extends Activity {
 		alertDialog.show();
 	}
 
+	/**
+	 * Disables all buttons that are on the AddEmergencyContactActivity.java
+	 * view.
+	 * 
+	 * @see activity_add_emergency_contact.xml
+	 */
 	private void disableAllButtons() {
 		Button saveEmergencyContact = (Button) findViewById(R.id.addEmergencyContactSaveButton);
 		Button cancelEmergencyContact = (Button) findViewById(R.id.addEmergencyContactCancelButton);
@@ -254,6 +316,12 @@ public class AddEmergencyContactActivity extends Activity {
 		cancelEmergencyContact.setEnabled(false);
 	}
 
+	/**
+	 * Enables all buttons that are on the AddEmergencyContactActivity.java
+	 * view.
+	 * 
+	 * @see activity_add_emergency_contact.xml
+	 */
 	private void enableAllButtons() {
 		Button saveEmergencyContact = (Button) findViewById(R.id.addEmergencyContactSaveButton);
 		Button cancelEmergencyContact = (Button) findViewById(R.id.addEmergencyContactCancelButton);
@@ -264,6 +332,11 @@ public class AddEmergencyContactActivity extends Activity {
 		cancelEmergencyContact.setEnabled(true);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -271,6 +344,11 @@ public class AddEmergencyContactActivity extends Activity {
 		return true;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
@@ -285,20 +363,24 @@ public class AddEmergencyContactActivity extends Activity {
 			createGroup();
 		} else if (id == R.id.action_home) {
 			home();
-		} else if (id == R.id.action_settings){
+		} else if (id == R.id.action_settings) {
 			settings();
 		}
 		return true;
 	}
 
+	/**
+	 * This method is used to log the current user out of the application. The
+	 * user can only log out if they have internet connection.
+	 */
 	private void logCurrentUserOut() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Logging out user: " + ParseUser.getCurrentUser()
+			Log.i(TAG, "Logging out user: " + ParseUser.getCurrentUser()
 					+ "...");
 			ParseUser.logOut();
 			if (ParseUser.getCurrentUser() == null) {
-				LOGGER.info("User successfully logged out!");
+				Log.i(TAG, "User successfully logged out!");
 				Toast.makeText(getApplicationContext(),
 						"Successfully Logged Out!", Toast.LENGTH_LONG).show();
 				Intent intent = new Intent(getApplicationContext(),
@@ -314,10 +396,15 @@ public class AddEmergencyContactActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'Add Contact' menu option. This will display
+	 * the activity that will allow a user to add a new contact to their contact
+	 * list @see AddContactActivity.java and @see activity_add_contact.xml
+	 */
 	private void addNewContact() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Starting Add Contact Activity...");
+			Log.i(TAG, "Starting Add Contact Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					AddContactActivity.class);
 			startActivity(intent);
@@ -327,10 +414,15 @@ public class AddEmergencyContactActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'View Map' menu option. This will display the
+	 * activity that will allow a user to view their current location on a map @see
+	 * MapsViewActivity.java and @see activity_maps_view.xml
+	 */
 	private void viewMap() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Starting Map View Activity...");
+			Log.i(TAG, "Starting Map View Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					MapsViewActivity.class);
 			startActivity(intent);
@@ -340,10 +432,17 @@ public class AddEmergencyContactActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'Create Group' menu option. This will display
+	 * the activity that will allow a user to select participants from their
+	 * contact list who they wish to participate in the group they are creating @see
+	 * SelectGroupParticipantsActivity.java and @see
+	 * activity_select_group_participants.xml
+	 */
 	private void createGroup() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Starting Create Group Activity...");
+			Log.i(TAG, "Starting Create Group Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					SelectGroupParticipantsActivity.class);
 			startActivity(intent);
@@ -353,10 +452,15 @@ public class AddEmergencyContactActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'Home' menu option. This will display the
+	 * home activity screen to the user. @see HomeActivity.java and @see
+	 * activity_home.xml
+	 */
 	private void home() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Starting Home Activity...");
+			Log.i(TAG, "Starting Home Activity...");
 			Intent intent = new Intent(getApplicationContext(),
 					HomeActivity.class);
 			startActivity(intent);
@@ -366,11 +470,18 @@ public class AddEmergencyContactActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used for the 'Settings' menu option. This will display the
+	 * activity that will allow a user to view and change their current settings
+	 * for the application @see SettingsActivity.java and @see
+	 * activity_settings.xml
+	 */
 	private void settings() {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			LOGGER.info("Going to Settings page... ");
-			Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+			Log.i(TAG, "Going to Settings page... ");
+			Intent intent = new Intent(getApplicationContext(),
+					SettingsActivity.class);
 			startActivity(intent);
 			finish();
 		} else {

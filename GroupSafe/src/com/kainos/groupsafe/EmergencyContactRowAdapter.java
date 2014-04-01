@@ -1,9 +1,8 @@
 package com.kainos.groupsafe;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
-
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,32 +11,61 @@ import android.widget.TextView;
 
 import com.kainos.groupsafe.R;
 
+/**
+ * This class is used to add rows to the emergency contact List View on the
+ * Settings activity. @see settings.xml. The information from each Emergency
+ * Contact @see EmergencyContact.java will be extracted and placed in the
+ * appropriate place within the row @see emergency_contact_row.xml.
+ * 
+ * @author Rhiannon Henry
+ */
 public class EmergencyContactRowAdapter extends ArrayAdapter<EmergencyContact> {
 
-	private final static Logger LOGGER = Logger
-			.getLogger(EmergencyContactRowAdapter.class.getName());
-
+	private static final String TAG = "EMERGENCY_CONTACT_ROW_ADAPTER";
 	public ArrayList<EmergencyContact> emergencyContactList;
 
+	/**
+	 * This is the constructor for the adapter.
+	 * 
+	 * @param context
+	 *            the current state of the application and device
+	 * @param layoutResourceId
+	 *            an integer value referencing the xml layout for the row (@see
+	 *            emergency_contact_row.xml)
+	 * @param emergencyContactList
+	 *            this is an ArrayList containing information about all the
+	 *            emergency contacts for a user
+	 */
 	public EmergencyContactRowAdapter(Context context, int layoutResourceId,
 			ArrayList<EmergencyContact> emergencyContactList) {
 		super(context, layoutResourceId, emergencyContactList);
 		this.emergencyContactList = new ArrayList<EmergencyContact>();
 		this.emergencyContactList.addAll(emergencyContactList);
 	}
-	
+
+	/**
+	 * This class holds the reference the items that are within the layout of
+	 * the emergency contact row @see emergency_contact_row.xml
+	 * 
+	 * @author Rhiannon Henry
+	 * 
+	 */
 	private class ViewHolder {
 		TextView emergencyContactName;
 		TextView emergencyContactNumber;
 		TextView emergencyContactRelationship;
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see android.widget.ArrayAdapter#getView(int, android.view.View, android.view.ViewGroup)
+	 */
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 
 		ViewHolder holder = null;
-		LOGGER.info("ConvertView " + String.valueOf(position));
-		LOGGER.info("Number of emergency contacts: "+emergencyContactList.size());
+		Log.d(TAG,"ConvertView " + String.valueOf(position));
+		Log.d(TAG,"Number of emergency contacts: "
+				+ emergencyContactList.size());
 
 		LayoutInflater vi = (LayoutInflater) getContext().getSystemService(
 				Context.LAYOUT_INFLATER_SERVICE);
@@ -55,13 +83,13 @@ public class EmergencyContactRowAdapter extends ArrayAdapter<EmergencyContact> {
 		convertView.setTag(holder);
 
 		EmergencyContact eContact = emergencyContactList.get(position);
-		LOGGER.info("Creating View with Emergency Contact:");
-		LOGGER.info("Name: "+eContact.getEmergencyContactName());
-		LOGGER.info("Number: "+eContact.getEmergencyContactNumber());
-		LOGGER.info("Relationship: "+eContact.getEmergencyContactRelationship());
-		
-		holder.emergencyContactName
-				.setText(eContact.getEmergencyContactName());
+		Log.i(TAG,"Creating View with Emergency Contact:");
+		Log.i(TAG,"Name: " + eContact.getEmergencyContactName());
+		Log.i(TAG,"Number: " + eContact.getEmergencyContactNumber());
+		Log.i(TAG,"Relationship: "
+				+ eContact.getEmergencyContactRelationship());
+
+		holder.emergencyContactName.setText(eContact.getEmergencyContactName());
 		holder.emergencyContactNumber.setText(eContact
 				.getEmergencyContactNumber());
 		holder.emergencyContactRelationship.setText(eContact
@@ -69,6 +97,5 @@ public class EmergencyContactRowAdapter extends ArrayAdapter<EmergencyContact> {
 
 		return convertView;
 	}
-	
 
 }

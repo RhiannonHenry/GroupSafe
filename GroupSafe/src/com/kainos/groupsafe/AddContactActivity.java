@@ -441,7 +441,7 @@ public class AddContactActivity extends Activity {
 	}
 
 	/**
-	 * Enables all buttons that are on the AddContactActivity.java view.
+	 * Disables all buttons that are on the AddContactActivity.java view.
 	 * 
 	 * @see activity_add_contact.xml
 	 */

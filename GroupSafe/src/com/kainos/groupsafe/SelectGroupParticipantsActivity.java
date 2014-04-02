@@ -2,11 +2,9 @@ package com.kainos.groupsafe;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import com.parse.FindCallback;
 import com.parse.Parse;
-import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -15,36 +13,46 @@ import com.parse.ParseUser;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 
+/**
+ * This Activity is the first step in the 'Create Group' process, where a user
+ * can select contacts from their contact list that they wish to participate in
+ * the group. From this screen, the user will be able select/de-select
+ * participants and proceed to the next step in the 'Create Group' process
+ * (GroupDetails @see {@link SetGroupGeoFenceActivity})
+ * 
+ * @author Rhiannon Henry
+ * 
+ */
 public class SelectGroupParticipantsActivity extends Activity {
 
-	private final static Logger LOGGER = Logger
-			.getLogger(SelectGroupParticipantsActivity.class.getName());
-	static SelectGroupParticipantsActivity _instance = null;
-
-	ParticipantContactRowAdapter adapter = null;
+	private static final String TAG = "SELECT_PARTICIPANTS_ACTIVITY";
+	private static SelectGroupParticipantsActivity _instance = null;
+	private ParticipantContactRowAdapter adapter = null;
 	private ArrayList<ParticipantContact> retrievedContacts = new ArrayList<ParticipantContact>();
 	private ArrayList<String> chosenParticipants = new ArrayList<String>();
 	private Button next, cancel;
-	ListView listView = null;
+	private ListView listView = null;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
-		ParseAnalytics.trackAppOpened(getIntent());
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_select_group_participants);
 		_instance = this;
-
 		refreshContacts();
-
 		// create an Array Adapter from the String Array
 		listView = (ListView) findViewById(R.id.contactGroupList);
 		View footer = getLayoutInflater().inflate(
@@ -66,29 +74,51 @@ public class SelectGroupParticipantsActivity extends Activity {
 		cancelButtonOnClick();
 	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		GroupSafeApplication.activityResumed();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
+	}
+	
+	/**
+	 * This method is used if the user clicks 'Cancel' button on the
+	 * {@link SetGroupGeoFenceActivity} screen (@see
+	 * footer_select_participants.xml). This method returns the user to the Home
+	 * screen {@link HomeActivity}
+	 */
 	private void cancelButtonOnClick() {
 		cancel.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				disableAllButtons();
-
-				LOGGER.info("Exiting the Create Group process...");
+				Log.i(TAG, "Exiting the Create Group process...");
 				Intent intent = new Intent(_instance, HomeActivity.class);
 				startActivity(intent);
 			}
 		});
 	}
 
+	/**
+	 * This method is called if the user clicks the 'Next' button on the
+	 * {@link SetGroupGeoFenceActivity} screen (@see
+	 * footer_select_participants.xml). This method will gather all the selected
+	 * participants and place them in an array. This array will be passed
+	 * through to the next activity {@link SetGroupGeoFenceActivity} via the
+	 * intent.
+	 */
 	private void nextButtonOnClick() {
 		next.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// Disable all Buttons
 				disableAllButtons();
-
 				ArrayList<ParticipantContact> possibleParticipants = adapter.participantContactList;
-
 				for (int i = 0; i < possibleParticipants.size(); i++) {
 					ParticipantContact possibleParticipant = possibleParticipants
 							.get(i);
@@ -97,12 +127,10 @@ public class SelectGroupParticipantsActivity extends Activity {
 								.getObjectId());
 					}
 				}
-
-				LOGGER.info("Chosen Participants: ");
+				Log.i(TAG, "Chosen Participants: ");
 				for (int j = 0; j < chosenParticipants.size(); j++) {
-					LOGGER.info(j + ". " + chosenParticipants.get(j));
+					Log.i(TAG, j + ". " + chosenParticipants.get(j));
 				}
-
 				Intent intent = new Intent(_instance,
 						SetGroupGeoFenceActivity.class);
 				intent.putStringArrayListExtra("chosenParticipants",
@@ -112,6 +140,10 @@ public class SelectGroupParticipantsActivity extends Activity {
 		});
 	}
 
+	/**
+	 * Disables all buttons on the screen @see footer_select_participants.xml
+	 * and @see footer_select_participants.xml
+	 */
 	private void disableAllButtons() {
 		next.setClickable(false);
 		next.setEnabled(false);
@@ -119,6 +151,10 @@ public class SelectGroupParticipantsActivity extends Activity {
 		cancel.setEnabled(false);
 	}
 
+	/**
+	 * Enables all buttons on the screen @see footer_select_participants.xml and @see
+	 * footer_select_participants.xml
+	 */
 	private void enableAllButtons() {
 		next.setClickable(true);
 		next.setEnabled(true);
@@ -126,16 +162,10 @@ public class SelectGroupParticipantsActivity extends Activity {
 		cancel.setEnabled(true);
 	}
 
-	/**
-	 * This is a Javadoc example. It explains the working of Javadoc comments.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param String
-	 *            text The above line is used to document what the parameters
-	 *            that are passed to the method do. Each parameter gets its own @param
-	 *            block.
-	 * 
-	 * @return void This explains what the output / result of the method is. In
-	 *         this case, it's void.
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -147,8 +177,6 @@ public class SelectGroupParticipantsActivity extends Activity {
 	/**
 	 * This method is used to retrieve a list of contacts for the currentUser
 	 * from Parse.
-	 * 
-	 * @return void This method doesn't return anything.
 	 */
 	private void refreshContacts() {
 		retrievedContacts.clear();
@@ -156,11 +184,11 @@ public class SelectGroupParticipantsActivity extends Activity {
 		@SuppressWarnings("unchecked")
 		ArrayList<Object> userContacts = (ArrayList<Object>) currentUser
 				.get("contacts");
-		LOGGER.info("Got Contacts:");
+		Log.i(TAG, "Got Contacts:");
 		for (int i = 0; i < userContacts.size(); i++) {
 			Object currentContact = userContacts.get(i);
 			createRetrievedContact(currentContact);
-			LOGGER.info(i + ". " + currentContact);
+			Log.i(TAG, i + ". " + currentContact);
 		}
 	}
 
@@ -171,9 +199,6 @@ public class SelectGroupParticipantsActivity extends Activity {
 	 * 
 	 * @param Object
 	 *            This is the objectID of the Contact returned from Parse.
-	 * 
-	 * @return void This explains what the output / result of the method is. In
-	 *         this case, it's void.
 	 */
 	private void createRetrievedContact(Object currentContact) {
 		String contactObjectId = currentContact.toString();
@@ -188,8 +213,8 @@ public class SelectGroupParticipantsActivity extends Activity {
 						String contactName = current.get("name").toString();
 						String contactNumber = current.get("number").toString();
 						String objectId = current.getObjectId();
-						LOGGER.info("Contact Name: " + contactName);
-						LOGGER.info("Contact Number: " + contactNumber);
+						Log.i(TAG, "Contact Name: " + contactName);
+						Log.i(TAG, "Contact Number: " + contactNumber);
 						ParseQuery<ParseUser> getUserForContact = ParseUser
 								.getQuery();
 						getUserForContact.whereEqualTo("username",
@@ -200,10 +225,12 @@ public class SelectGroupParticipantsActivity extends Activity {
 							if (contactUserList.size() > 0) {
 								ParseUser contactUser = contactUserList.get(0);
 								if (contactUser.getBoolean("groupLeader")) {
-									LOGGER.info("User is currently a GROUP LEADER");
+									Log.i(TAG,
+											"User is currently a GROUP LEADER");
 								} else if (contactUser
 										.getBoolean("groupMember")) {
-									LOGGER.info("User is currently a GROUP MEMBER");
+									Log.i(TAG,
+											"User is currently a GROUP MEMBER");
 								} else {
 									ParticipantContact contact = new ParticipantContact(
 											contactName, contactNumber,
@@ -214,16 +241,17 @@ public class SelectGroupParticipantsActivity extends Activity {
 									listView.refreshDrawableState();
 								}
 							} else {
-								LOGGER.info("ERROR:: Unable to find user for contact");
+								Log.e(TAG,
+										"ERROR:: Unable to find user for contact");
 							}
 						} catch (ParseException e1) {
-							// TODO Auto-generated catch block
+							Log.e(TAG, "ERROR::");
 							e1.printStackTrace();
 						}
 
 					}
 				} else {
-					LOGGER.info("SOMETHING WENT WRONG RETRIEVING CONTACT");
+					Log.e(TAG, "SOMETHING WENT WRONG RETRIEVING CONTACT");
 
 				}
 			}

@@ -12,10 +12,7 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
@@ -77,6 +74,19 @@ public class EmergencyContactDetailsActivity extends Activity {
 			Utilities.showNoInternetConnectionDialog(this);
 		}
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		GroupSafeApplication.activityResumed();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
+	}
+
 
 	/**
 	 * This method is used to update the page with the relevant information

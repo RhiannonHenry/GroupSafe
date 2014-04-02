@@ -58,6 +58,19 @@ public class EditOrganizationActivity extends Activity {
 		cancelButtonClicked();
 		saveButtonClicked();
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		GroupSafeApplication.activityResumed();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
+	}
+
 
 	/**
 	 * This method is called when the user clicks on 'Save' button from the @see

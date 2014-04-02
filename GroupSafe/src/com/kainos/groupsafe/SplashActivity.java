@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
@@ -37,7 +35,7 @@ public class SplashActivity extends Activity {
 	private final static String TAG = "Splash_Activity";
 	private static SplashActivity _instance = null;
 	private boolean internetPresent = false;
-	private ConnectionDetector connectionDetector;
+	//private ConnectionDetector connectionDetector;
 
 	/*
 	 * (non-Javadoc)
@@ -49,7 +47,7 @@ public class SplashActivity extends Activity {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
 		ParseAnalytics.trackAppOpened(getIntent());
-		connectionDetector = new ConnectionDetector(getApplicationContext());
+		//connectionDetector = new ConnectionDetector(getApplicationContext());
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		Log.i(TAG, "User: " + currentUser);
 		if (currentUser != null) {
@@ -60,6 +58,18 @@ public class SplashActivity extends Activity {
 		_instance = this;
 		// createTestOrganization();
 		enableAllButtons();
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		GroupSafeApplication.activityResumed();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
 	}
 
 	/**
@@ -75,7 +85,7 @@ public class SplashActivity extends Activity {
 	 */
 	public void registerNow(View view) {
 		disableAllButtons();
-		internetPresent = connectionDetector.isConnectedToInternet();
+		//internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
 			Log.i(TAG,
 					"The user has clicked 'Register'. Now entering RegisterActivity.class");
@@ -100,7 +110,7 @@ public class SplashActivity extends Activity {
 	public void signin(View view) {
 		// Disable buttons
 		disableAllButtons();
-		internetPresent = connectionDetector.isConnectedToInternet();
+		//internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
 			proceedToLogin();
 		} else {

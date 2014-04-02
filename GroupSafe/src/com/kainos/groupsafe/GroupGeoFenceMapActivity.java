@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -120,6 +121,14 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		startActivityLogic();
 	}
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
+		autoUpdate.cancel();
+	}
+
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -129,6 +138,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 	public void onResume() {
 		Log.i(TAG, "UPDATING...");
 		super.onResume();
+		GroupSafeApplication.activityResumed();
 		autoUpdate = new Timer();
 		autoUpdate.schedule(new TimerTask() {
 			@Override
@@ -336,12 +346,6 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 				});
 			}
 		}, 0, 30000); // updates every 30 seconds
-	}
-
-	@Override
-	public void onPause() {
-		autoUpdate.cancel();
-		super.onPause();
 	}
 
 	/**

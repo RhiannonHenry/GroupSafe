@@ -69,6 +69,18 @@ public class RegisterActivity extends Activity {
 		enableAllButtons();
 	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		GroupSafeApplication.activityResumed();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
+	}
+
 	/**
 	 * This method is called when the user opts to cancel registration and
 	 * navigate back to the Splash screen
@@ -80,8 +92,7 @@ public class RegisterActivity extends Activity {
 	public void registerCancel(View view) {
 		disableAllButtons();
 
-		Intent intent = new Intent(_instance,
-				SplashActivity.class);
+		Intent intent = new Intent(_instance, SplashActivity.class);
 		startActivity(intent);
 		finish();
 	}
@@ -245,8 +256,7 @@ public class RegisterActivity extends Activity {
 					Toast.makeText(getApplicationContext(),
 							"Successfully Registered!", Toast.LENGTH_LONG)
 							.show();
-					Intent intent = new Intent(_instance,
-							HomeActivity.class);
+					Intent intent = new Intent(_instance, HomeActivity.class);
 					startActivity(intent);
 					finish();
 				} else {
@@ -347,7 +357,7 @@ public class RegisterActivity extends Activity {
 	 * their Internet settings. The user can cancel the dialog or they can be
 	 * directed to the 'Settings' screen for their phone.
 	 */
-	 {
+	{
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 		alertDialog.setTitle("Internet Settings");
 		alertDialog

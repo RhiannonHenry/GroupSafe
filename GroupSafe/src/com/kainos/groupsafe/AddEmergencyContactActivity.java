@@ -67,6 +67,19 @@ public class AddEmergencyContactActivity extends Activity {
 		cancelButtonClicked();
 		saveButtonClicked();
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		GroupSafeApplication.activityResumed();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
+	}
+
 
 	/**
 	 * This method is called if the user clicks on Save. This will start a flow

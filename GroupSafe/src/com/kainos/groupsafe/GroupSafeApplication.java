@@ -15,6 +15,8 @@ import android.app.Application;
  */
 public class GroupSafeApplication extends Application {
 
+	private static boolean activityVisible;
+
 	public GroupSafeApplication() {
 	}
 
@@ -30,4 +32,17 @@ public class GroupSafeApplication extends Application {
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
 		PushService.setDefaultPushCallback(this, HomeActivity.class);
 	}
+
+	public static boolean isActivityVisible() {
+		return activityVisible;
+	}
+
+	public static void activityResumed() {
+		activityVisible = true;
+	}
+
+	public static void activityPaused() {
+		activityVisible = false;
+	}
+
 }

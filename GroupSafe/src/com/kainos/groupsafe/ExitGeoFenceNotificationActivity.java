@@ -1,6 +1,7 @@
 package com.kainos.groupsafe;
 
 import com.parse.Parse;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
@@ -39,6 +40,19 @@ public class ExitGeoFenceNotificationActivity extends Activity {
 		enableAllButtons();
 		OKButtonClicked();
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		GroupSafeApplication.activityResumed();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
+	}
+
 
 	/**
 	 * This method is called when the user clicks 'OK' on the

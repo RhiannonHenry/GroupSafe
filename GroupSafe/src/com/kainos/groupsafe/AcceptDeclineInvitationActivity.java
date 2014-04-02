@@ -13,10 +13,7 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
@@ -82,12 +79,22 @@ public class AcceptDeclineInvitationActivity extends Activity {
 
 	@Override
 	public void onResume() {
+		super.onResume();
+		GroupSafeApplication.activityResumed();
 		internetPresent = connectionDetector.isConnectedToInternet();
 		enableAllButtons();
 		if (internetPresent) {
 			populatePage();
 		}
 	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
+	}
+
+	
 
 	/**
 	 * This method is used to update the text on the Accept/Decline Invitation
@@ -404,7 +411,6 @@ public class AcceptDeclineInvitationActivity extends Activity {
 		decline.setClickable(false);
 		decline.setEnabled(false);
 	}
-
 
 	/*
 	 * (non-Javadoc)

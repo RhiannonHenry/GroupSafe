@@ -12,10 +12,7 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
@@ -73,6 +70,22 @@ public class ContactDetailsActivity extends Activity {
 		setContentView(R.layout.activity_contact_details);
 		_instance = this;
 		enableAllButtons();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		GroupSafeApplication.activityResumed();
+		internetPresent = connectionDetector.isConnectedToInternet();
+		if (internetPresent) {
+			populatePage();
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
 	}
 
 	/**
@@ -279,9 +292,6 @@ public class ContactDetailsActivity extends Activity {
 		return MenuUtils.menuOptions(id, this, internetPresent, TAG);
 	}
 
-
-
-	
 	/**
 	 * Disables all buttons that are on the ContactDetailsActivity.java view.
 	 * 

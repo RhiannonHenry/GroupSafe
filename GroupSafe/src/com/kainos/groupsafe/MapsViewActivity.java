@@ -1,11 +1,10 @@
 package com.kainos.groupsafe;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -14,7 +13,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.parse.FindCallback;
 import com.parse.Parse;
-import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -25,28 +23,41 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+/**
+ * Activity that will be displayed to the user if they select 'View Map' from
+ * the menu. The user will be able to see their current location on the Map.
+ * 
+ * Layout: @see activity_maps_view.xml Menu: @see maps_view.xml
+ * 
+ * @author Rhiannon Henry
+ * 
+ */
 public class MapsViewActivity extends Activity {
 
-	private final static Logger LOGGER = Logger
-			.getLogger(MapsViewActivity.class.getName());
+	private static final String TAG = "MAP_VIEW";
 
 	private GoogleMap googleMap;
-	MarkerOptions currentLocationMarker;
-	GPSTracker locationServices;
+	private MarkerOptions currentLocationMarker;
+	private boolean internetPresent = false;
+	private ConnectionDetector connectionDetector;
+	private GPSTracker locationServices;
 	private String userObjectId;
 	private String userLocationObjectId;
 	private double lat;
 	private double lng;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
-		ParseAnalytics.trackAppOpened(getIntent());
-
+		connectionDetector = new ConnectionDetector(getApplicationContext());
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_maps_view);
-
 		try {
 			// Get User Location : Lat, Lng...
 			getCurrentLocation();
@@ -59,9 +70,33 @@ public class MapsViewActivity extends Activity {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
+	/**
+	 * This method is called and uses the GPSTracker class to find the users
+	 * current latitude and longitude location.
+	 * 
+	 * @see {@link GPSTracker}
+	 */
+	private void getCurrentLocation() {
+		Log.d(TAG, "Entering Get Current Location...");
+		locationServices = new GPSTracker(MapsViewActivity.this);
+		if (locationServices.canGetLocation()) {
+			lat = getMyLat();
+			lng = getMyLng();
+			Log.i(TAG, "Location: Lat: " + lat + " Lng: " + lng);
+		} else {
+			locationServices.showSettingAlert();
+		}
+	}
+
+	/**
+	 * This method is used to check if the user has a current unique location
+	 * identifier associated with their contact. If there is a currently
+	 * associated location, we want to update that object. If there is not
+	 * currently a location in the database associated with the user, we want to
+	 * create one.
+	 */
 	private void checkForExistingEntry() {
 		userObjectId = ParseUser.getCurrentUser().getObjectId();
 
@@ -74,48 +109,58 @@ public class MapsViewActivity extends Activity {
 				if (e == null) {
 					if (foundExistingLocation.size() != 0) {
 						ParseObject currentData = foundExistingLocation.get(0);
-						LOGGER.info("A LOCATION ENTRY ALREADY EXISTS FOR USER");
-						LOGGER.info("EXISTING LOCATION ObjectID: "
-								+ currentData.getObjectId());
-						LOGGER.info("UPDATING LAT and LNG FOR CURRENT USER");
+						Log.i(TAG, "A LOCATION ENTRY ALREADY EXISTS FOR USER");
+						Log.i(TAG,
+								"EXISTING LOCATION ObjectID: "
+										+ currentData.getObjectId());
+						Log.i(TAG, "UPDATING LAT and LNG FOR CURRENT USER");
 						currentData.put("currentLat", String.valueOf(lat));
 						currentData.put("currentLng", String.valueOf(lng));
 						try {
 							currentData.save();
-							LOGGER.info("Success:: UPDATED USER LOCATION DATA SUCCESSFULLY");
+							Log.i(TAG,
+									"Success:: UPDATED USER LOCATION DATA SUCCESSFULLY");
 						} catch (ParseException e1) {
-							LOGGER.info("UNABLE TO UPDATE USER LOCATION DATA");
+							Log.e(TAG, "UNABLE TO UPDATE USER LOCATION DATA");
 							e1.printStackTrace();
 						}
 					} else {
-						LOGGER.info("THIS IS A NEW LOCATION ENTRY");
+						Log.i(TAG, "THIS IS A NEW LOCATION ENTRY");
 						createNewLocationInTable();
 					}
-				}else{
-					LOGGER.info("ERROR::");
+				} else {
+					Log.e(TAG, "ERROR::");
 					e.printStackTrace();
 				}
 			}
 		});
 	}
 
+	/**
+	 * This method is used to create a new location object in the Location
+	 * Entity in the database.
+	 */
 	protected void createNewLocationInTable() {
 		ParseObject location = new ParseObject("Location");
 		location.put("currentLat", String.valueOf(lat));
 		location.put("currentLng", String.valueOf(lng));
 		location.put("userId", ParseUser.getCurrentUser().getObjectId());
 		try {
-			LOGGER.info("Success:: saved new user location to Location Table");
+			Log.i(TAG, "Success:: saved new user location to Location Table");
 			location.save();
 		} catch (ParseException e2) {
-			LOGGER.info("UNABLE TO SAVE NEW LOCATION AT THIS TIME...");
+			Log.e(TAG, "UNABLE TO SAVE NEW LOCATION AT THIS TIME...");
 			e2.printStackTrace();
 		}
 		retrieveObjectID();
 	}
 
+	/**
+	 * This method is used to retrieve the unique location identifier that is
+	 * associated with a user.
+	 */
 	private void retrieveObjectID() {
-		LOGGER.info("RETRIEVING LOCATION OBJECT ID FOR EXISTING USER");
+		Log.d(TAG, "RETRIEVING LOCATION OBJECT ID FOR EXISTING USER");
 		ParseQuery<ParseObject> locationID = ParseQuery.getQuery("Location");
 		locationID.whereEqualTo("userId", userObjectId);
 		locationID.findInBackground(new FindCallback<ParseObject>() {
@@ -124,34 +169,47 @@ public class MapsViewActivity extends Activity {
 				if (e == null) {
 					for (int i = 0; i < locationList.size(); i++) {
 						ParseObject current = locationList.get(i);
-						LOGGER.info("Location: " + current.get("currentLat")
+						Log.i(TAG, "Location: " + current.get("currentLat")
 								+ "," + current.get("currentLng")
 								+ " for user: " + userObjectId);
 						if (current.get("userId").equals(userObjectId)) {
 							userLocationObjectId = current.getObjectId();
 							addLocationToUserCurrentLocation(userLocationObjectId);
 						} else {
-							LOGGER.info("NO MATCH FOR LOCATION");
+							Log.e(TAG, "NO MATCH FOR LOCATION");
 						}
 					}
 				} else {
-					LOGGER.info("UNABLE TO RETRIEVE LOCATION FROM LOCATION TABLE");
+					Log.e(TAG,
+							"UNABLE TO RETRIEVE LOCATION FROM LOCATION TABLE");
 				}
 			}
 
+			/**
+			 * This method is used to update the attribute 'currentLocation' in
+			 * the User object. This attribute holds a String value that is a
+			 * reference to the unique location identifier that is associated
+			 * with the user.
+			 * 
+			 * @param userLocationObjectId
+			 *            a String value that represents the unique location
+			 *            identifier for a Location object that is assoication
+			 *            with a User.
+			 */
 			private void addLocationToUserCurrentLocation(
 					String userLocationObjectId) {
-				LOGGER.info("UPDATING USER TABLE WITH CURRENT LOCATION OBJECT ID");
-				LOGGER.info("New Location ObjectID: " + userLocationObjectId);
+				Log.d(TAG,
+						"UPDATING USER TABLE WITH CURRENT LOCATION OBJECT ID");
+				Log.i(TAG, "New Location ObjectID: " + userLocationObjectId);
 				ParseUser currentUser = ParseUser.getCurrentUser();
 				currentUser.put("currentLocation", userLocationObjectId);
 				currentUser.saveInBackground(new SaveCallback() {
 					@Override
 					public void done(ParseException e) {
 						if (e == null) {
-							LOGGER.info("UPDATED USER SUCCESSFULLY");
+							Log.i(TAG, "UPDATED USER SUCCESSFULLY");
 						} else {
-							LOGGER.info("ERROR SAVING LOCATION FOR USER");
+							Log.e(TAG, "ERROR SAVING LOCATION FOR USER");
 						}
 					}
 				});
@@ -159,8 +217,12 @@ public class MapsViewActivity extends Activity {
 		});
 	}
 
+	/**
+	 * This method is used to initialise the Google Map Fragment if it has not
+	 * already initialised.
+	 */
 	private void initialiseMap() {
-		LOGGER.info("Entering Initialise Map...");
+		Log.d(TAG, "Entering Initialise Map...");
 		if (googleMap == null) {
 			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
 					R.id.map)).getMap();
@@ -171,27 +233,32 @@ public class MapsViewActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This method is used to initialise a Marker that will be used to point to
+	 * the users current location. If a marker has already been initialised, it
+	 * will be used.
+	 */
 	private void createCurrentLocationMarker() {
-		LOGGER.info("Entering Create Location Marker...");
+		Log.d(TAG, "Entering Create Location Marker...");
 		if (currentLocationMarker == null) {
 			currentLocationMarker = new MarkerOptions();
 		}
 	}
 
-	private void getCurrentLocation() {
-		LOGGER.info("Entering Get Current Location...");
-		locationServices = new GPSTracker(MapsViewActivity.this);
-		if (locationServices.canGetLocation()) {
-			lat = getMyLat();
-			lng = getMyLng();
-			LOGGER.info("Location: Lat: " + lat + " Lng: " + lng);
-		} else {
-			locationServices.showSettingAlert();
-		}
-	}
-
+	/**
+	 * This method is used to position the marker on the google map at the users
+	 * current position as defined by the parameters. The camera will then be
+	 * positioned at the marker.
+	 * 
+	 * @param lat
+	 *            a double value representing the users current latitude
+	 *            location.
+	 * @param lng
+	 *            a double value representing the users current longitude
+	 *            location.
+	 */
 	private void setMarker(double lat, double lng) {
-		LOGGER.info("Entering Set Marker...");
+		Log.d(TAG, "Entering Set Marker...");
 
 		LatLng currentPosition = new LatLng(lat, lng);
 		googleMap.addMarker(currentLocationMarker.position(currentPosition)
@@ -204,24 +271,48 @@ public class MapsViewActivity extends Activity {
 
 	}
 
+	/**
+	 * This method uses the locally created location services {@link GPSTracker}
+	 * to get the users latitude.
+	 * 
+	 * @return latitude a double value representing the users latitude location.
+	 */
 	private double getMyLat() {
 		double latitude = locationServices.getLat();
 		return latitude;
 	}
 
+	/**
+	 * This method uses the locally created location services {@link GPSTracker}
+	 * to get the users longitude.
+	 * 
+	 * @return longitude a double value representing the users longitude
+	 *         location.
+	 */
 	private double getMyLng() {
 		double longitude = locationServices.getLng();
 		return longitude;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onResume()
+	 */
 	@Override
 	protected void onResume() {
 		super.onResume();
+		GroupSafeApplication.activityResumed();
 		initialiseMap();
 		createCurrentLocationMarker();
 		setMarker(lat, lng);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -232,58 +323,7 @@ public class MapsViewActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-
-		if (id == R.id.action_logout) {
-			logCurrentUserOut();
-		} else if (id == R.id.action_addContact) {
-			LOGGER.info("Starting Add Contact Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					AddContactActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_viewMap) {
-			LOGGER.info("Starting Map View Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					MapsViewActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_createGroup) {
-			LOGGER.info("Starting Create Group Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					SelectGroupParticipantsActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_home) {
-			LOGGER.info("Starting Home Activity...");
-			Intent intent = new Intent(getApplicationContext(),
-					HomeActivity.class);
-			startActivity(intent);
-			finish();
-		} else if (id == R.id.action_settings) {
-
-			LOGGER.info("Going to Settings page... ");
-			Intent intent = new Intent(getApplicationContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			finish();
-		}
-		return true;
-	}
-
-	private void logCurrentUserOut() {
-		LOGGER.info("Logging out user: " + ParseUser.getCurrentUser() + "...");
-		ParseUser.logOut();
-		if (ParseUser.getCurrentUser() == null) {
-			LOGGER.info("User successfully logged out!");
-			Toast.makeText(getApplicationContext(), "Successfully Logged Out!",
-					Toast.LENGTH_LONG).show();
-			Intent intent = new Intent(getApplicationContext(),
-					SplashActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			Toast.makeText(getApplicationContext(), "Please Try Again!",
-					Toast.LENGTH_LONG).show();
-		}
+		internetPresent = connectionDetector.isConnectedToInternet();
+		return MenuUtils.menuOptions(id, this, internetPresent, TAG);
 	}
 }

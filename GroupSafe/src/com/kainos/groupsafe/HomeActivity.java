@@ -2,6 +2,7 @@ package com.kainos.groupsafe;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -146,6 +147,18 @@ public class HomeActivity extends Activity {
 						startActivity(intent);
 					}
 				});
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		GroupSafeApplication.activityResumed();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
 	}
 
 	/**

@@ -11,10 +11,7 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
@@ -55,6 +52,18 @@ public class AddContactActivity extends Activity {
 		setContentView(R.layout.activity_add_contact);
 		_instance = this;
 		enableAllButtons();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		GroupSafeApplication.activityResumed();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		GroupSafeApplication.activityPaused();
 	}
 
 	/**
@@ -283,8 +292,6 @@ public class AddContactActivity extends Activity {
 		internetPresent = connectionDetector.isConnectedToInternet();
 		return MenuUtils.menuOptions(id, this, internetPresent, TAG);
 	}
-
-	
 
 	/**
 	 * Enables all buttons that are on the AddContactActivity.java view.

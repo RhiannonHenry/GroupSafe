@@ -440,22 +440,23 @@ containing a value of this type.
         public static final int activity_home=0x7f030009;
         public static final int activity_invite_group_participants=0x7f03000a;
         public static final int activity_maps_view=0x7f03000b;
-        public static final int activity_notification=0x7f03000c;
-        public static final int activity_register=0x7f03000d;
-        public static final int activity_select_group_participants=0x7f03000e;
-        public static final int activity_set_group_geo_fence=0x7f03000f;
-        public static final int activity_settings=0x7f030010;
-        public static final int activity_splash=0x7f030011;
-        public static final int contact_row=0x7f030012;
-        public static final int custom_geofence_dialog=0x7f030013;
-        public static final int custom_notification_dialog=0x7f030014;
-        public static final int emergency_contact_row=0x7f030015;
-        public static final int footer_invite_participants=0x7f030016;
-        public static final int footer_select_participants=0x7f030017;
-        public static final int header_invite_participants=0x7f030018;
-        public static final int header_settings=0x7f030019;
-        public static final int invitee_row=0x7f03001a;
-        public static final int select_group_participant_row=0x7f03001b;
+        public static final int activity_no_internet_connection=0x7f03000c;
+        public static final int activity_notification=0x7f03000d;
+        public static final int activity_register=0x7f03000e;
+        public static final int activity_select_group_participants=0x7f03000f;
+        public static final int activity_set_group_geo_fence=0x7f030010;
+        public static final int activity_settings=0x7f030011;
+        public static final int activity_splash=0x7f030012;
+        public static final int contact_row=0x7f030013;
+        public static final int custom_geofence_dialog=0x7f030014;
+        public static final int custom_notification_dialog=0x7f030015;
+        public static final int emergency_contact_row=0x7f030016;
+        public static final int footer_invite_participants=0x7f030017;
+        public static final int footer_select_participants=0x7f030018;
+        public static final int header_invite_participants=0x7f030019;
+        public static final int header_settings=0x7f03001a;
+        public static final int invitee_row=0x7f03001b;
+        public static final int select_group_participant_row=0x7f03001c;
     }
     public static final class menu {
         public static final int accept_decline_invitation=0x7f0b0000;
@@ -470,11 +471,12 @@ containing a value of this type.
         public static final int home=0x7f0b0009;
         public static final int invite_group_participants=0x7f0b000a;
         public static final int maps_view=0x7f0b000b;
-        public static final int register=0x7f0b000c;
-        public static final int select_group_participants=0x7f0b000d;
-        public static final int set_group_geo_fence=0x7f0b000e;
-        public static final int settings=0x7f0b000f;
-        public static final int splash=0x7f0b0010;
+        public static final int no_internet_connection=0x7f0b000c;
+        public static final int register=0x7f0b000d;
+        public static final int select_group_participants=0x7f0b000e;
+        public static final int set_group_geo_fence=0x7f0b000f;
+        public static final int settings=0x7f0b0010;
+        public static final int splash=0x7f0b0011;
     }
     public static final class string {
         public static final int OK=0x7f060035;
@@ -700,6 +702,7 @@ containing a value of this type.
         /**  Strings for MAP VIEW page 
          */
         public static final int title_activity_maps_view=0x7f06005a;
+        public static final int title_activity_no_internet_connection=0x7f06008b;
         public static final int title_activity_notification=0x7f06007a;
         public static final int title_activity_register=0x7f060049;
         /**  String for STEP1: SELECT GROUP PARTICIPANTS page 

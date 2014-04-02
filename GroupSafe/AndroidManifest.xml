@@ -43,7 +43,7 @@
     <application
         android:name="com.kainos.groupsafe.GroupSafeApplication"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/group_safe_logo"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
@@ -115,6 +115,10 @@
             android:name="com.kainos.groupsafe.GroupGeoFenceMapActivity"
             android:label="@string/title_activity_group_geo_fence_map" >
         </activity>
+        <activity
+            android:name="com.kainos.groupsafe.ExitGeoFenceNotificationActivity"
+            android:label="@string/title_activity_exit_geo_fence_notification" >
+        </activity>
 
         <!-- THIS IS TO INTEGRATE GOOGLE PLAY (FOR MAPS) -->
         <meta-data
@@ -160,10 +164,18 @@
                 <category android:name="com.kainos.groupsafe" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name="com.kainos.groupsafe.ConnectionDetectorReceiver"
+            android:label="ConnectionDetectorReceiver" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
         <!-- END -->
         <activity
-            android:name="com.kainos.groupsafe.ExitGeoFenceNotificationActivity"
-            android:label="@string/title_activity_exit_geo_fence_notification" >
+            android:name="com.kainos.groupsafe.NoInternetConnectionActivity"
+            android:label="@string/title_activity_no_internet_connection" >
         </activity>
     </application>
 

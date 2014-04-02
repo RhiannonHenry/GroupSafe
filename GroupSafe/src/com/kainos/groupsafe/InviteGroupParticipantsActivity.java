@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +11,6 @@ import org.json.JSONObject;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.Parse;
-import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParsePush;
@@ -23,26 +21,30 @@ import com.parse.SaveCallback;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 
+/**
+ * This Activity is the last step in the 'Create Group' process, where a group
+ * invitation is sent to the selected participants. From this screen, the user
+ * will be able to Terminate a group, Invite participants, go back a step to
+ * 'Group Details' or Start a group.
+ * 
+ * @author Rhiannon Henry
+ * 
+ */
 public class InviteGroupParticipantsActivity extends Activity {
 
-	static InviteGroupParticipantsActivity _instance = null;
-	private final static Logger LOGGER = Logger
-			.getLogger(InviteGroupParticipantsActivity.class.getName());
-
-	InviteesAdapter adapter = null;
-	ListView listView = null;
-
-	// populate this with contact name and number [Parse call]
-	// getParticipantInformation method
+	private static InviteGroupParticipantsActivity _instance = null;
+	private static final String TAG = "INVITE_PARTICIPANTS_ACTIVITY";
+	private InviteesAdapter adapter = null;
+	private ListView listView = null;
 	private ArrayList<InviteeContact> invitedContacts = new ArrayList<InviteeContact>();
 	private ArrayList<String> groupParticipants_participantId = new ArrayList<String>();
-	// Array of contacts passed through from before
 	private ArrayList<String> participants;
 	private int radius;
 	private boolean participantsInvited = false;
@@ -52,19 +54,19 @@ public class InviteGroupParticipantsActivity extends Activity {
 	private View header, footer;
 	private Timer autoUpdate;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
-		ParseAnalytics.trackAppOpened(getIntent());
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_invite_group_participants);
 		_instance = this;
-
 		initializeVariables();
-
-		// create an Array Adapter from the String Array
 		listView = (ListView) findViewById(R.id.inviteeList);
 		footer = getLayoutInflater().inflate(
 				R.layout.footer_invite_participants, null);
@@ -74,17 +76,16 @@ public class InviteGroupParticipantsActivity extends Activity {
 		listView.addHeaderView(header);
 		adapter = new InviteesAdapter(this, R.layout.invitee_row,
 				invitedContacts);
-		// assign adapter to ListView
 		listView.setAdapter(adapter);
 
-		LOGGER.info("Got Participants: ");
+		Log.i(TAG, "Got Participants: ");
 		for (int i = 0; i < participants.size(); i++) {
-			LOGGER.info("" + participants.get(i));
+			Log.i(TAG, "" + participants.get(i));
 			getParticipantInformation(participants.get(i));
 		}
-		LOGGER.info("Got Radius size: " + radius);
-		LOGGER.info("Got Group Name: " + groupName);
-		LOGGER.info("Got Group Organization: " + groupOrganization);
+		Log.i(TAG, "Got Radius size: " + radius);
+		Log.i(TAG, "Got Group Name: " + groupName);
+		Log.i(TAG, "Got Group Organization: " + groupOrganization);
 
 		invite = (Button) header
 				.findViewById(R.id.inviteGroupParticipantsButton);
@@ -105,10 +106,16 @@ public class InviteGroupParticipantsActivity extends Activity {
 		cancelButtonClicked();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onResume()
+	 */
 	@Override
 	public void onResume() {
-		LOGGER.info("UPDATING...");
+		Log.d(TAG, "UPDATING...");
 		super.onResume();
+		GroupSafeApplication.activityPaused();
 		autoUpdate = new Timer();
 		autoUpdate.schedule(new TimerTask() {
 			@Override
@@ -117,14 +124,14 @@ public class InviteGroupParticipantsActivity extends Activity {
 					public void run() {
 						if (participantsInvited) {
 							for (int i = 0; i < invitedContacts.size(); i++) {
-								LOGGER.info("Updating Participant: "
+								Log.i(TAG, "Updating Participant: "
 										+ invitedContacts.get(i)
 												.getInviteeContactName());
 								updateParticipantStatus(invitedContacts.get(i),
 										i);
 							}
 						} else {
-							LOGGER.info("NOTHING TO UPDATE");
+							Log.i(TAG, "NOTHING TO UPDATE");
 						}
 					}
 				});
@@ -132,12 +139,26 @@ public class InviteGroupParticipantsActivity extends Activity {
 		}, 0, 30000); // updates every 30 seconds
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onPause()
+	 */
 	@Override
 	public void onPause() {
-		autoUpdate.cancel();
 		super.onPause();
+		autoUpdate.cancel();
+		GroupSafeApplication.activityPaused();
+
 	}
 
+	/**
+	 * This method is called if the user clicks on the 'Cancel' button on the
+	 * screen @see activity_invite_group_participants.xml. Clicking this button
+	 * will terminate the group, sending out the termination notification to all
+	 * participants. This option is only enabled once the participants have been
+	 * invited (i.e the user has clicked the 'Invite Participants' button)
+	 */
 	private void cancelButtonClicked() {
 		cancel.setOnClickListener(new OnClickListener() {
 			@Override
@@ -147,13 +168,19 @@ public class InviteGroupParticipantsActivity extends Activity {
 				notifyGroupMembers();
 			}
 
+			/**
+			 * This method is used to find the Group in the Group entity in the
+			 * database to fetch the list of 'groupParticipants'. For each of
+			 * these Participants in the list, we must then find the associated
+			 * Participant object in the Participant table.
+			 */
 			private void notifyGroupMembers() {
 				ParseQuery<ParseObject> getGroupQuery = ParseQuery
 						.getQuery("Group");
 				getGroupQuery.whereEqualTo("objectId", groupId);
 				try {
 					List<ParseObject> foundGroups = getGroupQuery.find();
-					LOGGER.info("SUCCESS:: Found Group");
+					Log.i(TAG, "SUCCESS:: Found Group");
 					if (foundGroups.size() > 0) {
 						ParseObject group = foundGroups.get(0);
 						@SuppressWarnings("unchecked")
@@ -164,16 +191,20 @@ public class InviteGroupParticipantsActivity extends Activity {
 									.get(i));
 						}
 					} else {
-						LOGGER.info("FAILURE:: Cannot access group");
+						Log.e(TAG, "FAILURE:: Cannot access group");
 					}
 				} catch (ParseException e) {
-					LOGGER.info("ERROR:: Unable to Find Group...");
+					Log.e(TAG, "ERROR:: Unable to Find Group...");
 					e.printStackTrace();
 				}
 
 				deleteGroup();
 			}
 
+			/**
+			 * This method is used to find and remove the current group from the
+			 * Group Entity in the Database.
+			 */
 			private void deleteGroup() {
 				ParseQuery<ParseObject> query = ParseQuery.getQuery("Group");
 				query.whereEqualTo("objectId", groupId);
@@ -183,30 +214,42 @@ public class InviteGroupParticipantsActivity extends Activity {
 							ParseException e) {
 						if (e == null) {
 							if (foundGroups.size() > 0) {
-								LOGGER.info("SUCCESS:: Found Group!");
+								Log.i(TAG, "SUCCESS:: Found Group!");
 								ParseObject group = foundGroups.get(0);
 								group.deleteEventually(new DeleteCallback() {
 									@Override
 									public void done(ParseException e) {
 										if (e == null) {
-											LOGGER.info("SUCCESS:: Deleted Group From DB");
+											Log.i(TAG,
+													"SUCCESS:: Deleted Group From DB");
 										} else {
-											LOGGER.info("ERROR:: Failed to Delete Group");
+											Log.e(TAG,
+													"ERROR:: Failed to Delete Group");
 											e.printStackTrace();
 										}
 									}
 								});
 							} else {
-								LOGGER.info("FAILURE:: Failed to Find Group");
+								Log.e(TAG, "FAILURE:: Failed to Find Group");
 							}
 						} else {
-							LOGGER.info("ERROR::");
+							Log.e(TAG, "ERROR::");
 							e.printStackTrace();
 						}
 					}
 				});
 			}
 
+			/**
+			 * This method is used to find the Participant object in the
+			 * Participant Entity in the Database using the passed in unique
+			 * participant identifier.
+			 * 
+			 * @param participant
+			 *            a String value that represents the unique participant
+			 *            identifier for a specific participant in the
+			 *            Participant Entity in the Database.
+			 */
 			private void findParticipantInParticipantTable(String participant) {
 				ParseQuery<ParseObject> getParticipant = ParseQuery
 						.getQuery("Participant");
@@ -219,23 +262,35 @@ public class InviteGroupParticipantsActivity extends Activity {
 									ParseException e) {
 								if (e == null) {
 									if (foundParticipants.size() > 0) {
-										LOGGER.info("SUCCESS:: Found Participant");
+										Log.i(TAG,
+												"SUCCESS:: Found Participant");
 										ParseObject current = foundParticipants
 												.get(0);
 										String number = current.get(
 												"participantNumber").toString();
-										LOGGER.info("Got username: " + number
+										Log.i(TAG, "Got username: " + number
 												+ " for participant");
 										findUserInDb(number);
 									} else {
-										LOGGER.info("FAILURE:: Failed to get Participant");
+										Log.e(TAG,
+												"FAILURE:: Failed to get Participant");
 									}
 								} else {
-									LOGGER.info("ERROR::");
+									Log.e(TAG, "ERROR::");
 									e.printStackTrace();
 								}
 							}
 
+							/**
+							 * This method is used to find the User object in
+							 * the User entity in the database using the passed
+							 * in unique username (phone number) for the user.
+							 * 
+							 * @param number
+							 *            a String value representing the users
+							 *            phone number (unique username) for a
+							 *            specific User in the database
+							 */
 							private void findUserInDb(String number) {
 								ParseQuery<ParseUser> userQuery = ParseUser
 										.getQuery();
@@ -250,8 +305,9 @@ public class InviteGroupParticipantsActivity extends Activity {
 													if (userList.size() > 0) {
 														ParseUser user = userList
 																.get(0);
-														LOGGER.info("SUCCESS:: Found User "
-																+ user.get("displayName"));
+														Log.i(TAG,
+																"SUCCESS:: Found User "
+																		+ user.get("displayName"));
 														String groupLeaderDisplayName = ParseUser
 																.getCurrentUser()
 																.get("displayName")
@@ -270,24 +326,46 @@ public class InviteGroupParticipantsActivity extends Activity {
 																			.toString(),
 																	terminationData);
 														} catch (JSONException e1) {
-															LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
+															Log.e(TAG,
+																	"ERROR: Error Creating JSON for Temination Notification.");
 															e1.printStackTrace();
 														}
 													} else {
-														LOGGER.info("FAILURE:: Unable to find User");
+														Log.e(TAG,
+																"FAILURE:: Unable to find User");
 													}
 												} else {
-													LOGGER.info("ERROR::");
+													Log.e(TAG, "ERROR::");
 													e.printStackTrace();
 												}
 											}
 
+											/**
+											 * This method is used to send the
+											 * termination notification to the
+											 * participant (with associated user
+											 * with unique user identifier).
+											 * 
+											 * @param userObjectId
+											 *            a String value
+											 *            representing the
+											 *            unique user identifier
+											 *            for the participant to
+											 *            whom the notification
+											 *            should be sent.
+											 * @param terminationData
+											 *            a JSONObject comprised
+											 *            to form the body of
+											 *            the notification to be
+											 *            sent to the
+											 *            participant
+											 */
 											private void sendNotification(
 													String userObjectId,
 													JSONObject terminationData) {
 												String notificationChannel = "user_"
 														+ userObjectId;
-												LOGGER.info("#004: Channel = "
+												Log.i(TAG, "#004: Channel = "
 														+ notificationChannel);
 												ParsePush push = new ParsePush();
 												push.setData(terminationData);
@@ -308,6 +386,15 @@ public class InviteGroupParticipantsActivity extends Activity {
 		});
 	}
 
+	/**
+	 * This method is used to update the 'status' of an invited user.
+	 * 
+	 * @param currentParticipant
+	 *            the @see {@link InviteeContact} object representing an invited
+	 *            contact.
+	 * @param position
+	 *            the position in the list array for a specific invited contact.
+	 */
 	private void updateParticipantStatus(InviteeContact currentParticipant,
 			int position) {
 		String participantId = currentParticipant.getObjectId();
@@ -315,7 +402,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 		String participantName = currentParticipant.getInviteeContactName();
 		String participantNumber = currentParticipant.getInviteeContactNumber();
 
-		LOGGER.info("Trying to Find Participant in DB...");
+		Log.i(TAG, "Trying to Find Participant in DB...");
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Participant");
 		query.whereEqualTo("participantId", participantId);
 		query.whereEqualTo("groupId", groupId);
@@ -324,11 +411,11 @@ public class InviteGroupParticipantsActivity extends Activity {
 			List<ParseObject> foundParticipant = query.find();
 			if (foundParticipant.size() > 0) {
 				ParseObject current = foundParticipant.get(0);
-				LOGGER.info("SUCCESS:: Found Participant "
+				Log.i(TAG, "SUCCESS:: Found Participant "
 						+ current.getObjectId().toString());
 				String currentStatus = current.get("status").toString();
 				if (!displayedStatus.equals(currentStatus)) {
-					LOGGER.info("STATUS DIFFERENCE!");
+					Log.i(TAG, "STATUS DIFFERENCE!");
 					InviteeContact updatedContact = new InviteeContact(
 							participantName, participantNumber, participantId,
 							Status.valueOf(currentStatus));
@@ -337,23 +424,27 @@ public class InviteGroupParticipantsActivity extends Activity {
 					adapter.notifyDataSetChanged();
 					listView.refreshDrawableState();
 				} else {
-					LOGGER.info("NO CHANGES TO PARTICIPANT STATE!");
+					Log.i(TAG, "NO CHANGES TO PARTICIPANT STATE!");
 				}
 			} else {
-				LOGGER.info("FAILURE:: Could Not Find Participant.");
+				Log.e(TAG, "FAILURE:: Could Not Find Participant.");
 			}
 		} catch (ParseException e) {
-			LOGGER.info("ERROR:: Unable to find Participant");
+			Log.e(TAG, "ERROR:: Unable to find Participant");
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * This method is used to take the user back to the 'Group Details' page @see
+	 * {@link SetGroupGeoFenceActivity}. This button should be disabled if the
+	 * user has clicked 'Invite Participants'
+	 */
 	private void previousButtonClicked() {
 		prev.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				disableAllButtons();
-				// Go back to setRadiusView
 				Intent intent = new Intent(_instance,
 						SetGroupGeoFenceActivity.class);
 				intent.putStringArrayListExtra("chosenParticipants",
@@ -363,6 +454,11 @@ public class InviteGroupParticipantsActivity extends Activity {
 		});
 	}
 
+	/**
+	 * This method is used to take the user to the Group Map View @see
+	 * {@link GroupGeoFenceMapActivity}. Before this can be viewed, all the
+	 * participants must first be notified that the group has been started.
+	 */
 	private void nextButtonClicked() {
 		next.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -373,12 +469,16 @@ public class InviteGroupParticipantsActivity extends Activity {
 		});
 	}
 
+	/**
+	 * This method gets a new list of participants (as this list is changed as
+	 * participants accept/decline the invitation)
+	 */
 	protected void sendStartPushNotificationToParticipants() {
 		ParseQuery<ParseObject> getGroupQuery = ParseQuery.getQuery("Group");
 		getGroupQuery.whereEqualTo("objectId", groupId);
 		try {
 			List<ParseObject> foundGroups = getGroupQuery.find();
-			LOGGER.info("SUCCESS:: Found Group");
+			Log.i(TAG, "SUCCESS:: Found Group");
 			if (foundGroups.size() > 0) {
 				ParseObject group = foundGroups.get(0);
 				@SuppressWarnings("unchecked")
@@ -389,14 +489,23 @@ public class InviteGroupParticipantsActivity extends Activity {
 							.get(i));
 				}
 			} else {
-				LOGGER.info("FAILURE:: Cannot access group");
+				Log.e(TAG, "FAILURE:: Cannot access group");
 			}
 		} catch (ParseException e) {
-			LOGGER.info("ERROR:: Unable to Find Group...");
+			Log.e(TAG, "ERROR:: Unable to Find Group...");
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * This method is used to find the associtated Participant object for each
+	 * unique participant identifier stored in the 'groupParticipants' list in
+	 * the Group Entity
+	 * 
+	 * @param participant
+	 *            a String value representing the unique participant identifier
+	 *            for a specific object (participant) in the Participant Entity
+	 */
 	private void findParticipantInParticipantTable(String participant) {
 		ParseQuery<ParseObject> getParticipant = ParseQuery
 				.getQuery("Participant");
@@ -407,22 +516,31 @@ public class InviteGroupParticipantsActivity extends Activity {
 					ParseException e) {
 				if (e == null) {
 					if (foundParticipants.size() > 0) {
-						LOGGER.info("SUCCESS:: Found Participant");
+						Log.i(TAG, "SUCCESS:: Found Participant");
 						ParseObject current = foundParticipants.get(0);
 						String number = current.get("participantNumber")
 								.toString();
-						LOGGER.info("Got username: " + number
+						Log.i(TAG, "Got username: " + number
 								+ " for participant");
 						findUserInDb(number);
 					} else {
-						LOGGER.info("FAILURE:: Failed to get Participant");
+						Log.e(TAG, "FAILURE:: Failed to get Participant");
 					}
 				} else {
-					LOGGER.info("ERROR::");
+					Log.e(TAG, "ERROR::");
 					e.printStackTrace();
 				}
 			}
 
+			/**
+			 * This method is used to find the User object in the User entity in
+			 * the database using the passed in unique username (phone number)
+			 * for the user.
+			 * 
+			 * @param number
+			 *            a String value representing the users phone number
+			 *            (unique username) for a specific User in the database
+			 */
 			private void findUserInDb(String number) {
 				ParseQuery<ParseUser> userQuery = ParseUser.getQuery();
 				userQuery.whereEqualTo("username", number);
@@ -432,8 +550,9 @@ public class InviteGroupParticipantsActivity extends Activity {
 						if (e == null) {
 							if (userList.size() > 0) {
 								ParseUser user = userList.get(0);
-								LOGGER.info("SUCCESS:: Found User "
-										+ user.get("displayName"));
+								Log.i(TAG,
+										"SUCCESS:: Found User "
+												+ user.get("displayName"));
 								String groupLeaderDisplayName = ParseUser
 										.getCurrentUser().get("displayName")
 										.toString();
@@ -458,24 +577,38 @@ public class InviteGroupParticipantsActivity extends Activity {
 									sendNotification(user.getObjectId()
 											.toString(), startData);
 								} catch (JSONException e1) {
-									LOGGER.info("ERROR: Error Creating JSON for Temination Notification.");
+									Log.e(TAG,
+											"ERROR: Error Creating JSON for Temination Notification.");
 									e1.printStackTrace();
 								}
 							} else {
-								LOGGER.info("FAILURE:: Unable to find User");
+								Log.e(TAG, "FAILURE:: Unable to find User");
 							}
 						} else {
-							LOGGER.info("ERROR::");
+							Log.e(TAG, "ERROR::");
 							e.printStackTrace();
 						}
 					}
 
+					/**
+					 * This method is used to send the start gorup notification
+					 * to the participant (with associated user with unique user
+					 * identifier).
+					 * 
+					 * @param userObjectId
+					 *            a String value representing the unique user
+					 *            identifier for the participant to whom the
+					 *            notification should be sent.
+					 * @param startData
+					 *            a JSONObject comprised to form the body of the
+					 *            notification to be sent to the participant
+					 */
 					private void sendNotification(String userObjectId,
-							JSONObject terminationData) {
+							JSONObject startData) {
 						String notificationChannel = "user_" + userObjectId;
-						LOGGER.info("#004: Channel = " + notificationChannel);
+						Log.i(TAG, "#004: Channel = " + notificationChannel);
 						ParsePush push = new ParsePush();
-						push.setData(terminationData);
+						push.setData(startData);
 						push.setChannel(notificationChannel);
 						push.sendInBackground();
 
@@ -491,16 +624,25 @@ public class InviteGroupParticipantsActivity extends Activity {
 		});
 	}
 
+	/**
+	 * This method is used when the user clicks on the 'Invite Participants'
+	 * button on the screen. This will send the group invitation notification to
+	 * ALL prospective group participants.
+	 */
 	private void inviteButtonClicked() {
 		invite.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				disableAllButtons();
-				// create group in DB
 				createGroupInDB();
 				setGroupLeaderStatus(true);
 			}
 
+			/**
+			 * This method is used to create a group object in the Group Entity
+			 * in the Database, with all the associated data for the current
+			 * group (name, leader, radius, participants)
+			 */
 			private void createGroupInDB() {
 				ArrayList<String> groupParticipants = new ArrayList<String>();
 				ParseObject newGroup = new ParseObject("Group");
@@ -513,17 +655,22 @@ public class InviteGroupParticipantsActivity extends Activity {
 					@Override
 					public void done(ParseException e) {
 						if (e == null) {
-							LOGGER.info("SUCCESS:: Saved Group");
+							Log.i(TAG, "SUCCESS:: Saved Group");
 							getGroupID();
 						} else {
-							LOGGER.info("ERROR:: ");
+							Log.e(TAG, "ERROR:: ");
 							e.printStackTrace();
 						}
 					}
 
+					/**
+					 * This method is used to get the unique group identifier
+					 * for the newly created group in the Group Entity in the
+					 * Database.
+					 */
 					private void getGroupID() {
-						LOGGER.info("GroupLeader: " + groupLeaderId);
-						LOGGER.info("GroupName: " + groupName);
+						Log.i(TAG, "GroupLeader: " + groupLeaderId);
+						Log.i(TAG, "GroupName: " + groupName);
 						ParseQuery<ParseObject> query = ParseQuery
 								.getQuery("Group");
 						query.whereEqualTo("groupLeaderId", groupLeaderId);
@@ -532,22 +679,29 @@ public class InviteGroupParticipantsActivity extends Activity {
 							List<ParseObject> foundGroups = query.find();
 							if (foundGroups.size() > 0) {
 								ParseObject current = foundGroups.get(0);
-								LOGGER.info("SUCCESS:: Group Found!"
-										+ current.get("groupName"));
+								Log.i(TAG,
+										"SUCCESS:: Group Found!"
+												+ current.get("groupName"));
 								groupId = current.getObjectId().toString();
-								LOGGER.info("GroupID: " + groupId);
+								Log.i(TAG, "GroupID: " + groupId);
 								createParticipantsInDB();
 							} else {
-								LOGGER.info("FAILURE:: Could Not Find Any Groups...");
+								Log.e(TAG,
+										"FAILURE:: Could Not Find Any Groups...");
 							}
 						} catch (ParseException e) {
-							LOGGER.info("ERROR Finding Group: ");
+							Log.e(TAG, "ERROR Finding Group: ");
 							e.printStackTrace();
 						}
 					}
 				});
 			}
 
+			/**
+			 * This method is used to create a unique Participant object in the
+			 * Participant Entity in the Database for each invited group
+			 * participant.
+			 */
 			private void createParticipantsInDB() {
 				for (int i = 0; i < invitedContacts.size(); i++) {
 					InviteeContact currentParticipant = invitedContacts.get(i);
@@ -559,14 +713,14 @@ public class InviteGroupParticipantsActivity extends Activity {
 							.toString();
 					participantId = currentParticipant.getObjectId();
 
-					LOGGER.info("Preparing to add participant: ");
-					LOGGER.info("Name: " + participantName);
-					LOGGER.info("Number: " + participantNumber);
-					LOGGER.info("ID: " + participantId);
-					LOGGER.info("Status: " + participantStatus);
-					LOGGER.info("Group Leader ID: " + groupLeaderId);
-					LOGGER.info("Group ID: " + groupId);
-					LOGGER.info("... To Participant Table in DB.");
+					Log.i(TAG, "Preparing to add participant: ");
+					Log.i(TAG, "Name: " + participantName);
+					Log.i(TAG, "Number: " + participantNumber);
+					Log.i(TAG, "ID: " + participantId);
+					Log.i(TAG, "Status: " + participantStatus);
+					Log.i(TAG, "Group Leader ID: " + groupLeaderId);
+					Log.i(TAG, "Group ID: " + groupId);
+					Log.i(TAG, "... To Participant Table in DB.");
 
 					ParseObject newParticipant = new ParseObject("Participant");
 					newParticipant.put("groupId", groupId);
@@ -579,24 +733,29 @@ public class InviteGroupParticipantsActivity extends Activity {
 						@Override
 						public void done(ParseException e) {
 							if (e == null) {
-								LOGGER.info("SUCCESS:: Created Participant Successfully");
+								Log.i(TAG,
+										"SUCCESS:: Created Participant Successfully");
 							} else {
-								LOGGER.info("ERROR:: ");
+								Log.e(TAG, "ERROR:: ");
 								e.printStackTrace();
 							}
 						}
 					});
 					if (i == invitedContacts.size() - 1) {
-						LOGGER.info("Finished Creating the last Participant...");
-						LOGGER.info("Fetching all the Participant 'objectId' fields...");
+						Log.i(TAG, "Finished Creating the last Participant...");
+						Log.i(TAG,
+								"Fetching all the Participant 'objectId' fields...");
 						populateGroupParticipantsArray();
 					}
 				}
-				// send push notifications to participants
 				sendPushNotifications();
 				participantsInvited = true;
 			}
 
+			/**
+			 * This method is used to fetch the unique participant identifier
+			 * for each participant in the group and add it to an array list
+			 */
 			private void populateGroupParticipantsArray() {
 				ParseQuery<ParseObject> query = ParseQuery
 						.getQuery("Participant");
@@ -608,27 +767,36 @@ public class InviteGroupParticipantsActivity extends Activity {
 							ParseException e) {
 						if (e == null) {
 							if (participantsInGroup.size() > 0) {
-								LOGGER.info("SUCCESS:: Found Participants for Group!");
+								Log.i(TAG,
+										"SUCCESS:: Found Participants for Group!");
 								for (int i = 0; i < participantsInGroup.size(); i++) {
 									String currentObjectId = participantsInGroup
 											.get(i).getObjectId().toString();
-									LOGGER.info(i + ": " + currentObjectId);
+									Log.i(TAG, i + ": " + currentObjectId);
 									groupParticipants_participantId
 											.add(currentObjectId);
 									if (i == participantsInGroup.size() - 1) {
-										LOGGER.info("That's the last Participant in the group!");
+										Log.i(TAG,
+												"That's the last Participant in the group!");
 										addParticipantsArrayToGroupTableDB();
 									}
 								}
 							} else {
-								LOGGER.info("FAILURE:: Unable to find Participants for Group!");
+								Log.e(TAG,
+										"FAILURE:: Unable to find Participants for Group!");
 							}
 						} else {
-							LOGGER.info("ERROR: ");
+							Log.e(TAG, "ERROR: ");
 							e.printStackTrace();
 						}
 					}
 
+					/**
+					 * This method is used to add the array of unique
+					 * participant identifiers to the 'groupParticipants'
+					 * attribute for the group object in the Group Entity in the
+					 * Database.
+					 */
 					private void addParticipantsArrayToGroupTableDB() {
 						ParseQuery<ParseObject> query = ParseQuery
 								.getQuery("Group");
@@ -637,7 +805,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 						try {
 							List<ParseObject> foundGroups = query.find();
 							if (foundGroups.size() > 0) {
-								LOGGER.info("SUCCESS:: Group Found!");
+								Log.i(TAG, "SUCCESS:: Group Found!");
 								ParseObject current = foundGroups.get(0);
 								current.put("groupParticipants",
 										groupParticipants_participantId);
@@ -645,24 +813,32 @@ public class InviteGroupParticipantsActivity extends Activity {
 									@Override
 									public void done(ParseException e) {
 										if (e == null) {
-											LOGGER.info("SUCCESS:: Updated Group with Participants!");
+											Log.i(TAG,
+													"SUCCESS:: Updated Group with Participants!");
 										} else {
-											LOGGER.info("ERROR:: Updating Group with Participants FAILED");
+											Log.e(TAG,
+													"ERROR:: Updating Group with Participants FAILED");
 											e.printStackTrace();
 										}
 									}
 								});
 							} else {
-								LOGGER.info("FAILURE:: Could Not Find Any Groups...");
+								Log.e(TAG,
+										"FAILURE:: Could Not Find Any Groups...");
 							}
 						} catch (ParseException e) {
-							LOGGER.info("ERROR Finding Group: ");
+							Log.e(TAG, "ERROR Finding Group: ");
 							e.printStackTrace();
 						}
 					}
 				});
 			}
 
+			/**
+			 * This method is used to send the group invitation notification to
+			 * each participant in the 'groupParticipants' array in the
+			 * database.
+			 */
 			private void sendPushNotifications() {
 				// Send push notification using CHANNEL
 				// "user_[userObjectID]"
@@ -688,27 +864,40 @@ public class InviteGroupParticipantsActivity extends Activity {
 											String installationId = user.get(
 													"installationId")
 													.toString();
-											LOGGER.info("Installation ID: "
+											Log.i(TAG, "Installation ID: "
 													+ installationId);
 										} else {
-											LOGGER.info("ID: 001 Search Returned No Results.");
+											Log.e(TAG,
+													"ID: 001 Search Returned No Results.");
 										}
 									} else {
-										LOGGER.info("Error Getting Participant Data.");
+										Log.e(TAG,
+												"Error Getting Participant Data.");
 										e.printStackTrace();
 									}
 								}
 							});
 
-					LOGGER.info("Sending Push Notification to User: "
+					Log.i(TAG, "Sending Push Notification to User: "
 							+ invitedContacts.get(i).getInviteeContactName());
 					getParticipantUserObjectID(invitedContacts.get(i)
-							.getInviteeContactNumber(), data, i);
+							.getInviteeContactNumber(), data);
 				}
 			}
 
+			/**
+			 * This method ise just to sent the push notification to the
+			 * appropriate participant.
+			 * 
+			 * @param number
+			 *            a String value of the phone number of the participant
+			 * @param data
+			 *            a JSONObject object that contains the body of the push
+			 *            notification
+			 * @param place
+			 */
 			protected void getParticipantUserObjectID(String number,
-					final JSONObject data, final int place) {
+					final JSONObject data) {
 				ParseQuery<ParseUser> query = ParseUser.getQuery();
 				query.whereEqualTo("username", number);
 				query.findInBackground(new FindCallback<ParseUser>() {
@@ -717,28 +906,38 @@ public class InviteGroupParticipantsActivity extends Activity {
 						if (e == null) {
 							if (userList.size() > 0) {
 								ParseUser current = userList.get(0);
-								LOGGER.info("Successfully retrieved participant user account: "
-										+ current.getUsername()
-										+ " ObjectID: "
-										+ current.getObjectId().toString());
+								Log.i(TAG,
+										"Successfully retrieved participant user account: "
+												+ current.getUsername()
+												+ " ObjectID: "
+												+ current.getObjectId()
+														.toString());
 								participantUserObjectID = current.getObjectId()
 										.toString();
 								sendPushInvitation(data);
 
 							} else {
-								LOGGER.info("An error occurred retrieving the participant user account!");
+								Log.e(TAG,
+										"An error occurred retrieving the participant user account!");
 							}
 						} else {
-							LOGGER.info("ERROR: ");
+							Log.e(TAG, "ERROR: ");
 							e.printStackTrace();
 						}
 					}
 				});
 			}
 
+			/**
+			 * The actual sending of the group invitation push notification
+			 * 
+			 * @param data
+			 *            a JSONObject value containing the group invitation
+			 *            notification body.
+			 */
 			private void sendPushInvitation(JSONObject data) {
 				String channel = "user_" + participantUserObjectID;
-				LOGGER.info("#003: Channel = " + channel);
+				Log.i(TAG, "#003: Channel = " + channel);
 				ParsePush push = new ParsePush();
 				push.setData(data);
 				push.setChannel(channel);
@@ -752,18 +951,32 @@ public class InviteGroupParticipantsActivity extends Activity {
 		});
 	}
 
+	/**
+	 * This method is used to set the boolean value of 'groupLeader' attribute
+	 * in a User Object to TRUE or FALSE depending on the value of the parameter
+	 * 
+	 * @param groupLeaderStatus
+	 *            a boolean value to represent if the user is a group leader
+	 *            (TRUE) or not (FALSE)
+	 */
 	protected void setGroupLeaderStatus(boolean groupLeaderStatus) {
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		currentUser.put("groupLeader", groupLeaderStatus);
 		try {
 			currentUser.save();
-			LOGGER.info("SUCCESS:: Updated 'groupLeader' value for user!");
+			Log.i(TAG, "SUCCESS:: Updated 'groupLeader' value for user!");
 		} catch (ParseException e) {
-			LOGGER.info("ERROR:: Updating 'groupLeader' value for user!");
+			Log.e(TAG, "ERROR:: Updating 'groupLeader' value for user!");
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * This method is used to initialise the variables that are passed through
+	 * from the 'Group Details' page @see {@link SetGroupGeoFenceActivity}.
+	 * These variables include: chosenParticipants, radius, name and
+	 * organization.
+	 */
 	private void initializeVariables() {
 		Intent intent = getIntent();
 		participants = intent.getStringArrayListExtra("chosenParticipants");
@@ -773,6 +986,15 @@ public class InviteGroupParticipantsActivity extends Activity {
 		groupLeaderId = ParseUser.getCurrentUser().getObjectId().toString();
 	}
 
+	/**
+	 * This method is used to generate the JSONObject of the Group Invitation
+	 * Notification
+	 * 
+	 * @param position
+	 *            the integer value of the location of the participant in the
+	 *            array of participants.
+	 * @return JSONObject the generated JSONObject notification.
+	 */
 	protected JSONObject generateJSON(int position) {
 		groupLeaderDisplayName = ParseUser.getCurrentUser().get("displayName")
 				.toString();
@@ -795,14 +1017,24 @@ public class InviteGroupParticipantsActivity extends Activity {
 							+ "\", "
 							+ "\"action\": \"com.kainos.groupsafe.AcceptDeclineInvitationActivity\"}");
 		} catch (JSONException e) {
-			LOGGER.info("INVALID JSON!!!");
+			Log.e(TAG, "INVALID JSON!!!");
 			e.printStackTrace();
 		}
 		return data;
 	}
 
+	/**
+	 * This method is used to populate the information about an invited contact
+	 * and is added to the adapter @see {@link InviteesAdapter} to be displayed
+	 * on a row in the list view.
+	 * 
+	 * @param participantObjectId
+	 *            a String value that represents the unique contact identifier
+	 *            for a chosen participant. This will reference a specific
+	 *            contact object in the Contact Entity in the database.
+	 */
 	private void getParticipantInformation(String participantObjectId) {
-		LOGGER.info("Getting Name for Participant with id: "
+		Log.i(TAG, "Getting Name for Participant with id: "
 				+ participantObjectId);
 
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Contact");
@@ -813,15 +1045,15 @@ public class InviteGroupParticipantsActivity extends Activity {
 					ParseException e) {
 				if (e == null) {
 					if (foundContactInformation.size() != 0) {
-						LOGGER.info("FOUND CONTACT");
+						Log.i(TAG, "FOUND CONTACT");
 						ParseObject currentData = foundContactInformation
 								.get(0);
 						String contactName = currentData.get("name").toString();
 						String contactNumber = currentData.get("number")
 								.toString();
 						String objectId = currentData.getObjectId();
-						LOGGER.info("CONTACT NAME: " + contactName);
-						LOGGER.info("CONTACT NUMBER: " + contactNumber);
+						Log.i(TAG, "CONTACT NAME: " + contactName);
+						Log.i(TAG, "CONTACT NUMBER: " + contactNumber);
 						InviteeContact contact = new InviteeContact(
 								contactName, contactNumber, objectId,
 								Status.PENDING);
@@ -830,7 +1062,7 @@ public class InviteGroupParticipantsActivity extends Activity {
 						adapter.notifyDataSetChanged();
 						listView.refreshDrawableState();
 					} else {
-						LOGGER.info("UNABLE TO FIND CONTACT");
+						Log.e(TAG, "UNABLE TO FIND CONTACT");
 					}
 				}
 			}
@@ -838,6 +1070,11 @@ public class InviteGroupParticipantsActivity extends Activity {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -845,6 +1082,10 @@ public class InviteGroupParticipantsActivity extends Activity {
 		return true;
 	}
 
+	/**
+	 * Enables all buttons on the screen @see header_invite_participants and @see
+	 * footer_invite_participants
+	 */
 	private void enableAllButtons() {
 		invite.setClickable(true);
 		invite.setEnabled(true);
@@ -854,6 +1095,10 @@ public class InviteGroupParticipantsActivity extends Activity {
 		prev.setEnabled(true);
 	}
 
+	/**
+	 * Disables all buttons on the screen @see header_invite_participants and @see
+	 * footer_invite_participants
+	 */
 	private void disableAllButtons() {
 		invite.setClickable(false);
 		invite.setEnabled(false);

@@ -9,6 +9,22 @@ import com.parse.ParseUser;
 
 public class MenuUtils {
 
+	/**
+	 * This method is used to select the appropriate menu method using the
+	 * parameters passed in.
+	 * 
+	 * @param id
+	 *            an integer value that identified that menu option that as been
+	 *            selected.
+	 * @param activity
+	 *            an Android Activity that made the menu request.
+	 * @param internetPresent
+	 *            a boolean value to indicate if the device has access to the
+	 *            internet.
+	 * @param TAG
+	 *            a String value used for logging purposes.
+	 * @return boolean
+	 */
 	public static boolean menuOptions(int id, Activity activity,
 			boolean internetPresent, String TAG) {
 		if (id == R.id.action_logout) {

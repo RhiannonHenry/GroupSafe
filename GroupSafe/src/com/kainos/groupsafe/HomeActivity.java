@@ -2,6 +2,7 @@ package com.kainos.groupsafe;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.parse.FindCallback;
 import com.parse.Parse;
@@ -76,14 +77,20 @@ public class HomeActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
+		currentUser = ParseUser.getCurrentUser();
+		currentUserId = currentUser.getObjectId();
 		PushService.setDefaultPushCallback(this, HomeActivity.class);
-		currentUserId = ParseUser.getCurrentUser().getObjectId().toString();
-
+		Set<String> subscriptions = PushService.getSubscriptions(getApplicationContext());
+		
 		if (getApplicationContext() != null) {
+			for(String current : subscriptions){
+				PushService.unsubscribe(getApplicationContext(), current);
+			}
 			PushService.subscribe(getApplicationContext(), "user_"
 					+ currentUserId, HomeActivity.class);
 		}
-		if (ParseInstallation.getCurrentInstallation() == null) {
+		ParseInstallation currentInstallation = ParseInstallation.getCurrentInstallation();
+		if ( currentInstallation == null) {
 			ParseInstallation.getCurrentInstallation().saveInBackground(
 					new SaveCallback() {
 						@Override
@@ -108,7 +115,6 @@ public class HomeActivity extends Activity {
 			installation.saveInBackground();
 		}
 
-		currentUser = ParseUser.getCurrentUser();
 		currentUser
 				.put("installationId", installation.getObjectId().toString());
 		currentUser.saveInBackground();

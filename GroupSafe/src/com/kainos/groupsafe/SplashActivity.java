@@ -34,8 +34,6 @@ public class SplashActivity extends Activity {
 
 	private final static String TAG = "Splash_Activity";
 	private static SplashActivity _instance = null;
-	private boolean internetPresent = false;
-	private ConnectionDetector connectionDetector;
 
 	/*
 	 * (non-Javadoc)
@@ -47,7 +45,6 @@ public class SplashActivity extends Activity {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
 		ParseAnalytics.trackAppOpened(getIntent());
-		connectionDetector = new ConnectionDetector(getApplicationContext());
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		Log.i(TAG, "User: " + currentUser);
 		if (currentUser != null) {
@@ -59,7 +56,7 @@ public class SplashActivity extends Activity {
 		// createTestOrganization();
 		enableAllButtons();
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -80,20 +77,18 @@ public class SplashActivity extends Activity {
 	 * 
 	 * @param view
 	 *            the base class for widgets, which are used to create
-	 *            interactive UI components (buttons, text fields, etc.). 
+	 *            interactive UI components (buttons, text fields, etc.).
 	 * @return void this class does not return anything
 	 */
 	public void registerNow(View view) {
-		disableAllButtons();
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
+		if (NetworkUtilities.getConnectivityStatus(_instance) == 0) {
+			Utilities.showNoInternetConnectionDialog(_instance);
+			enableAllButtons();
+		} else {
 			Log.i(TAG,
 					"The user has clicked 'Register'. Now entering RegisterActivity.class");
 			Intent intent = new Intent(_instance, RegisterActivity.class);
 			startActivity(intent);
-		} else {
-			Utilities.showNoInternetConnectionDialog(this);
-			enableAllButtons();
 		}
 	}
 
@@ -108,14 +103,12 @@ public class SplashActivity extends Activity {
 	 * @return void this class does not return anything
 	 */
 	public void signin(View view) {
-		// Disable buttons
 		disableAllButtons();
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			proceedToLogin();
-		} else {
-			Utilities.showNoInternetConnectionDialog(this);
+		if (NetworkUtilities.getConnectivityStatus(_instance) == 0) {
+			Utilities.showNoInternetConnectionDialog(_instance);
 			enableAllButtons();
+		} else {
+			proceedToLogin();
 		}
 	}
 

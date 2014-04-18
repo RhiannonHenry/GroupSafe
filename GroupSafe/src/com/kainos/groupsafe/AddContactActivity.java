@@ -290,7 +290,7 @@ public class AddContactActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		internetPresent = connectionDetector.isConnectedToInternet();
-		return MenuUtils.menuOptions(id, this, internetPresent, TAG);
+		return MenuUtilities.menuOptions(id, this, internetPresent, TAG);
 	}
 
 	/**

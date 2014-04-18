@@ -7,7 +7,7 @@ import android.widget.Toast;
 
 import com.parse.ParseUser;
 
-public class MenuUtils {
+public class MenuUtilities {
 
 	/**
 	 * This method is used to select the appropriate menu method using the
@@ -28,17 +28,17 @@ public class MenuUtils {
 	public static boolean menuOptions(int id, Activity activity,
 			boolean internetPresent, String TAG) {
 		if (id == R.id.action_logout) {
-			MenuUtils.logCurrentUserOut(activity, internetPresent, TAG);
+			MenuUtilities.logCurrentUserOut(activity, internetPresent, TAG);
 		} else if (id == R.id.action_addContact) {
-			MenuUtils.addNewContact(activity, internetPresent, TAG);
+			MenuUtilities.addNewContact(activity, internetPresent, TAG);
 		} else if (id == R.id.action_viewMap) {
-			MenuUtils.viewMap(activity, internetPresent, TAG);
+			MenuUtilities.viewMap(activity, internetPresent, TAG);
 		} else if (id == R.id.action_createGroup) {
-			MenuUtils.createGroup(activity, internetPresent, TAG);
+			MenuUtilities.createGroup(activity, internetPresent, TAG);
 		} else if (id == R.id.action_settings) {
-			MenuUtils.settings(activity, internetPresent, TAG);
+			MenuUtilities.settings(activity, internetPresent, TAG);
 		} else if (id == R.id.action_home) {
-			MenuUtils.home(activity, internetPresent, TAG);
+			MenuUtilities.home(activity, internetPresent, TAG);
 		}
 		return true;
 	}

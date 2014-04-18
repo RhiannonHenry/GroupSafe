@@ -11,8 +11,6 @@ import com.parse.SignUpCallback;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
@@ -50,8 +48,6 @@ public class RegisterActivity extends Activity {
 	private static String emailAddress = null;
 
 	private boolean errorsPresent = false;
-	private boolean internetPresent = false;
-	private ConnectionDetector connectionDetector;
 
 	/*
 	 * (non-Javadoc)
@@ -62,7 +58,6 @@ public class RegisterActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		Parse.initialize(this, "TOLfW1Hct4MUsKvpcUgB8rbMgHEryr4MW95A0bAZ",
 				"C5QjK9SQaHuVqSXqkBfFBw3WuAVynntpdn3xiQvN");
-		connectionDetector = new ConnectionDetector(getApplicationContext());
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_register);
 		_instance = this;
@@ -107,12 +102,11 @@ public class RegisterActivity extends Activity {
 	 */
 	public void register(View view) {
 		disableAllButtons();
-		internetPresent = connectionDetector.isConnectedToInternet();
-		if (internetPresent) {
-			proceedToRegistration();
-		} else {
-			Utilities.showNoInternetConnectionDialog(this);
+		if(NetworkUtilities.getConnectivityStatus(_instance)==0){
+			Utilities.showNoInternetConnectionDialog(_instance);
 			enableAllButtons();
+		}else{
+			proceedToRegistration();
 		}
 	}
 
@@ -350,35 +344,5 @@ public class RegisterActivity extends Activity {
 		Button registerButton = (Button) findViewById(R.id.registerButton);
 		registerButton.setClickable(false);
 		registerButton.setEnabled(false);
-	}
-
-	/**
-	 * Method that displays an alert dialog to the user prompting them to alter
-	 * their Internet settings. The user can cancel the dialog or they can be
-	 * directed to the 'Settings' screen for their phone.
-	 */
-	{
-		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-		alertDialog.setTitle("Internet Settings");
-		alertDialog
-				.setMessage("Cannot connect to internet. Enable Internet Services in Settings.");
-
-		alertDialog.setPositiveButton("Settings",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Intent intent = new Intent(Settings.ACTION_SETTINGS);
-						startActivity(intent);
-					}
-				});
-
-		alertDialog.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-		alertDialog.show();
 	}
 }

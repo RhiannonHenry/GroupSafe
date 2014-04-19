@@ -32,7 +32,7 @@ import android.widget.ListView;
  */
 public class SelectGroupParticipantsActivity extends Activity {
 
-	private static final String TAG = "SELECT_PARTICIPANTS_ACTIVITY";
+	private static final String TAG = "Select_Participants_Activity";
 	private static SelectGroupParticipantsActivity _instance = null;
 	private ParticipantContactRowAdapter adapter = null;
 	private ArrayList<ParticipantContact> retrievedContacts = new ArrayList<ParticipantContact>();

@@ -11,7 +11,7 @@ import android.view.Menu;
 
 public class NoInternetConnectionActivity extends Activity {
 
-	private static final String TAG = "NO_INTERNET_CONNECTION_ACTIVITY";
+	private static final String TAG = "No_Internet_Connection_Activity";
 	private static NoInternetConnectionActivity _instance = null;
 
 	@Override

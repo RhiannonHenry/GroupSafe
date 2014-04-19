@@ -9,13 +9,13 @@
     tools:context=".EditOrganizationActivity" >
 
     <TextView
-        android:id="@+id/addEmergencyContactPageMessage"
+        android:id="@+id/editOrganizationPageMessage"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:gravity="center_horizontal"
         android:layout_marginTop="@dimen/small_margin_top"
-        android:text="@string/addEmergencyContactPageMessage"
+        android:text="@string/editOrganizationPageMessage"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <EditText
@@ -23,7 +23,7 @@
         android:layout_width="@dimen/text_input_width"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_top"
-        android:layout_below="@id/addEmergencyContactPageMessage"
+        android:layout_below="@id/editOrganizationPageMessage"
         android:layout_centerHorizontal="true"
         android:ems="10"
         android:hint="@string/organizationIdHint"

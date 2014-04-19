@@ -34,7 +34,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
  */
 public class MapsViewActivity extends Activity {
 
-	private static final String TAG = "MAP_VIEW";
+	private static final String TAG = "Individual_Map_Activity";
 
 	private GoogleMap googleMap;
 	private MarkerOptions currentLocationMarker;

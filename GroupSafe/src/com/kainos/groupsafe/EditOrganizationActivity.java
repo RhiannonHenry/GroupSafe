@@ -3,11 +3,8 @@ package com.kainos.groupsafe;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -250,36 +247,6 @@ public class EditOrganizationActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.edit_organization, menu);
 		return true;
-	}
-
-	/**
-	 * Method that displays an alert dialog to the user prompting them to alter
-	 * their Internet settings. The user can cancel the dialog or they can be
-	 * directed to the 'Settings' screen for their phone.
-	 */
-	 {
-		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-		alertDialog.setTitle("Internet Settings");
-		alertDialog
-				.setMessage("Cannot connect to internet. Enable Internet Services in Settings.");
-
-		alertDialog.setPositiveButton("Settings",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Intent intent = new Intent(Settings.ACTION_SETTINGS);
-						startActivity(intent);
-					}
-				});
-
-		alertDialog.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-		alertDialog.show();
 	}
 
 	/**

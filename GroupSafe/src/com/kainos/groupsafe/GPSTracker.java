@@ -24,7 +24,7 @@ import android.util.Log;
  */
 public class GPSTracker extends Service implements LocationListener {
 
-	private static final String TAG = "GPS_TRACKER";
+	private static final String TAG = "GPS_Tracker";
 	// 10 meter(s)
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATE = 10;
 	// 1 minute(s)

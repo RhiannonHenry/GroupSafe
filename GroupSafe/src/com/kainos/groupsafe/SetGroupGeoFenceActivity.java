@@ -36,7 +36,7 @@ import android.widget.Spinner;
  */
 public class SetGroupGeoFenceActivity extends Activity {
 
-	private static final String TAG = "SET_GROUP_DETAILS";
+	private static final String TAG = "Set_Group_Details_Activity";
 	private static SetGroupGeoFenceActivity _instance = null;
 
 	static final String SAVED_GROUP_ORGANIZATION = "groupOrganization";

@@ -64,7 +64,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 
 	private static GroupGeoFenceMapActivity _instance = null;
 	final Context context = this;
-	private static final String TAG = "GROUP_MAP";
+	private static final String TAG = "Group_Map_Activity";
 	private static final int EARTH_RADIUS_KM = 6371;
 
 	private GoogleMap googleMap;

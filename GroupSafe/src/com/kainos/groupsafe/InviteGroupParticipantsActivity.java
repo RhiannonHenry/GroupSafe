@@ -40,7 +40,7 @@ import android.widget.ListView;
 public class InviteGroupParticipantsActivity extends Activity {
 
 	private static InviteGroupParticipantsActivity _instance = null;
-	private static final String TAG = "INVITE_PARTICIPANTS_ACTIVITY";
+	private static final String TAG = "Invite_Group_Participants_Activity";
 	private InviteesAdapter adapter = null;
 	private ListView listView = null;
 	private ArrayList<InviteeContact> invitedContacts = new ArrayList<InviteeContact>();

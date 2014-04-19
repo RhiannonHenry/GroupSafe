@@ -23,7 +23,7 @@ import com.kainos.groupsafe.R;
  */
 public class InviteesAdapter extends ArrayAdapter<InviteeContact> {
 
-	private static final String TAG = "INVITED_CONTACT_ADAPTER";
+	private static final String TAG = "Invited_Contact_Row_Adapter";
 
 	public ArrayList<InviteeContact> inviteeList;
 

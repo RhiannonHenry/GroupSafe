@@ -35,7 +35,7 @@ import android.widget.Toast;
  */
 public class ContactDetailsActivity extends Activity {
 
-	private static final String TAG = "DETAILED_CONTACT";
+	private static final String TAG = "Detailed_Contact_Activity";
 	private static ContactDetailsActivity _instance = null;
 	private static String contactName = null;
 	private static String contactNumber = null;

@@ -22,7 +22,7 @@ import android.widget.Button;
  */
 public class ExitGeoFenceNotificationActivity extends Activity {
 
-	private static final String TAG = "EXIT_GEO_FENCE_NOTFICATION";
+	private static final String TAG = "Exit_Geo_Fence_Notification_Activity";
 	private Button ok;
 
 	/*

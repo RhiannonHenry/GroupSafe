@@ -36,7 +36,7 @@ import android.widget.Toast;
  */
 public class AcceptDeclineInvitationActivity extends Activity {
 
-	private static final String TAG = "ACCEPT/DECLINE_INVITATION";
+	private static final String TAG = "Accept_Decline_Invitation_Activity";
 	private static final String STATUS_ACCEPT = "ACCEPTED";
 	private static final String STATUS_DECLINE = "DECLINED";
 	private String channel, userId, groupLeaderId, groupId, participantId,

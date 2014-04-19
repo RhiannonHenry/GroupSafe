@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 public class ConnectionDetectorReceiver extends BroadcastReceiver {
 
-	private static final String TAG = "CONNECTION_DETECTOR_RECEIVER";
+	private static final String TAG = "Connection_Detector_Receiver";
 
 	@Override
 	public void onReceive(final Context context, Intent intent) {

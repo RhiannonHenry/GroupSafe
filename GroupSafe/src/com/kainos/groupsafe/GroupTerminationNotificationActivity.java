@@ -28,7 +28,7 @@ import android.widget.TextView;
 public class GroupTerminationNotificationActivity extends Activity {
 
 	private static GroupTerminationNotificationActivity _instance = null;
-	private static final String TAG = "GROUP_TERMINATION_NOTIFICATION";
+	private static final String TAG = "Group_Termination_Notification_Activity";
 	private TextView pageTitle, pageMessage;
 	private Button ok;
 	private ParseUser myself;

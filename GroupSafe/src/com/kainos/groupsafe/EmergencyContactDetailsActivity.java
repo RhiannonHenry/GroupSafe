@@ -35,7 +35,7 @@ import android.widget.TextView;
  */
 public class EmergencyContactDetailsActivity extends Activity {
 
-	private static final String TAG = "DETAILED_EMERGENCY_CONTACT";
+	private static final String TAG = "Detailed_Emergency_Contact_Activity";
 	private static EmergencyContactDetailsActivity _instance = null;
 	private static String emergencyContactName = null;
 	private static String emergencyContactNumber = null;

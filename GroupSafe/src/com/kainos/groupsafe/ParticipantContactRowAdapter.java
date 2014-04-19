@@ -24,7 +24,7 @@ import android.widget.TextView;
 public class ParticipantContactRowAdapter extends
 		ArrayAdapter<ParticipantContact> {
 
-	private static final String TAG = "PARTICIPANT_CONTACT_ROW_ADAPTER";
+	private static final String TAG = "Participant_Contact_Row_Adapter";
 
 	public ArrayList<ParticipantContact> participantContactList;
 

@@ -1,7 +1,6 @@
 package com.kainos.groupsafe;
 
 import java.util.Iterator;
-import java.util.logging.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,6 +8,7 @@ import org.json.JSONObject;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 /**
  * This class is used to monitor incoming notifications and alerts the device if
@@ -21,9 +21,7 @@ import android.content.Intent;
  */
 public class NotificationResponseReceiver extends BroadcastReceiver {
 	
-	private static final String TAG = "InvitationResponseReceiver";
-	private static final Logger LOGGER = Logger
-			.getLogger(NotificationResponseReceiver.class.getName());
+	private static final String TAG = "Invitation_Response_Receiver";
 
 	String action, channel, key, title, alert, groupLeaderId, groupId,
 			participantId, radius;
@@ -40,18 +38,18 @@ public class NotificationResponseReceiver extends BroadcastReceiver {
 			json = new JSONObject(intent.getExtras()
 					.getString("com.parse.Data"));
 
-			LOGGER.info("" + TAG + " Got Action: " + action + "on channel "
+			Log.i(TAG," Got Action: " + action + "on channel "
 					+ channel + " with: ");
 
 			@SuppressWarnings("rawtypes")
 			Iterator itr = json.keys();
 			while (itr.hasNext()) {
 				key = itr.next().toString();
-				LOGGER.info("" + TAG + " ... " + key + " => "
+				Log.i(TAG, " ... " + key + " => "
 						+ json.getString(key));
 				while (itr.hasNext()) {
 					key = itr.next().toString();
-					LOGGER.info(" ... " + key + " => " + json.getString(key));
+					Log.i(TAG," ... " + key + " => " + json.getString(key));
 					if (key.equals("title")) {
 						title = json.getString(key);
 					} else if (key.equals("alert")) {
@@ -106,7 +104,7 @@ public class NotificationResponseReceiver extends BroadcastReceiver {
 			}
 
 		} catch (JSONException e) {
-			LOGGER.info("ERROR in JSON: " + e.getMessage());
+			Log.e(TAG,"ERROR in JSON: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}

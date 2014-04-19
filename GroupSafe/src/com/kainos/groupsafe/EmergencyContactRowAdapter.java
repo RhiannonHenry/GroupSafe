@@ -21,7 +21,7 @@ import com.kainos.groupsafe.R;
  */
 public class EmergencyContactRowAdapter extends ArrayAdapter<EmergencyContact> {
 
-	private static final String TAG = "EMERGENCY_CONTACT_ROW_ADAPTER";
+	private static final String TAG = "Emergency_Contact_Row_Adapter";
 	public ArrayList<EmergencyContact> emergencyContactList;
 
 	/**

@@ -11,10 +11,7 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
@@ -38,7 +35,7 @@ import android.widget.Toast;
  */
 public class AddEmergencyContactActivity extends Activity {
 
-	private static String TAG = "ADD_EMERGENCY_CONTACT";
+	private static String TAG = "Add_Emergency_Contact_Activity";
 	private static AddEmergencyContactActivity _instance = null;
 	private static String emergencyContactName = null;
 	private static String emergencyContactNumber = null;
@@ -282,36 +279,6 @@ public class AddEmergencyContactActivity extends Activity {
 				}
 			}
 		});
-	}
-
-	/**
-	 * Method that displays an alert dialog to the user prompting them to alter
-	 * their Internet settings. The user can cancel the dialog or they can be
-	 * directed to the 'Settings' screen for their phone.
-	 */
-	 {
-		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-		alertDialog.setTitle("Internet Settings");
-		alertDialog
-				.setMessage("Cannot connect to internet. Enable Internet Services in Settings.");
-
-		alertDialog.setPositiveButton("Settings",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Intent intent = new Intent(Settings.ACTION_SETTINGS);
-						startActivity(intent);
-					}
-				});
-
-		alertDialog.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-		alertDialog.show();
 	}
 
 	/**

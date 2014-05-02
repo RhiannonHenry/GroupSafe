@@ -66,10 +66,6 @@ public class SettingsActivity extends Activity {
 		setContentView(R.layout.activity_settings);
 		_instance = this;
 		refreshEmergencyContacts();
-		deleteOrganization = (Button) findViewById(R.id.editOrganizationDeleteButton);
-		addEmergencyContactButton = (Button) findViewById(R.id.addEmergencyContactButton);
-		editOrganisationButton = (Button) findViewById(R.id.editOrganizationButton);
-		passwordResetButton = (Button) findViewById(R.id.resetPasswordButton);
 
 		// create an Array Adapter from the String Array
 		listView = (ListView) findViewById(R.id.emergencyContactList);
@@ -80,6 +76,11 @@ public class SettingsActivity extends Activity {
 				R.layout.emergency_contact_row, emergencyContacts);
 		listView.setAdapter(adapter);
 
+		deleteOrganization = (Button) findViewById(R.id.editOrganizationDeleteButton);
+		addEmergencyContactButton = (Button) findViewById(R.id.addEmergencyContactButton);
+		editOrganisationButton = (Button) findViewById(R.id.editOrganizationButton);
+		passwordResetButton = (Button) findViewById(R.id.resetPasswordButton);
+		
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
 			Log.i(TAG, "Populating page...");
@@ -323,6 +324,8 @@ public class SettingsActivity extends Activity {
 							ParseObject found = foundContacts.get(0);
 							userOrganization.setText(found.get(
 									"organizationName").toString());
+							deleteOrganization.setEnabled(true);
+							deleteOrganization.setClickable(true);
 						} else {
 							Log.i(TAG, "NO ORGANIZATION WITH THAT ID FOUND");
 						}
@@ -331,6 +334,8 @@ public class SettingsActivity extends Activity {
 			});
 		} else {
 			userOrganization.setText("n/a");
+			deleteOrganization.setEnabled(false);
+			deleteOrganization.setClickable(false);
 		}
 	}
 
@@ -492,8 +497,6 @@ public class SettingsActivity extends Activity {
 	private void enableAllButtons() {
 		editOrganisationButton.setClickable(true);
 		editOrganisationButton.setEnabled(true);
-		deleteOrganization.setClickable(true);
-		deleteOrganization.setEnabled(true);
 		addEmergencyContactButton.setClickable(true);
 		addEmergencyContactButton.setEnabled(true);
 		passwordResetButton.setClickable(true);
@@ -508,8 +511,6 @@ public class SettingsActivity extends Activity {
 	private void disableAllButtons() {
 		editOrganisationButton.setClickable(false);
 		editOrganisationButton.setEnabled(false);
-		deleteOrganization.setClickable(false);
-		deleteOrganization.setEnabled(false);
 		addEmergencyContactButton.setClickable(false);
 		addEmergencyContactButton.setEnabled(false);
 		passwordResetButton.setClickable(false);

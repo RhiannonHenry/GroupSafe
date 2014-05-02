@@ -1,6 +1,5 @@
 package com.kainos.groupsafe;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +64,6 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 	private static GroupGeoFenceMapActivity _instance = null;
 	final Context context = this;
 	private static final String TAG = "Group_Map_Activity";
-	private static final int EARTH_RADIUS_KM = 6371;
 
 	private GoogleMap googleMap;
 	private Circle circle;
@@ -118,6 +116,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		Log.i(TAG, "GOT GROUP_LEADER_ID: " + groupLeaderId);
 		Log.i(TAG, "GOT RADIUS: " + radius);
 		Log.d(TAG, "Entering START ACTIVITY LOGIC...");
+		createGroupLeaderCurrentLocationMarker();
 		startActivityLogic();
 	}
 
@@ -175,7 +174,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								}
 							} else {
 								Log.i(TAG, "Refreshing View for GROUP MEMBER");
-								createGroupLeaderCurrentLocationMarker();
+								
 								getLeaderLocationAndSetMarker();
 								createOwnCurrentLocationMarker();
 								setOwnMarker(lat, lng);
@@ -213,7 +212,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								+ geoFenceCenter.latitude + ","
 								+ geoFenceCenter.longitude);
 
-						int meters = getDistanceDifference(participantLocation,
+						int meters = Haversine.getDistanceDifference(participantLocation,
 								geoFenceCenter);
 						if (meters > radius) {
 							JSONObject participantNotificationData = null;
@@ -288,61 +287,6 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 							}
 						});
 					}
-
-					/**
-					 * This method uses the Haversine Formula to calculate the
-					 * distance the participant is from the centre of the
-					 * geo-fence (i.e whether they are inside or outside the
-					 * geo-fence)
-					 * 
-					 * @param participantLocation
-					 *            the latitude and longitude of the participants
-					 *            current location.
-					 * @param geoFenceCenter
-					 *            the latitude and longitude of the center of
-					 *            the geo-fence
-					 * @return difference and integer value of the distance
-					 *         between the participant and the centre of the
-					 *         geo-fence in meters.
-					 */
-					private int getDistanceDifference(
-							LatLng participantLocation, LatLng geoFenceCenter) {
-						// Lat and Lng for PARTICIPANT
-						double participantLatitude = participantLocation.latitude;
-						double participantLongitude = participantLocation.longitude;
-						// Lat and Lng for LEADER/CENTER OF GEOFENCE
-						double geoFenceCenterLatitude = geoFenceCenter.latitude;
-						double geoFenceCenterLongitude = geoFenceCenter.longitude;
-						// Difference between Lat and Lng
-						double deltaLatitude = Math
-								.toRadians(participantLatitude
-										- geoFenceCenterLatitude);
-						double deltaLongitude = Math
-								.toRadians(participantLongitude
-										- geoFenceCenterLongitude);
-						// Part 1:
-						// sin^2(lat1-lat2/2)+cos(lat1)*cos(lat2)*sin^2(long1-long2/2)
-						double part1 = Math.sin(deltaLatitude / 2)
-								* Math.sin(deltaLatitude / 2)
-								+ Math.cos(Math.toRadians(participantLatitude)
-										* Math.toRadians(participantLongitude))
-								* Math.sin(deltaLongitude / 2)
-								* Math.sin(deltaLongitude / 2);
-						// Part 2:
-						// 2*sin^-1(sqrt(part1))
-						double part2 = 2.0 * Math.asin(Math.sqrt(part1));
-						// Part 3: Difference
-						// radius*part2
-						double difference = EARTH_RADIUS_KM * part2;
-						Log.i(TAG, "Difference in KM: " + difference);
-						DecimalFormat newFormat = new DecimalFormat("####");
-						double meter = difference * 1000;
-						int meterInDec = Integer.valueOf(newFormat
-								.format(meter));
-						Log.i(TAG, "Distance from Center of Geo-fence = "
-								+ meterInDec);
-						return meterInDec;
-					}
 				});
 			}
 		}, 0, 30000); // updates every 30 seconds
@@ -395,7 +339,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 
 		// TODO: Remove hard coding...
 		// 54.5822043,-5.9380233 --> lat, lng
-		LatLng currentPosition = new LatLng(54.5822043, -5.9380233);
+		LatLng currentPosition = new LatLng(latitude, longitude);
 		googleMap.addMarker(ownMarker
 				.position(currentPosition)
 				.title("My Location")
@@ -648,10 +592,10 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								.toString();
 
 						// TODO:: remove hard coding. Delete these 4 lines.
-						if (latitude == 0 && longitude == 0) {
-							latitude = 54.5871171;
-							longitude = -5.9338856;
-						}
+//						if (latitude == 0 && longitude == 0) {
+//							latitude = 54.5871171;
+//							longitude = -5.9338856;
+//						}
 						Log.i(TAG, "Creating Marker Options with Location: "
 								+ latitude + "," + longitude);
 						Log.i(TAG, "For Participant with userID: " + userId);
@@ -761,7 +705,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 				// TODO: Remove hard coding...
 				// 54.5821639,-5.9368431 --> latitude, longitude
 				if (!initialGeoFenceDrawn) {
-					geoFence.center(new LatLng(54.5821639, -5.9368431))
+					geoFence.center(new LatLng(latitude, longitude))
 							.radius(currentRadius)
 							.fillColor(Color.parseColor("#f6a9f3"));
 					circle = googleMap.addCircle(geoFence);
@@ -769,7 +713,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 				} else {
 					// TODO: Remove hard coding...
 					// 54.5821639,-5.9368431 --> latitude, longitude
-					circle.setCenter(new LatLng(54.5821639, -5.9368431));
+					circle.setCenter(new LatLng(latitude, longitude));
 					circle.setRadius(currentRadius);
 				}
 			}
@@ -799,7 +743,8 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		Log.i(TAG, "Placing Group Leader at: " + latitude + "," + longitude);
 		// TODO: Remove hard coding...
 		// 54.5821639,-5.9368431 --> lat, lng
-		LatLng currentPosition = new LatLng(54.5821639, -5.9368431);
+		Log.e(TAG,"PLACING GROUP LEADER MARKER NOW");
+		LatLng currentPosition = new LatLng(latitude, longitude);
 		googleMap.addMarker(groupLeaderMarker
 				.position(currentPosition)
 				.title(title)

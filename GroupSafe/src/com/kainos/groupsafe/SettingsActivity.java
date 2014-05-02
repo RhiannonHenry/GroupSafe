@@ -71,7 +71,6 @@ public class SettingsActivity extends Activity {
 		editOrganisationButton = (Button) findViewById(R.id.editOrganizationButton);
 		passwordResetButton = (Button) findViewById(R.id.resetPasswordButton);
 
-		enableAllButtons();
 		// create an Array Adapter from the String Array
 		listView = (ListView) findViewById(R.id.emergencyContactList);
 		View header = getLayoutInflater().inflate(R.layout.header_settings,
@@ -93,6 +92,7 @@ public class SettingsActivity extends Activity {
 		userClicksOnResetPassword();
 		userClicksOnEditOrganizationId();
 		userClicksOnDeleteOrganization();
+		enableAllButtons();
 	}
 	
 	@Override

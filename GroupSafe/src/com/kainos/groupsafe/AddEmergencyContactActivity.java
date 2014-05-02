@@ -1,5 +1,6 @@
 package com.kainos.groupsafe;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.parse.FindCallback;
@@ -13,6 +14,7 @@ import com.parse.SaveCallback;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,6 +47,7 @@ public class AddEmergencyContactActivity extends Activity {
 	private EditText addEmergencyContactNumber;
 	private EditText addEmergencyContactRelationship;
 	private boolean internetPresent = false;
+	private boolean errorsPresent = false;
 	private ConnectionDetector connectionDetector;
 
 	/*
@@ -59,12 +62,15 @@ public class AddEmergencyContactActivity extends Activity {
 		connectionDetector = new ConnectionDetector(getApplicationContext());
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_emergency_contact);
+		addEmergencyContactName = (EditText) findViewById(R.id.addEmergencyContactNameInput);
+		addEmergencyContactNumber = (EditText) findViewById(R.id.addEmergencyContactNumberInput);
+		addEmergencyContactRelationship = (EditText) findViewById(R.id.addEmergencyContactRelationshipInput);
 		_instance = this;
 		enableAllButtons();
 		cancelButtonClicked();
 		saveButtonClicked();
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -76,7 +82,6 @@ public class AddEmergencyContactActivity extends Activity {
 		super.onPause();
 		GroupSafeApplication.activityPaused();
 	}
-
 
 	/**
 	 * This method is called if the user clicks on Save. This will start a flow
@@ -91,12 +96,36 @@ public class AddEmergencyContactActivity extends Activity {
 				disableAllButtons();
 				internetPresent = connectionDetector.isConnectedToInternet();
 				if (internetPresent) {
-					addEmergencyContactToDatabase();
+					if (errorsPresent){
+						addEmergencyContactName.setError(null);
+						addEmergencyContactNumber.setError(null);
+						addEmergencyContactRelationship.setError(null);
+					}
+					if (validateEmergencyContact()) {
+						addEmergencyContactToDatabase();
+					}
 				} else {
 					Utilities.showNoInternetConnectionDialog(_instance);
 					enableAllButtons();
 				}
 
+			}
+
+			private boolean validateEmergencyContact() {
+				ArrayList<EditText> requiredFields = new ArrayList<EditText>();
+				requiredFields.add(addEmergencyContactName);
+				requiredFields.add(addEmergencyContactNumber);
+				requiredFields.add(addEmergencyContactRelationship);
+				
+				for(EditText requiredField : requiredFields){
+					if(TextUtils.isEmpty(requiredField.getText().toString())){
+						requiredField.setError(getString(R.string.error_requiredField));
+						errorsPresent = true;
+						enableAllButtons();
+						return false;
+					}
+				}
+				return true;
 			}
 		});
 	}
@@ -107,9 +136,6 @@ public class AddEmergencyContactActivity extends Activity {
 	 * an existing duplicate entry already in the database.
 	 */
 	protected void addEmergencyContactToDatabase() {
-		addEmergencyContactName = (EditText) findViewById(R.id.addEmergencyContactNameInput);
-		addEmergencyContactNumber = (EditText) findViewById(R.id.addEmergencyContactNumberInput);
-		addEmergencyContactRelationship = (EditText) findViewById(R.id.addEmergencyContactRelationshipInput);
 		emergencyContactName = addEmergencyContactName.getText().toString();
 		emergencyContactNumber = addEmergencyContactNumber.getText().toString();
 		emergencyContactRelationship = addEmergencyContactRelationship

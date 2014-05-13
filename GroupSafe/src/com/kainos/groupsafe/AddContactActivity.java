@@ -13,6 +13,7 @@ import com.parse.SaveCallback;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,6 +40,7 @@ public class AddContactActivity extends Activity {
 	private static String newContactObjectID = null;
 	private static AddContactActivity _instance = null;
 	private boolean internetPresent = false;
+	private boolean errorsPresent = false;
 	private ConnectionDetector connectionDetector;
 	private EditText addContactName;
 	private EditText addContactNumber;
@@ -51,6 +53,8 @@ public class AddContactActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_contact);
 		_instance = this;
+		addContactName = (EditText) findViewById(R.id.addContactNameInput);
+		addContactNumber = (EditText) findViewById(R.id.addContactNumberInput);
 		enableAllButtons();
 	}
 
@@ -101,11 +105,38 @@ public class AddContactActivity extends Activity {
 		disableAllButtons();
 		internetPresent = connectionDetector.isConnectedToInternet();
 		if (internetPresent) {
-			addContactToDatabase();
+			if (errorsPresent) {
+				addContactName.setError(null);
+				addContactNumber.setError(null);
+			}
+			if (valid()) {
+				addContactToDatabase();
+			}else{
+				enableAllButtons();
+			}
 		} else {
 			Utilities.showNoInternetConnectionDialog(this);
 			enableAllButtons();
 		}
+	}
+
+	private boolean valid() {
+		contactName = addContactName.getText().toString();
+		contactNumber = addContactNumber.getText().toString();
+		View focusView = null;
+		if (TextUtils.isEmpty(contactName)) {
+			addContactName.setError(getString(R.string.error_requiredField));
+			focusView = addContactName;
+			errorsPresent = true;
+			return false;
+		}
+		if (TextUtils.isEmpty(contactNumber)) {
+			addContactNumber.setError(getString(R.string.error_requiredField));
+			focusView = addContactNumber;
+			errorsPresent = true;
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -113,8 +144,6 @@ public class AddContactActivity extends Activity {
 	 * form to local variables: Contact name and Contact number
 	 */
 	private void addContactToDatabase() {
-		addContactName = (EditText) findViewById(R.id.addContactNameInput);
-		addContactNumber = (EditText) findViewById(R.id.addContactNumberInput);
 		contactName = addContactName.getText().toString();
 		contactNumber = addContactNumber.getText().toString();
 
@@ -140,6 +169,9 @@ public class AddContactActivity extends Activity {
 					} else {
 						enableAllButtons();
 						Log.e(TAG, "User doesn't exist in database");
+						addContactNumber
+								.setError(getString(R.string.error_invalid_contact));
+						errorsPresent = true;
 						Toast.makeText(getApplicationContext(),
 								"User does not exist. Try Again!",
 								Toast.LENGTH_LONG).show();
@@ -223,6 +255,7 @@ public class AddContactActivity extends Activity {
 							addContactToUserContactList(newContactObjectID);
 						} else {
 							Log.e(TAG, "NO MATCH FOR CONTACT");
+							enableAllButtons();
 						}
 					}
 				} else {

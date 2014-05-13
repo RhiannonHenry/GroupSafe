@@ -5,6 +5,7 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -35,6 +36,7 @@ public class EditOrganizationActivity extends Activity {
 	private static String organizationId = null;
 	private EditText organizationIdInput;
 	private boolean internetPresent = false;
+	private boolean errorsPresent = false;
 	private ConnectionDetector connectionDetector;
 
 	/*
@@ -55,7 +57,7 @@ public class EditOrganizationActivity extends Activity {
 		cancelButtonClicked();
 		saveButtonClicked();
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -67,7 +69,6 @@ public class EditOrganizationActivity extends Activity {
 		super.onPause();
 		GroupSafeApplication.activityPaused();
 	}
-
 
 	/**
 	 * This method is called when the user clicks on 'Save' button from the @see
@@ -82,12 +83,32 @@ public class EditOrganizationActivity extends Activity {
 				disableAllButtons();
 				internetPresent = connectionDetector.isConnectedToInternet();
 				if (internetPresent) {
-					checkIfGroupExists();
+					if (errorsPresent) {
+						organizationIdInput.setError(null);
+					}
+					if (validForm()) {
+						checkIfGroupExists();
+					} else {
+						enableAllButtons();
+					}
 				} else {
 					Utilities.showNoInternetConnectionDialog(_instance);
 					enableAllButtons();
 				}
 
+			}
+
+			private boolean validForm() {
+				organizationId = organizationIdInput.getText().toString();
+				View focusView = null;
+				if (TextUtils.isEmpty(organizationId)) {
+					organizationIdInput
+							.setError(getString(R.string.error_requiredField));
+					focusView = organizationIdInput;
+					errorsPresent = true;
+					return false;
+				}
+				return true;
 			}
 		});
 	}
@@ -118,6 +139,9 @@ public class EditOrganizationActivity extends Activity {
 						saveOrganizationForUser();
 					} else {
 						enableAllButtons();
+						organizationIdInput
+								.setError(getString(R.string.error_invalid_organizationId));
+						errorsPresent = true;
 						Toast.makeText(getApplicationContext(),
 								"Organization does not exist. Try Again!",
 								Toast.LENGTH_LONG).show();
@@ -125,6 +149,7 @@ public class EditOrganizationActivity extends Activity {
 				} else {
 					Log.e(TAG, "AN ERROR HAS OCCURRED: ");
 					e.printStackTrace();
+					enableAllButtons();
 				}
 			}
 		});

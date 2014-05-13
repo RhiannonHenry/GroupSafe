@@ -8,6 +8,9 @@
     <string name="error_invalidPassword">Password id invalid. (Between 4 to 8 Characters)</string>
     <string name="error_invalidEmailAddress">Email is invalid.</string>
     <string name="error_invalid_credentials">Username/Password Invalid</string>
+    <string name="error_invalid_organizationId">Organization ID is invalid</string>
+    <string name="error_invalid_contact">No user exists for this number</string>
+    
 
     <!-- MENU String -->
     <string name="menuOption_logout">Logout</string>

@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 /**
  * This Activity is the first step in the 'Create Group' process, where a user
@@ -85,7 +86,7 @@ public class SelectGroupParticipantsActivity extends Activity {
 		super.onPause();
 		GroupSafeApplication.activityPaused();
 	}
-	
+
 	/**
 	 * This method is used if the user clicks 'Cancel' button on the
 	 * {@link SetGroupGeoFenceActivity} screen (@see
@@ -127,15 +128,22 @@ public class SelectGroupParticipantsActivity extends Activity {
 								.getObjectId());
 					}
 				}
-				Log.i(TAG, "Chosen Participants: ");
-				for (int j = 0; j < chosenParticipants.size(); j++) {
-					Log.i(TAG, j + ". " + chosenParticipants.get(j));
+				if (chosenParticipants.size() > 0) {
+					Log.i(TAG, "Chosen Participants: ");
+					for (int j = 0; j < chosenParticipants.size(); j++) {
+						Log.i(TAG, j + ". " + chosenParticipants.get(j));
+					}
+					Intent intent = new Intent(_instance,
+							SetGroupGeoFenceActivity.class);
+					intent.putStringArrayListExtra("chosenParticipants",
+							chosenParticipants);
+					startActivity(intent);
+				} else {
+					Toast.makeText(getApplicationContext(),
+							"You must select at least 1 participant",
+							Toast.LENGTH_SHORT).show();
+					enableAllButtons();
 				}
-				Intent intent = new Intent(_instance,
-						SetGroupGeoFenceActivity.class);
-				intent.putStringArrayListExtra("chosenParticipants",
-						chosenParticipants);
-				startActivity(intent);
 			}
 		});
 	}

@@ -6,11 +6,14 @@ import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,6 +34,8 @@ import android.widget.Toast;
 public class RegisterActivity extends Activity {
 	private static final String TAG = "Register_Activity";
 	private static RegisterActivity _instance = null;
+	private ParseInstallation installation = null;
+	private Context context;
 
 	/**
 	 * Below are the Editable Text Areas on the register form
@@ -61,6 +66,7 @@ public class RegisterActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_register);
 		_instance = this;
+		context = getApplicationContext();
 		enableAllButtons();
 	}
 
@@ -102,10 +108,10 @@ public class RegisterActivity extends Activity {
 	 */
 	public void register(View view) {
 		disableAllButtons();
-		if(NetworkUtilities.getConnectivityStatus(_instance)==0){
+		if (NetworkUtilities.getConnectivityStatus(_instance) == 0) {
 			Utilities.showNoInternetConnectionDialog(_instance);
 			enableAllButtons();
-		}else{
+		} else {
 			proceedToRegistration();
 		}
 	}
@@ -247,12 +253,6 @@ public class RegisterActivity extends Activity {
 					Log.i(TAG, "Account Created Successfully");
 					// Show a simple Toast message upon successful registration
 					registerParseDevice();
-					Toast.makeText(getApplicationContext(),
-							"Successfully Registered!", Toast.LENGTH_LONG)
-							.show();
-					Intent intent = new Intent(_instance, HomeActivity.class);
-					startActivity(intent);
-					finish();
 				} else {
 					enableAllButtons();
 					Log.e(TAG, "A user with username: {" + username
@@ -268,7 +268,7 @@ public class RegisterActivity extends Activity {
 			 * Creates an installation associated with this device
 			 */
 			private void registerParseDevice() {
-				ParseInstallation.getCurrentInstallation().saveInBackground();
+				new ParseAsyncTask().execute(context);
 			}
 		});
 	}
@@ -345,4 +345,37 @@ public class RegisterActivity extends Activity {
 		registerButton.setClickable(false);
 		registerButton.setEnabled(false);
 	}
+	
+	private class ParseAsyncTask extends AsyncTask<Context, Void, Context> {
+		@Override
+		protected Context doInBackground(Context... context) {
+			installation = ParseInstallation.getCurrentInstallation();
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Context result) {
+			Log.i(TAG, "Finished ASYNC TASK");
+			installation.saveInBackground(
+					new SaveCallback() {
+						@Override
+						public void done(ParseException e) {
+							if (e == null) {
+								Toast.makeText(getApplicationContext(),
+										"Successfully Registered!",
+										Toast.LENGTH_LONG).show();
+								Intent intent = new Intent(_instance,
+										HomeActivity.class);
+								startActivity(intent);
+								finish();
+							} else {
+								Log.e(TAG,
+										"UNABLE TO REGISTER WITHOUT INSTALLATION");
+							}
+						}
+					});
+			
+		}
+	}
+
 }

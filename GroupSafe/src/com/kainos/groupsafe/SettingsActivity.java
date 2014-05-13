@@ -118,6 +118,8 @@ public class SettingsActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				disableAllButtons();
+				deleteOrganization.setEnabled(false);
+				deleteOrganization.setClickable(false);
 				ParseUser currentUser = ParseUser.getCurrentUser();
 				final String currentOrganizationId = currentUser.get(
 						"organizationId").toString();

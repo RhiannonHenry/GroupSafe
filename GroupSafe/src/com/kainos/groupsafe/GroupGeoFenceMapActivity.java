@@ -126,7 +126,6 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		autoUpdate.cancel();
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -163,9 +162,13 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 										String userObjectId = participantUser
 												.get(0).getObjectId()
 												.toString();
-										String userDisplayName = participantUser.get(0).get("displayName").toString();
+										String userDisplayName = participantUser
+												.get(0).get("displayName")
+												.toString();
 										if (userObjectId != null) {
-											checkIfParticipantInGeoFence(userObjectId, userDisplayName);
+											checkIfParticipantInGeoFence(
+													userObjectId,
+													userDisplayName);
 										}
 									} catch (ParseException e) {
 										Log.e(TAG, "ERROR:: ");
@@ -174,7 +177,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								}
 							} else {
 								Log.i(TAG, "Refreshing View for GROUP MEMBER");
-								
+
 								getLeaderLocationAndSetMarker();
 								createOwnCurrentLocationMarker();
 								setOwnMarker(lat, lng);
@@ -196,45 +199,50 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 					 * @param userObjectId
 					 *            the unique identifier for the user we are
 					 *            checking.
-					 * @param userDisplayName 
+					 * @param userDisplayName
 					 */
 					private void checkIfParticipantInGeoFence(
 							String userObjectId, String userDisplayName) {
 						MarkerOptions participant = participantLocationMarkers
 								.get(userObjectId);
 						Log.i(TAG, "Getting location for user: " + userObjectId);
+						try {
+							LatLng participantLocation = participant
+									.getPosition();
+							Log.i(TAG, "User is at location: "
+									+ participantLocation.latitude + ","
+									+ participantLocation.longitude);
+							LatLng geoFenceCenter = circle.getCenter();
+							Log.i(TAG, "Center of Geo-Fence is at: "
+									+ geoFenceCenter.latitude + ","
+									+ geoFenceCenter.longitude);
 
-						LatLng participantLocation = participant.getPosition();
-						Log.i(TAG, "User is at location: "
-								+ participantLocation.latitude + ","
-								+ participantLocation.longitude);
-						LatLng geoFenceCenter = circle.getCenter();
-						Log.i(TAG, "Center of Geo-Fence is at: "
-								+ geoFenceCenter.latitude + ","
-								+ geoFenceCenter.longitude);
-
-						int meters = Haversine.getDistanceDifference(participantLocation,
-								geoFenceCenter);
-						if (meters > radius) {
-							JSONObject participantNotificationData = null;
-							try {
-								participantNotificationData = new JSONObject(
-										"{"
-												+ "\"alert\":\""
-												+ "You have left the Geo-Fence\", "
-												+ "\"action\":\"com.kainos.groupsafe.ExitGeoFenceNotificationActivity\", "
-												+ "\"title\": \"Exit!\"}");
-								sendAlertNotification(userObjectId,
-										participantNotificationData);
-							} catch (JSONException e1) {
-								Log.e(TAG,
-										"ERROR: Error Creating JSON for Temination Notification.");
-								e1.printStackTrace();
+							int meters = Haversine.getDistanceDifference(
+									participantLocation, geoFenceCenter);
+							if (meters > radius) {
+								JSONObject participantNotificationData = null;
+								try {
+									participantNotificationData = new JSONObject(
+											"{"
+													+ "\"alert\":\""
+													+ "You have left the Geo-Fence\", "
+													+ "\"action\":\"com.kainos.groupsafe.ExitGeoFenceNotificationActivity\", "
+													+ "\"title\": \"Exit!\"}");
+									sendAlertNotification(userObjectId,
+											participantNotificationData);
+								} catch (JSONException e1) {
+									Log.e(TAG,
+											"ERROR: Error Creating JSON for Temination Notification.");
+									e1.printStackTrace();
+								}
+								notifyGroupLeader(userObjectId, userDisplayName);
+							} else {
+								Log.i(TAG, "PARTICIPANT IS WITHIN THE GEO-FENCE");
 							}
-							notifyGroupLeader(userObjectId, userDisplayName);
-						} else {
-							Log.i(TAG, "PARTICIPANT IS WITHIN THE GEO-FENCE");
+						} catch (NullPointerException e) {
+							Log.e(TAG, "Participnt has not been positioned yet...");
 						}
+						
 					}
 
 					/**
@@ -264,9 +272,10 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 					 * 
 					 * @param userObjectId
 					 *            the user who is outside the geo-fence
-					 * @param userDisplayName 
+					 * @param userDisplayName
 					 */
-					private void notifyGroupLeader(String userObjectId, String userDisplayName) {
+					private void notifyGroupLeader(String userObjectId,
+							String userDisplayName) {
 						final Dialog dialog = new Dialog(context);
 						dialog.setContentView(R.layout.custom_notification_dialog);
 						dialog.setTitle("Exit Geo-Fence");
@@ -450,7 +459,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 							e.printStackTrace();
 						}
 					}
-				});	
+				});
 	}
 
 	/**
@@ -547,7 +556,8 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 							Log.i(TAG, "Got location ID: " + userLocation);
 							Log.i(TAG,
 									"Adding Location ID to participantLocations array...");
-							getParticipantLatLng(userLocation, current.get("displayName").toString());
+							getParticipantLatLng(userLocation,
+									current.get("displayName").toString());
 						}
 					} else {
 						Log.e(TAG,
@@ -572,7 +582,8 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 	 *            a String value representing a unique reference to the location
 	 *            associated with the user/participant.
 	 */
-	protected void getParticipantLatLng(String userLocationID, final String displayName) {
+	protected void getParticipantLatLng(String userLocationID,
+			final String displayName) {
 		ParseQuery<ParseObject> getLocationQuery = ParseQuery
 				.getQuery("Location");
 		getLocationQuery.whereEqualTo("objectId", userLocationID);
@@ -594,10 +605,10 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								.toString();
 
 						// TODO:: remove hard coding. Delete these 4 lines.
-//						if (latitude == 0 && longitude == 0) {
-//							latitude = 54.5871171;
-//							longitude = -5.9338856;
-//						}
+						// if (latitude == 0 && longitude == 0) {
+						// latitude = 54.5871171;
+						// longitude = -5.9338856;
+						// }
 						Log.i(TAG, "Creating Marker Options with Location: "
 								+ latitude + "," + longitude);
 						Log.i(TAG, "For Participant with userID: " + userId);
@@ -745,7 +756,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 		Log.i(TAG, "Placing Group Leader at: " + latitude + "," + longitude);
 		// TODO: Remove hard coding...
 		// 54.5821639,-5.9368431 --> lat, lng
-		Log.e(TAG,"PLACING GROUP LEADER MARKER NOW");
+		Log.e(TAG, "PLACING GROUP LEADER MARKER NOW");
 		LatLng currentPosition = new LatLng(latitude, longitude);
 		googleMap.addMarker(groupLeaderMarker
 				.position(currentPosition)

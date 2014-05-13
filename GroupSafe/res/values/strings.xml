@@ -63,17 +63,17 @@
     <string name="displayNameExample">Joe Sample</string>
     <string name="emailExample">j.sample@example.co.uk</string>
     <string name="title_activity_register">Register</string>
-    <string name="title_activity_home">HomeActivity</string>
+    <string name="title_activity_home">Home</string>
 
     <!-- Strings for ADD CONTACT page -->
     <string name="addContactPageMessage">Add New Contact:</string>
     <string name="contactNamePrompt">Contact Display Name:</string>
     <string name="contactNumberPrompt">Contact Phone Number:</string>
-    <string name="title_activity_add_contact">AddContactActivity</string>
+    <string name="title_activity_add_contact">Add Contact</string>
 
     <!-- Strings for CONTACT ROW -->
     <string name="contact_row_arrow_description">></string>
-    <string name="title_activity_contact_details">ContactDetailsActivity</string>
+    <string name="title_activity_contact_details">Contact Details</string>
 
     <!-- Strings for DETAILED CONTACT VIEW page -->
     <string name="detailedContactPageMessage">Detailed Contact Information:</string>
@@ -87,14 +87,14 @@
     <string name="detailed_contact_group_member"></string>
 
     <!-- Strings for MAP VIEW page -->
-    <string name="title_activity_maps_view">MapsViewActivity</string>
+    <string name="title_activity_maps_view">Individual Map</string>
     <string name="map_view_text">Below is a map showing your current location:</string>
 
     <!-- String for STEP1: SELECT GROUP PARTICIPANTS page -->
-    <string name="title_activity_select_group_participants">SelectGroupParticipantsActivity</string>
+    <string name="title_activity_select_group_participants">Select Group Participants</string>
 
     <!-- Strings for STEP2: GEO-FENCE RADIUS page -->
-    <string name="title_activity_set_group_geo_fence">SetGroupGeoFenceActivity</string>
+    <string name="title_activity_set_group_geo_fence">Set Group Details</string>
     <string name="detailed_radius_prompt">Select Geo-Fence Radius(meters): </string>
     <string name="radius_prompt">Radius(m): </string>
     <string name="group_name_prompt">Set Group Name:</string>
@@ -140,9 +140,9 @@
     <string name="detailedEmergencyContactNamePrompt">Name: </string>
     <string name="detailedEmergencyContactNumberPrompt">Number: </string>
     <string name="detailedEmergencyContactRelationshipPrompt">Relationship: </string>
-    <string name="title_activity_notification">NotificationActivity</string>
-    <string name="title_activity_accept_decline_invitation">AcceptDeclineInvitationActivity</string>
-    <string name="title_activity_edit_organization">EditOrganizationActivity</string>
+    <string name="title_activity_notification">Notification</string>
+    <string name="title_activity_accept_decline_invitation">Group Invitation</string>
+    <string name="title_activity_edit_organization">Edit Organization</string>
 
     <!-- Strings for EDIT ORGANIZATION page -->
     <string name="editOrganizationPageMessage">Enter the OrganizationID of the Organization you want to join:</string>
@@ -154,8 +154,8 @@
     <string name="notification_message">Notififcation Message goes HERE</string>
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
-    <string name="title_activity_group_termination_notification">GroupTerminationNotificationActivity</string>
-    <string name="title_activity_group_geo_fence_map">GroupGeoFenceMapActivity</string>
+    <string name="title_activity_group_termination_notification">Group Termination</string>
+    <string name="title_activity_group_geo_fence_map">Group Map</string>
 
     <!-- Strings for CUSTOM EDIT GEO-FENCE RADIUS dialog -->
     <string name="set_radius">Radius(m)</string>
@@ -181,9 +181,9 @@
         <item>140</item>
     </string-array>
 
-    <string name="title_activity_exit_geo_fence_notification">ExitGeoFenceNotificationActivity</string>
+    <string name="title_activity_exit_geo_fence_notification">Outside Geo-Fence</string>
     <string name="exit_geo_fence_notification_message">You have left the Geo-Fence. Please re-enter the Geo-Fence</string>
     <string name="exit_geo_fence_notification_title">Exited Geo-Fence</string>
-    <string name="title_activity_no_internet_connection">NoInternetConnectionActivity</string>
+    <string name="title_activity_no_internet_connection">Connection Error</string>
 
 </resources>

@@ -14,8 +14,10 @@ import com.parse.ParseUser;
 import com.parse.PushService;
 import com.parse.SaveCallback;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
@@ -23,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 /**
  * This is the activity screen that will be displayed to the user once they have
@@ -38,6 +41,7 @@ public class HomeActivity extends Activity {
 	private final static String TAG = "Home_Activity";
 	public static final String SELECTED_CONTACT = "com.kainos.groupsafe.activities.HomeActivity.SELECTEDCONTACT";
 	private static HomeActivity _instance = null;
+	private ParseInstallation currentInstallation = null;
 
 	/**
 	 * An Array of Contacts for the user @see Contact.java
@@ -80,45 +84,17 @@ public class HomeActivity extends Activity {
 		currentUser = ParseUser.getCurrentUser();
 		currentUserId = currentUser.getObjectId();
 		PushService.setDefaultPushCallback(this, HomeActivity.class);
-		Set<String> subscriptions = PushService.getSubscriptions(getApplicationContext());
-		
+		Set<String> subscriptions = PushService
+				.getSubscriptions(getApplicationContext());
+
 		if (getApplicationContext() != null) {
-			for(String current : subscriptions){
+			for (String current : subscriptions) {
 				PushService.unsubscribe(getApplicationContext(), current);
 			}
 			PushService.subscribe(getApplicationContext(), "user_"
 					+ currentUserId, HomeActivity.class);
 		}
-		ParseInstallation currentInstallation = ParseInstallation.getCurrentInstallation();
-		if ( currentInstallation == null) {
-			ParseInstallation.getCurrentInstallation().saveInBackground(
-					new SaveCallback() {
-						@Override
-						public void done(ParseException e) {
-							if (e == null) {
-								installation = ParseInstallation
-										.getCurrentInstallation();
-								Log.d(TAG, "Got Installation: "
-										+ installation.getObjectId().toString());
-								installation.put("owner", currentUserId);
-								installation.saveInBackground();
-							} else {
-								Log.e(TAG,
-										"Unable to save the current installation");
-								e.printStackTrace();
-							}
-						}
-					});
-		} else {
-			installation = ParseInstallation.getCurrentInstallation();
-			installation.put("owner", currentUserId);
-			installation.saveInBackground();
-		}
-
-		currentUser
-				.put("installationId", installation.getObjectId().toString());
-		currentUser.saveInBackground();
-
+		new ParseAsyncTask().execute(getApplicationContext());
 		connectionDetector = new ConnectionDetector(getApplicationContext());
 
 		super.onCreate(savedInstanceState);
@@ -231,6 +207,77 @@ public class HomeActivity extends Activity {
 			}
 		});
 	}
+	
+	private class ParseAsyncTask extends AsyncTask<Context, Void, Context> {
+		@Override
+		protected Context doInBackground(Context... context) {
+			currentInstallation = ParseInstallation
+					.getCurrentInstallation();			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Context result) {
+			Log.i(TAG, "Finished ASYNC TASK");
+			if (currentInstallation == null) {
+				Log.i(TAG, "Parse Installation is NULL");
+				ParseInstallation.getCurrentInstallation().saveInBackground(
+						new SaveCallback() {
+							@Override
+							public void done(ParseException e) {
+								if (e == null) {
+									installation = ParseInstallation
+											.getCurrentInstallation();
+									Log.d(TAG, "Got Installation: "
+											+ installation.getObjectId().toString());
+									installation.put("owner", currentUserId);
+									installation
+											.saveInBackground(new SaveCallback() {
+
+												@Override
+												public void done(ParseException e) {
+													if (e == null) {
+														Log.i(TAG,
+																"Updated owner for installation");
+													}
+												}
+											});
+								} else {
+									Log.e(TAG,
+											"Unable to save the current installation");
+									e.printStackTrace();
+								}
+							}
+						});
+			} else {
+				Log.i(TAG, "Updating current installation");
+				installation = ParseInstallation.getCurrentInstallation();
+				installation.put("owner", currentUserId);
+				installation.saveInBackground(new SaveCallback() {
+
+					@Override
+					public void done(ParseException e) {
+						if (e == null) {
+							Log.i(TAG, "Updated owner for Installation");
+						}
+					}
+				});
+			}
+
+			currentUser
+					.put("installationId", installation.getObjectId().toString());
+			currentUser.saveInBackground(new SaveCallback() {
+				@Override
+				public void done(ParseException e) {
+					if (e == null) {
+						Log.i(TAG, "Updated installationID for user");
+					}
+				}
+			});
+			
+		}
+	}
+
 
 	/*
 	 * (non-Javadoc)

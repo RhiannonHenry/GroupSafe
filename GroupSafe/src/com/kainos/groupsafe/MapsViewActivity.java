@@ -118,13 +118,13 @@ public class MapsViewActivity extends Activity {
 		}, 0, 30000); // updates every 30 seconds
 	}
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		autoUpdate.cancel();
-		locationServices.stopUsingGPS();
-		googleMap.clear();
-	}
+//	@Override
+//	protected void onDestroy() {
+//		super.onDestroy();
+//		autoUpdate.cancel();
+//		locationServices.stopUsingGPS();
+//		googleMap.clear();
+//	}
 
 	/**
 	 * This method is called and uses the GPSTracker class to find the users

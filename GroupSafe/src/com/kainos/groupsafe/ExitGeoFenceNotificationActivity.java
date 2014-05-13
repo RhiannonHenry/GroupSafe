@@ -14,9 +14,7 @@ import android.widget.Button;
  * This Activity is used to notify a user that is a group member that they have
  * left the groups geo-fence. This screen will be displayed if the user receives
  * a ExitGeoFenceNotification from the group leader.
- * 
- * @see activity_exit_geo_fence_notification.xml
- * 
+ *  
  * @author Rhiannon Henry
  * 
  */

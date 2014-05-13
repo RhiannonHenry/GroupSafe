@@ -53,7 +53,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
  * and group members. This screen displays the map, the current participants and
  * the geo-fence.
  * 
- * @see activity_group_geo_fence_map.xml
  * 
  * @author Rhiannon Henry
  * 
@@ -164,8 +163,9 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 										String userObjectId = participantUser
 												.get(0).getObjectId()
 												.toString();
+										String userDisplayName = participantUser.get(0).get("displayName").toString();
 										if (userObjectId != null) {
-											checkIfParticipantInGeoFence(userObjectId);
+											checkIfParticipantInGeoFence(userObjectId, userDisplayName);
 										}
 									} catch (ParseException e) {
 										Log.e(TAG, "ERROR:: ");
@@ -196,9 +196,10 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 					 * @param userObjectId
 					 *            the unique identifier for the user we are
 					 *            checking.
+					 * @param userDisplayName 
 					 */
 					private void checkIfParticipantInGeoFence(
-							String userObjectId) {
+							String userObjectId, String userDisplayName) {
 						MarkerOptions participant = participantLocationMarkers
 								.get(userObjectId);
 						Log.i(TAG, "Getting location for user: " + userObjectId);
@@ -230,7 +231,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 										"ERROR: Error Creating JSON for Temination Notification.");
 								e1.printStackTrace();
 							}
-							notifyGroupLeader(userObjectId);
+							notifyGroupLeader(userObjectId, userDisplayName);
 						} else {
 							Log.i(TAG, "PARTICIPANT IS WITHIN THE GEO-FENCE");
 						}
@@ -263,8 +264,9 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 					 * 
 					 * @param userObjectId
 					 *            the user who is outside the geo-fence
+					 * @param userDisplayName 
 					 */
-					private void notifyGroupLeader(String userObjectId) {
+					private void notifyGroupLeader(String userObjectId, String userDisplayName) {
 						final Dialog dialog = new Dialog(context);
 						dialog.setContentView(R.layout.custom_notification_dialog);
 						dialog.setTitle("Exit Geo-Fence");
@@ -272,7 +274,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								.findViewById(R.id.dialogNotificationOK);
 						TextView message = (TextView) dialog
 								.findViewById(R.id.dialogNotificationMessage);
-						message.setText("Participant " + userObjectId
+						message.setText("Participant " + userDisplayName
 								+ " has left the geo-fence!");
 						okButton.setEnabled(true);
 						okButton.setClickable(true);
@@ -545,7 +547,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 							Log.i(TAG, "Got location ID: " + userLocation);
 							Log.i(TAG,
 									"Adding Location ID to participantLocations array...");
-							getParticipantLatLng(userLocation);
+							getParticipantLatLng(userLocation, current.get("displayName").toString());
 						}
 					} else {
 						Log.e(TAG,
@@ -570,7 +572,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 	 *            a String value representing a unique reference to the location
 	 *            associated with the user/participant.
 	 */
-	protected void getParticipantLatLng(String userLocationID) {
+	protected void getParticipantLatLng(String userLocationID, final String displayName) {
 		ParseQuery<ParseObject> getLocationQuery = ParseQuery
 				.getQuery("Location");
 		getLocationQuery.whereEqualTo("objectId", userLocationID);
@@ -608,7 +610,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 								currentMarker = new MarkerOptions();
 								googleMap.addMarker(currentMarker
 										.position(currentPosition)
-										.title("Participant " + userId)
+										.title("Participant " + displayName)
 										.draggable(false)
 										.icon(BitmapDescriptorFactory
 												.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
@@ -619,7 +621,7 @@ public class GroupGeoFenceMapActivity extends FragmentActivity implements
 							MarkerOptions participantMarker = new MarkerOptions();
 							googleMap.addMarker(participantMarker
 									.position(currentPosition)
-									.title("Participant " + userId)
+									.title("Participant " + displayName)
 									.draggable(false)
 									.icon(BitmapDescriptorFactory
 											.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));

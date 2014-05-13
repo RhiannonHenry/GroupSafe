@@ -1,6 +1,8 @@
 package com.kainos.groupsafe;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -36,8 +38,8 @@ public class MapsViewActivity extends Activity {
 
 	private static final String TAG = "Individual_Map_Activity";
 
-	private GoogleMap googleMap;
-	private MarkerOptions currentLocationMarker;
+	private GoogleMap googleMap = null;
+	private MarkerOptions currentLocationMarker = null;
 	private boolean internetPresent = false;
 	private ConnectionDetector connectionDetector;
 	private GPSTracker locationServices;
@@ -45,6 +47,7 @@ public class MapsViewActivity extends Activity {
 	private String userLocationObjectId;
 	private double lat;
 	private double lng;
+	private Timer autoUpdate;
 
 	/*
 	 * (non-Javadoc)
@@ -60,6 +63,7 @@ public class MapsViewActivity extends Activity {
 		setContentView(R.layout.activity_maps_view);
 		try {
 			// Get User Location : Lat, Lng...
+			locationServices = new GPSTracker(this);
 			getCurrentLocation();
 			// Check if User has a pre-existing location in the database...
 			checkForExistingEntry();
@@ -72,21 +76,73 @@ public class MapsViewActivity extends Activity {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.support.v4.app.FragmentActivity#onResume()
+	 */
+	@Override
+	public void onResume() {
+		Log.i(TAG, "UPDATING...");
+		super.onResume();
+		GroupSafeApplication.activityResumed();
+		autoUpdate = new Timer();
+		autoUpdate.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					public void run() {
+						if (googleMap == null || currentLocationMarker == null) {
+							Log.i(TAG, "Waiting for map to initialise");
+						} else {
+							getCurrentLocation();
+							updateMarker(lat, lng);
+						}
+
+					}
+
+					private void updateMarker(double lat, double lng) {
+						Log.d(TAG, "Entering Update Marker...");
+
+						LatLng currentPosition = new LatLng(lat, lng);
+						currentLocationMarker.position(currentPosition)
+								.title("Current Location").draggable(false);
+
+						CameraPosition cameraPosition = new CameraPosition.Builder()
+								.target(currentPosition).zoom(12).build();
+						googleMap.animateCamera(CameraUpdateFactory
+								.newCameraPosition(cameraPosition));
+					}
+				});
+			}
+		}, 0, 30000); // updates every 30 seconds
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		autoUpdate.cancel();
+		locationServices.stopUsingGPS();
+		googleMap.clear();
+	}
+
 	/**
 	 * This method is called and uses the GPSTracker class to find the users
 	 * current latitude and longitude location.
 	 * 
-	 * @see {@link GPSTracker}
 	 */
 	private void getCurrentLocation() {
 		Log.d(TAG, "Entering Get Current Location...");
-		locationServices = new GPSTracker(MapsViewActivity.this);
-		if (locationServices.canGetLocation()) {
-			lat = getMyLat();
-			lng = getMyLng();
-			Log.i(TAG, "Location: Lat: " + lat + " Lng: " + lng);
+		if (locationServices == null) {
+			locationServices = new GPSTracker(this);
 		} else {
-			locationServices.showSettingAlert();
+			if (locationServices.canGetLocation()) {
+				lat = getMyLat();
+				lng = getMyLng();
+				Log.i(TAG, "Location: Lat: " + lat + " Lng: " + lng);
+			} else {
+				locationServices.showSettingAlert();
+			}
 		}
 	}
 
@@ -268,7 +324,6 @@ public class MapsViewActivity extends Activity {
 				.target(currentPosition).zoom(12).build();
 		googleMap.animateCamera(CameraUpdateFactory
 				.newCameraPosition(cameraPosition));
-
 	}
 
 	/**
@@ -292,20 +347,6 @@ public class MapsViewActivity extends Activity {
 	private double getMyLng() {
 		double longitude = locationServices.getLng();
 		return longitude;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.app.Activity#onResume()
-	 */
-	@Override
-	protected void onResume() {
-		super.onResume();
-		GroupSafeApplication.activityResumed();
-		initialiseMap();
-		createCurrentLocationMarker();
-		setMarker(lat, lng);
 	}
 
 	/*

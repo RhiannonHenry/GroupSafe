@@ -8,10 +8,6 @@
         android:minSdkVersion="11"
         android:targetSdkVersion="19" />
 
-    <instrumentation
-        android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="com.kainos.groupsafe" />
-
     <!-- Maps v2 Uses OpenGI so need this... -->
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -43,6 +39,9 @@
 
     <uses-permission android:name="com.kainos.groupsafe.permission.C2D_MESSAGE" />
 
+<!--     <instrumentation -->
+<!--         android:name="android.test.InstrumentationTestRunner" -->
+<!--         android:targetPackage="com.kainos.groupsafe" /> -->
     <!-- To allow Testing on phone set android:debuggable="true" -->
     <application
         android:name="com.kainos.groupsafe.GroupSafeApplication"
@@ -130,7 +129,7 @@
             android:value="@integer/google_play_services_version" />
 
         <uses-library android:name="com.google.android.maps" />
-        <uses-library android:name="android.test.runner" />
+<!--         <uses-library android:name="android.test.runner" /> -->
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"

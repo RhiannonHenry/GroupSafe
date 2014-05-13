@@ -17,9 +17,8 @@ import android.util.Log;
  * This class is used to get the users current location via GPS or Network. I
  * followed a tutorial to help me implement this.
  * 
- * @author Rhiannon Henry and {@link http
- *         ://www.androidhive.info/2012/07/android-
- *         gps-location-manager-tutorial/}
+ * @author Rhiannon Henry and http ://www.androidhive.info/2012/07/android-
+ *         gps-location-manager-tutorial/
  * 
  */
 public class GPSTracker extends Service implements LocationListener {
@@ -57,7 +56,7 @@ public class GPSTracker extends Service implements LocationListener {
 	private Location getLocation() {
 		try {
 			locationManager = (LocationManager) mContext
-					.getSystemService(LOCATION_SERVICE);
+					.getSystemService(Context.LOCATION_SERVICE);
 			isGPSEnabled = locationManager
 					.isProviderEnabled(LocationManager.GPS_PROVIDER);
 			isNetworkEnabled = locationManager
@@ -65,9 +64,11 @@ public class GPSTracker extends Service implements LocationListener {
 
 			if (!isGPSEnabled && !isNetworkEnabled) {
 				// No network provider is enabled
+				Log.e(TAG, "No Network Provider Enabled");
 			} else {
 				this.canGetLocation = true;
 				// Get location from Network Provider
+				Log.i(TAG, "Can get Location");
 				if (isNetworkEnabled) {
 					Log.i(TAG, "Getting Location: Network Provider...");
 					locationManager.requestLocationUpdates(
@@ -78,6 +79,8 @@ public class GPSTracker extends Service implements LocationListener {
 					if (locationManager != null) {
 						location = locationManager
 								.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+						Log.i(TAG, "Last Location = " + location.getLatitude()
+								+ "," + location.getLongitude());
 						if (location != null) {
 							lat = location.getLatitude();
 							lng = location.getLongitude();
@@ -97,6 +100,8 @@ public class GPSTracker extends Service implements LocationListener {
 					if (locationManager != null) {
 						location = locationManager
 								.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+						Log.i(TAG, "Last Location = " + location.getLatitude()
+								+ "," + location.getLongitude());
 						if (location != null) {
 							lat = location.getLatitude();
 							lng = location.getLongitude();

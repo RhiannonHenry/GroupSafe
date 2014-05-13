@@ -310,7 +310,6 @@ public class AddContactActivity extends Activity {
 	/**
 	 * Disables all buttons that are on the AddContactActivity.java view.
 	 * 
-	 * @see activity_add_contact.xml
 	 */
 	public void disableAllButtons() {
 		Button saveButton = (Button) findViewById(R.id.addContactSaveButton);

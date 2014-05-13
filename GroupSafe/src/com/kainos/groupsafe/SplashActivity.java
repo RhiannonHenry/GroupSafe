@@ -78,7 +78,6 @@ public class SplashActivity extends Activity {
 	 * @param view
 	 *            the base class for widgets, which are used to create
 	 *            interactive UI components (buttons, text fields, etc.).
-	 * @return void this class does not return anything
 	 */
 	public void registerNow(View view) {
 		if (NetworkUtilities.getConnectivityStatus(_instance) == 0) {
@@ -100,7 +99,6 @@ public class SplashActivity extends Activity {
 	 * @param view
 	 *            the base class for widgets, which are used to create
 	 *            interactive UI components (buttons, text fields, etc.).
-	 * @return void this class does not return anything
 	 */
 	public void signin(View view) {
 		disableAllButtons();

@@ -28,9 +28,7 @@ import android.widget.Toast;
  * notification (i.e. one of their contacts has invited them to join a group.).
  * Form this activity the user will be able to either accept or decline the
  * group notification.
- * 
- * @see activity_accept_decline_invitation.xml
- * 
+ *  
  * @author Rhiannon Henry
  * 
  */
